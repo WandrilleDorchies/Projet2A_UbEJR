@@ -12,4 +12,4 @@ def run_app():
 
     app.include_router(movie_router)
 
-    uvicorn.run(app, port=8000, host="localhost")
+    uvicorn.run(app, port=9876, host="localhost")
