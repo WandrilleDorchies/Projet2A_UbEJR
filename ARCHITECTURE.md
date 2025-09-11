@@ -2,22 +2,33 @@
 
 ```mermaid
 ---
-title: Quick Architecture overview
+title: Architecture Ub'EJR
 ---
-    graph LR
-    USR((User))
-    DB[("fa:fa-database App Database \n (PostgreSQL)" )]
-    API(fa:fa-python API / \n WebService)
-    DAO(fa:fa-python DAO)
-    SVC(fa:fa-python Service / \n Controllers )
-    MDB[(fa:fa-database TheMovieDB)]
-    MDBAPI(TMDB API)
+flowchart LR
+ subgraph Services["Service Controllers"]
+        AUTH["Auth Service"]
+        MENU["Menu Service"]
+        ORDR["Orders Service"]
+        DELIV["Delivery Service"]
+  end
+ subgraph Interfaces["Interface Layer"]
+        CLI["CLI"]
+        API["API Webservice"]
+  end
+ subgraph PythonApp["Python App"]
+        DAO["Data Acces Object"]
+        Services
+        Interfaces
+  end
+    STRIPE["Stripe API"] --> ORDR
+    ADM(("Admin")) <--> API
+    CUS(("Customer")) <--> CLI
+    DEL(("Deliverer")) <--> CLI
+    DAO --> Services
+    DELIV --> GMAPI["Google Maps API
+        Trajets/Distance Matrix"]
+    GMAPI <--> GMDB[("Google Maps Database")]
+    Interfaces <--> Services
+    DB[("PostgreSQL Database")] --> DAO
 
-    USR<--->API
-        subgraph Python app 
-            API<-->SVC<-->DAO
-        end
-    DAO<--->DB
-    MDBAPI <--> MDB
-    SVC <--> MDBAPI
 ```
