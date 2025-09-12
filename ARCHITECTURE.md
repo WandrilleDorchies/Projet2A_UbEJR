@@ -22,8 +22,8 @@ flowchart LR
   end
     STRIPE["Stripe API"] --> ORDR
     ADM(("Admin")) <--> API
+    DEL(("Deliverer")) <--> API
     CUS(("Customer")) <--> CLI
-    DEL(("Deliverer")) <--> CLI
     DAO --> Services
     DELIV --> GMAPI["Google Maps API
         Trajets/Distance Matrix"]
