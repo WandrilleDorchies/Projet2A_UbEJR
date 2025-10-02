@@ -55,7 +55,7 @@ CREATE TABLE Items (
     item_id INTEGER PRIMARY KEY,
     name VARCHAR(128),
     price DOUBLE CHECK (price >= 0),
-    type VARCHAR(32),
+    item_type VARCHAR(32),
     description VARCHAR(256),
     stock INTEGER CHECK (stock >= 0)
 );

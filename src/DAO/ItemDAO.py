@@ -18,13 +18,13 @@ class ItemDAO:
         # pyrefly: ignore
         return Item(**raw_item)
 
-    def create_item(self, name, price, type_item, description, stock) -> Item:
+    def create_item(self, name, price, item_type, description, stock) -> Item:
         # TODO: decide return type
         #     : handle autonumber & check for existing item with similar name
         raw_created_item = self.db_connector.sql_query(
             """
-        INSERT INTO Items (id_item, name, price, type, description, stock)
-        VALUES (DEFAULT, %(name)s, %(price)s,%(type_item)s, %(description)s, %(stock)s)
+        INSERT INTO Items (id_item, name, price, item_type, description, stock)
+        VALUES (DEFAULT, %(name)s, %(price)s,%(item_type)s, %(description)s, %(stock)s)
         RETURNING *;
         """,
             # TODO: dic with column and values
