@@ -1,16 +1,16 @@
-from pydantic import BaseModel
+from User import User
 
 
-class Driver(BaseModel):
+class Driver(User):
     """
     Represents a driver in the system.
 
     Attributes
     ----------
-        id_user (int): Unique identifier for the driver (references User).
-        id_delivering (bool, optional): Indicates if the driver is currently delivering. Default is False.
         phone (str): Driver's phone number.
+        id_delivering (bool, optional): Indicates if the driver is currently delivering.
+                                        Default is False.
     """
-    id_user: int
+
     phone: str
     is_delivering: bool = False

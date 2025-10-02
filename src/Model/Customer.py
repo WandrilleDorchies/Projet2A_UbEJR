@@ -1,8 +1,8 @@
 from Address import Address
-from pydantic import BaseModel
+from User import User
 
 
-class Customer(BaseModel):
+class Customer(User):
     """
     Represents a customer in the system.
 
@@ -13,7 +13,7 @@ class Customer(BaseModel):
         phone (str): Customer's phone number.
         mail (str): Customer's email address.
     """
-    id_user: int
+
     address: Address
     phone: str
     mail: str

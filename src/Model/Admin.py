@@ -1,12 +1,7 @@
-from pydantic import BaseModel
+from User import User
 
 
-class Admin(BaseModel):
+class Admin(User):
     """
     Represents an administrator in the system.
-
-    Attributes
-    ----------
-        id_user (int): Unique identifier for the admin (references User).
     """
-    id_user: int
