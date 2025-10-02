@@ -3,21 +3,20 @@ from pydantic import BaseModel
 
 class Item(BaseModel):
     """
-    Represents an item.
+    Represents an item/product in the system.
 
     Attributes
     ----------
-        id_item (int): Unique item identifier.
-        name (str): Item name.
-        price (float): Price of the item. always >= 0.
-        type_item (str): Type of consumable, for example Food, Drink, etc
-        description (str): Long form description
-        stock (int): current stock of the item. always >= 0.
+        id_item (int): Unique identifier for the item.
+        name (str): Name of the item.
+        price (float): Price of the item.
+        type (str): Category or type of item.
+        description (str): Description of the item.
+        stock (int): Current stock quantity.
     """
-
     id_item: int
     name: str
     price: float
-    type_item: str
+    kind: str
     description: str
     stock: int

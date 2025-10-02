@@ -1,7 +1,8 @@
-from pydantic import BaseModel
-from typing import List
 from datetime import date, time
+from typing import List
+
 from Item import Item
+from pydantic import BaseModel
 
 
 class Order(BaseModel):
@@ -19,11 +20,12 @@ class Order(BaseModel):
         is_paid (bool, optional): Whether the order has been paid. Default is False.
         is_prepared (bool, optional): Whether the order is prepared. Default is False.
     """
+
     id_order: int
     client_id: int
-    state: int = 0
     items: List[Item]
     date: date
     time: time
+    state: int = 0
     is_paid: bool = False
     is_prepared: bool = False
