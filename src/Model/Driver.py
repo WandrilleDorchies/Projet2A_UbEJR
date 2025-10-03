@@ -8,7 +8,7 @@ class Driver(User):
     Attributes
     ----------
         phone (str): Driver's phone number.
-        id_delivering (bool, optional): Indicates if the driver is currently delivering.
+        is_delivering (bool, optional): Indicates if the driver is currently delivering.
                                         Default is False.
     """
 
