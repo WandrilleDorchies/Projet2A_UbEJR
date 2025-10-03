@@ -1,8 +1,9 @@
 from datetime import date, time
 from typing import List
 
-from Item import Item
 from pydantic import BaseModel
+
+from .Item import Item
 
 
 class Order(BaseModel):

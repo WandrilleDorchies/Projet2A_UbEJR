@@ -1,3 +1,4 @@
+#NOT FINISHED PLS DO NOT TOUCH 
 from datetime import datetime
 
 import pytest
@@ -317,14 +318,14 @@ class TestCustomer:
 
         customer_data = {
             "id": 10,
-            "first_name": "Jack",
+            "first_name": "Emma",
             "last_name": "Roberts",
             "created_at": datetime.now(),
             "password": "hashed_password",
             "salt": "random_salt",
             "address": address,
             "phone": "",
-            "mail": "jack.roberts@gmail.com"
+            "mail": "emma.roberts@gmail.com"
         }
 
         with pytest.raises(ValidationError) as exc_info:
@@ -340,17 +341,17 @@ class TestCustomer:
             city="Rennes",
             country="France"
         )
-        
+
         customer_data = {
             "id": 11,
-            "first_name": "Karen",
+            "first_name": "Wandrille",
             "last_name": "Lee",
             "created_at": datetime.now(),
             "password": "hashed_password",
             "salt": "random_salt",
             "address": address,
             "phone": "   ",
-            "mail": "karen.lee@gmail.com"
+            "mail": "wandrille.lee@gmail.com"
         }
 
         with pytest.raises(ValidationError) as exc_info:
@@ -366,7 +367,7 @@ class TestCustomer:
             city="Tours",
             country="France"
         )
-        
+
         # First customer
         customer1_data = {
             "id": 12,
