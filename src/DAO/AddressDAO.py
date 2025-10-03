@@ -68,7 +68,7 @@ class AddressDAO:
     def update_address(self, address_id, number, street, city, postal_code, country):
         raw_update_address = self.db_connector.sql_query(
             """
-        UPDATE Address SET number = %(number)s, street=%(street)s, city=%(city)s, 
+        UPDATE Address SET number = %(number)s, street=%(street)s, city=%(city)s,
         postal_code=%(postal_code)s, country=%(country)s
         WHERE address_id=%(address_id)s RETURNING *;
         """,
