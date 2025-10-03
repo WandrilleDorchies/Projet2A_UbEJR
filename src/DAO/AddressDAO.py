@@ -40,17 +40,17 @@ class AddressDAO:
 
         if address_bdd is None:
             return None
-        for address in address_bdd:
-            list_address.append(
-                Address(
-                    number=address["number"],
-                    street=address["street"],
-                    city=address["city"],
-                    postal_code=address["postal_code"],
-                    country=address["country"],
-                )
-            )
 
+        list_address = [
+            Address(
+                number=address["number"],
+                street=address["street"],
+                city=address["city"],
+                postal_code=address["postal_code"],
+                country=address["country"],
+            )
+            for address in address_bdd
+        ]
         return list_address
 
     def create_address(self, address_id, number, street, city, postal_code, country) -> Address:
