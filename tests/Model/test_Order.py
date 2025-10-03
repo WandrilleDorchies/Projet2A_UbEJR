@@ -2,8 +2,8 @@ from unittest.mock import Mock
 
 import pytest
 from pydantic_core import ValidationError
-from src.Model.Item import Item
 
+from src.Model.Item import Item
 from src.Model.Order import Order
 
 
