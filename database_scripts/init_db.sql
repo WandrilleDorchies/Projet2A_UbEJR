@@ -1,6 +1,9 @@
+DROP SCHEMA IF EXISTS project CASCADE;
+CREATE SCHEMA project;
+
 -- Table: Addresses
-CREATE TABLE Addresses (
-    address_id INTEGER PRIMARY KEY,
+CREATE TABLE project.Addresses (
+    address_id SERIAL PRIMARY KEY,
     address_number INT NOT NULL,
     address_street VARCHAR(256) NOT NULL,
     address_city VARCHAR(128) NOT NULL,
@@ -9,8 +12,8 @@ CREATE TABLE Addresses (
 );
 
 -- Table: Customers
-CREATE TABLE Customers (
-    customer_id INTEGER PRIMARY KEY,
+CREATE TABLE project.Customers (
+    customer_id SERIAL PRIMARY KEY,
     customer_first_name VARCHAR(128),
     customer_last_name VARCHAR(128),
     customer_phone VARCHAR(16),
@@ -21,16 +24,16 @@ CREATE TABLE Customers (
 );
 
 -- Table: Admins
-CREATE TABLE Admins (
-    admin_id INTEGER PRIMARY KEY,
+CREATE TABLE project.Admins (
+    admin_id SERIAL PRIMARY KEY,
     admin_first_name VARCHAR(128),
     admin_last_name VARCHAR(128),
     admin_password_hash VARCHAR(512)
 );
 
 -- Table: Drivers
-CREATE TABLE Drivers (
-    driver_id INTEGER PRIMARY KEY,
+CREATE TABLE project.Drivers (
+    driver_id SERIAL PRIMARY KEY,
     driver_first_name VARCHAR(128),
     driver_last_name VARCHAR(128),
     driver_password_hash VARCHAR(512),
@@ -39,8 +42,8 @@ CREATE TABLE Drivers (
 );
 
 -- Table: Orders
-CREATE TABLE Orders (
-    order_id INTEGER PRIMARY KEY,
+CREATE TABLE project.Orders (
+    order_id SERIAL PRIMARY KEY,
     order_customer_id INTEGER,
     order_state INTEGER,
     order_date DATE,
@@ -51,34 +54,35 @@ CREATE TABLE Orders (
 );
 
 -- Table: Items
-CREATE TABLE Items (
-    item_id INTEGER PRIMARY KEY,
+CREATE TABLE project.Items (
+    item_id SERIAL PRIMARY KEY,
     item_name VARCHAR(128),
-    item_price DOUBLE CHECK (price >= 0),
+    item_price FLOAT(24) CHECK (item_price >= 0),
     item_type VARCHAR(32),
     item_description VARCHAR(256),
-    item_stock INTEGER CHECK (stock >= 0)
-    item_in_menu BOOLEAN (DEFAULT=FALSE)
+    item_stock INTEGER CHECK (item_stock >= 0),
+    item_in_menu BOOLEAN DEFAULT false
 );
 
 -- Table: Orders_Items 
-CREATE TABLE Order_Items (
+CREATE TABLE project.Order_Items (
     order_id INTEGER,
     item_id INTEGER,
     item_quantity INTEGER CHECK (item_quantity > 0),
-    item_price DOUBLE CHECK (item_price >= 0),
+    item_price FLOAT(24) CHECK (item_price >= 0),
     PRIMARY KEY (order_id, item_id),
-    FOREIGN KEY (order_id) REFERENCES Orders(order_id),
-    FOREIGN KEY (item_id) REFERENCES Item(item_id)
+    FOREIGN KEY (order_id) REFERENCES project.Orders(order_id),
+    FOREIGN KEY (item_id) REFERENCES project.Items(item_id)
 );
 
+
 -- Table: Deliveries
-CREATE TABLE Deliveries (
+CREATE TABLE project.Deliveries (
     delivery_id_order INTEGER,
     delivery_id_driver INTEGER,
     delivery_state INTEGER,
     PRIMARY KEY (delivery_id_order, delivery_id_driver),
-    FOREIGN KEY (delivery_id_order) REFERENCES Orders(order_id),
-    FOREIGN KEY (delivery_id_driver) REFERENCES Drivers(driver_id)
+    FOREIGN KEY (delivery_id_order) REFERENCES project.Orders(order_id),
+    FOREIGN KEY (delivery_id_driver) REFERENCES project.Drivers(driver_id)
 );
 
