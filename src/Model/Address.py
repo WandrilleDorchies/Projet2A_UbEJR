@@ -13,6 +13,7 @@ class Address(BaseModel):
         postal_code (int): Postal or ZIP code.
         country (str): Country name.
     """
+
     number: int
     street: str
     city: str

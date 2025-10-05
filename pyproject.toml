@@ -12,6 +12,7 @@ dependencies = [
     "PyJWT>=2.10.1",
     "psycopg2-binary>=2.9.10",
     "python-dotenv>=1.1.1",
+    "googlemaps>=4.10.0",
 ]
 requires-python = "==3.12.*"
 readme = "README.md"
@@ -37,7 +38,7 @@ start = "pdm run __main__.py"
 typecheck = "pyrefly check"
 
 [tool.ruff]
-line-length = 120
+line-length = 100
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "B", "I", "A", "C90", "PERF", "TCH", "TID"]
