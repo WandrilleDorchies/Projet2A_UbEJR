@@ -1,18 +1,21 @@
 from typing import Optional
 
 from src.Model.Customer import Customer
+from src.utils.singleton import Singleton
 
 from .DBConnector import DBConnector
 
 
-class CustomerDAO:
+class CustomerDAO(metaclass=Singleton):
     db_connector: DBConnector
 
     def __init__(self, db_connector: DBConnector):
         self.db_connector = db_connector
 
     def get_customer_by_id(self, customer_id) -> Optional[Customer]:
-        raw_customer = self.db_connector.sql_query("SELECT * from Customers WHERE id=%s", [customer_id], "one")
+        raw_customer = self.db_connector.sql_query(
+            "SELECT * from Customers WHERE id=%s", [customer_id], "one"
+        )
         if raw_customer is None:
             return None
         # pyrefly: ignore
@@ -27,7 +30,9 @@ class CustomerDAO:
         list_customer = [Customer(**customer) for customer in raw_customers]
         return list_customer
 
-    def create_customer(self, customer_id, first_name, last_name, phone, mail, password_hash, address_id) -> Customer:
+    def create_customer(
+        self, customer_id, first_name, last_name, phone, mail, password_hash, address_id
+    ) -> Customer:
         raw_created_customer = self.db_connector.sql_query(
             """
         INSERT INTO Address (customer_id, first_name, last_name, phone, mail, password_hash, address_id)
@@ -37,7 +42,9 @@ class CustomerDAO:
         )
         return Customer(**raw_created_customer)
 
-    def update_customer(self, customer_id, first_name, last_name, phone, mail, password_hash, address_id):
+    def update_customer(
+        self, customer_id, first_name, last_name, phone, mail, password_hash, address_id
+    ):
         raw_update_customer = self.db_connector.sql_query(
             """
         UPDATE Address SET first_name = %(first_name)s, last_name=%(last_name)s, phone=%(phone)s, mail=%(mail)s,

@@ -1,18 +1,21 @@
 from typing import Optional
 
 from src.Model.Order import Order
+from src.utils.singleton import Singleton
 
 from .DBConnector import DBConnector
 
 
-class OrderDAO:
+class OrderDAO(metaclass=Singleton):
     db_connector: DBConnector
 
     def __init__(self, db_connector: DBConnector) -> None:
         self.db_connector = db_connector
 
     def get_order_by_id(self, order_id: int) -> Optional[Order]:
-        raw_order = self.db_connector.sql_query("SELECT * from Order WHERE id=%s", [order_id], "one")
+        raw_order = self.db_connector.sql_query(
+            "SELECT * from Order WHERE id=%s", [order_id], "one"
+        )
         if raw_order is None:
             return None
         # pyrefly: ignore
@@ -28,7 +31,9 @@ class OrderDAO:
         return Orders
 
     def get_all_orders_from_user_id(self, user_id) -> Optional[list[Order]]:
-        raw_orders = self.db_connector.sql_query("SELECT * from Order WHERE customer_id=%s", [user_id], "all")
+        raw_orders = self.db_connector.sql_query(
+            "SELECT * from Order WHERE customer_id=%s", [user_id], "all"
+        )
         if raw_orders is None:
             return None
         # pyrefly: ignore

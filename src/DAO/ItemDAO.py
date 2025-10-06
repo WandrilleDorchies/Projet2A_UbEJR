@@ -1,11 +1,12 @@
 from typing import Optional
 
 from src.Model.item import Item
+from src.utils.singleton import Singleton
 
 from .DBConnector import DBConnector
 
 
-class ItemDAO:
+class ItemDAO(metaclass=Singleton):
     db_connector: DBConnector
 
     def __init__(self, db_connector: DBConnector):

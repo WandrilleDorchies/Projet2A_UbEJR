@@ -9,16 +9,28 @@ class AddressService:
         self.dao = AddressDAO()
         self.service = GoogleMapService()
 
-    def get_adress_by_user(self, user_id: int) -> Address:
+    def get_address_by_user(self, user_id: int) -> Address:
         adress = self.dao.get_address(user_id)
         return adress
 
-    def is_valid(self, adress: Address) -> bool:
+    def is_valid(self, adress: str) -> bool:
         res: bool = self.service.validate_adress(adress)
-        return res
+        return True if res else False
 
-    def create_adress(self, number, street, city, postal_code, country) -> None:
-        self.dao.create_address()
+    def create_address(
+        self, number: int, street: str, city: str, postal_code: int, country: str
+    ) -> None:
+        address: str = f"{number} {street}, {postal_code} {city}, {country}"
 
-    def update_adress(self) -> None:
+        if self.is_valid(address):
+            self.dao.create_address(number, street, city, postal_code, country)
+
+    def update_adress(
+        self,
+        number: int = None,
+        street: str = None,
+        city: str = None,
+        postal_code: int = None,
+        country: str = None,
+    ) -> None:
         pass

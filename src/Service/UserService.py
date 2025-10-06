@@ -1,8 +1,6 @@
-from typing import Optional
-
 from src.DAO.UserRepo import UserRepo
 from src.Model.User import User
-from src.Service.PasswordService import check_password_strength, create_salt, hash_password
+from src.Service.PasswordService import check_password_strength, hash_password
 
 
 class UserService:
@@ -10,7 +8,12 @@ class UserService:
         self.user_repo = user_repo
 
     def create_user(self, username: str, password: str) -> User:
-        ## TODO
+        if not check_password_strength(password):
+            return False
+
+        hash_pw = hash_password(password, username)
+
+        self.user_repo.insert_into_db(username, hash_pw)
 
         return
 
