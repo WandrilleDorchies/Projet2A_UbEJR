@@ -12,5 +12,5 @@ class Driver(User):
                                         Default is False.
     """
 
-    phone: str
-    is_delivering: bool = False
+    driver_phone: str
+    driver_is_delivering: bool = False

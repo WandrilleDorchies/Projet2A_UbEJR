@@ -15,9 +15,9 @@ class Item(BaseModel):
         stock (int): Current stock quantity (>= 0).
     """
 
-    id_item: int
-    name: str
-    price: float
+    item_id: int
+    item_name: str
+    item_price: float
     item_type: str
-    description: str
-    stock: int
+    item_description: str
+    item_stock: int

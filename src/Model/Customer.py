@@ -9,11 +9,11 @@ class Customer(User):
     Attributes
     ----------
         id_user (int): Unique identifier for the customer (references User).
-        address (Address): Customer's physical address.
-        phone (str): Customer's phone number.
-        mail (str): Customer's email address.
+        customer_address (Address): Customer's physical address.
+        customer_phone (str): Customer's phone number.
+        customer_mail (str): Customer's email address.
     """
 
-    address: Address
-    phone: str
-    mail: str
+    customer_address: Address
+    customer_phone: str
+    customer_mail: str

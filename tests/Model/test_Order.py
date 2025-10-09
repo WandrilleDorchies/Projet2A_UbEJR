@@ -1,3 +1,4 @@
+from datetime import date, time
 from unittest.mock import Mock
 
 import pytest
@@ -10,43 +11,37 @@ from src.Model.Order import Order
 def test_order_constructor_ok():
     mock_item = Mock(spec=Item)
 
-    mock_date = Mock(name="mock_date")
-    mock_time = Mock(name="mock_time")
-
     order_test = Order(
-        id_order=1,
-        client_id=1,
-        items=[mock_item],
-        date=mock_date,
-        time=mock_time,
+        order_id=1,
+        order_customer_id=1,
+        order_date=date(2025, 5, 5),
+        order_time=time(12, 30),
+        order_items=[mock_item],
     )
 
     assert isinstance(order_test, Order)
-    assert order_test.id_order == 1
-    assert order_test.client_id == 1
-    assert order_test.items[0] == mock_item
-    assert order_test.date == mock_date
-    assert order_test.time == mock_time
-    assert order_test.state == 0
-    assert order_test.is_paid is False
-    assert order_test.is_prepared is False
+    assert order_test.order_id == 1
+    assert order_test.order_customer_id == 1
+    assert order_test.order_state == 0
+    assert order_test.order_date == date(2025, 5, 5)
+    assert order_test.order_time == time(12, 30)
+    assert order_test.order_items[0] == mock_item
+    assert order_test.order_is_paid is False
+    assert order_test.order_is_prepared is False
 
 
 def test_order_constructor_throws_on_incorrect_input():
     with pytest.raises(ValidationError) as exception_info:
         mock_item = Mock(spec=Item)
 
-        mock_date = Mock(name="mock_date")
-        mock_time = Mock(name="mock_time")
-
         Order(
-            id_order="one",
-            client_id=1,
-            items=[mock_item],
-            date=mock_date,
-            time=mock_time,
+            order_id="one",
+            order_customer_id=1,
+            order_date=date(2025, 5, 5),
+            order_time=time(12, 30),
+            order_items=[mock_item],
         )
-    assert "id_order" in str(
+    assert "order_id" in str(
         exception_info.value
     ) and "Input should be a valid integer, unable to parse string as an integer" in str(
         exception_info.value

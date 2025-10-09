@@ -29,23 +29,14 @@ class AddressDAO(metaclass=Singleton):
         """
 
         raw_address = self.db_connector.sql_query(
-            "SELECT *        "
-            "FROM Address   "
-            "JOIN Customer                          "
-            "USING address_id                          "
-            "WHERE customer_id = %(customer_id)s                          ",
+            "SELECT * FROM Address JOIN Customer USING address_id WHERE customer_id = %(customer_id)s",
             {"customer_id": customer_id},
             "one",
         )
-        if raw_address:
-            raw_address = Address(
-                address_number=raw_address["number"],
-                address_street=raw_address["street"],
-                address_city=raw_address["city"],
-                address_postal_code=raw_address["postal_code"],
-                address_country=raw_address["country"],
-            )
-        return raw_address
+        if raw_address is None:
+            return None
+        # pyrefly: ignore
+        return Address(**raw_address)
 
     def get_all_addresses(self) -> Optional[list[Address]]:
         """
@@ -58,24 +49,14 @@ class AddressDAO(metaclass=Singleton):
             None otherwise.
         """
 
-        address_bdd = self.db_connector.sql_query("SELECT * FROM Address", "all")
+        raw_addresses = self.db_connector.sql_query("SELECT * FROM Address", "all")
 
-        list_address = []
-
-        if address_bdd is None:
+        if raw_addresses is None:
             return None
 
-        list_address = [
-            Address(
-                address_number=address["number"],
-                address_street=address["street"],
-                address_city=address["city"],
-                address_postal_code=address["postal_code"],
-                address_country=address["country"],
-            )
-            for address in address_bdd
-        ]
-        return list_address
+        addresses = [Address(**raw_address) for raw_address in raw_addresses]
+
+        return addresses
 
     def create_address(self, address_id, number, street, city, postal_code, country) -> Address:
         """
@@ -170,12 +151,5 @@ class AddressDAO(metaclass=Singleton):
         """,
             "one",
         )
-        if raw_delete_address:
-            raw_delete_address = Address(
-                address_number=raw_delete_address["number"],
-                address_street=raw_delete_address["street"],
-                address_city=raw_delete_address["city"],
-                address_postal_code=raw_delete_address["postal_code"],
-                address_country=raw_delete_address["country"],
-            )
-        return raw_delete_address
+
+        return Address(**raw_delete_address)

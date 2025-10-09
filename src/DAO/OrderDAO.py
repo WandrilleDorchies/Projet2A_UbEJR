@@ -14,7 +14,7 @@ class OrderDAO(metaclass=Singleton):
 
     def get_order_by_id(self, order_id: int) -> Optional[Order]:
         raw_order = self.db_connector.sql_query(
-            "SELECT * from Order WHERE id=%s", [order_id], "one"
+            "SELECT * from Order WHERE order_id=%s", [order_id], "one"
         )
         if raw_order is None:
             return None
@@ -32,7 +32,7 @@ class OrderDAO(metaclass=Singleton):
 
     def get_all_orders_from_user_id(self, user_id) -> Optional[list[Order]]:
         raw_orders = self.db_connector.sql_query(
-            "SELECT * from Order WHERE customer_id=%s", [user_id], "all"
+            "SELECT * from Order WHERE order_customer_id=%s", [user_id], "all"
         )
         if raw_orders is None:
             return None
@@ -46,7 +46,7 @@ class OrderDAO(metaclass=Singleton):
         #     : handle autonumber & check for existing item with similar name
         raw_created_order = self.db_connector.sql_query(
             """
-        INSERT INTO Order (order_id, customer_id, order_state, order_date, order_time, order_is_paid, order_is_prepared)
+        INSERT INTO Order (order_id, order_customer_id, order_state, order_date, order_time, order_is_paid, order_is_prepared)
         VALUES (DEFAULT, %(customer_id)s, %(state)s, %(order_date)s, %(order_time)s, DEFAULT, DEFAULT)
         RETURNING *;
         """,

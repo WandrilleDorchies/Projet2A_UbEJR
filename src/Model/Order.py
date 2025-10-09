@@ -22,11 +22,11 @@ class Order(BaseModel):
         is_prepared (bool, optional): Whether the order is prepared. Default is False.
     """
 
-    id_order: int
-    client_id: int
-    items: List[Item]
-    date: date
-    time: time
-    state: int = 0
-    is_paid: bool = False
-    is_prepared: bool = False
+    order_id: int
+    order_customer_id: int
+    order_state: int = 0
+    order_date: date
+    order_time: time
+    order_is_paid: bool = False
+    order_is_prepared: bool = False
+    order_items: List[Item]

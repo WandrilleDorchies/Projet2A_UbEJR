@@ -15,11 +15,11 @@ class TestCustomer:
     def test_customer_creation_valid_data(self):
         """Test creating a customer with valid data"""
         address = Address(
-            street_number="123",
-            street_name="Main Street",
-            postal_code="75001",
-            city="Paris",
-            country="France"
+            address_number="123",
+            address_street="Main Street",
+            address_city="Paris",
+            address_postal_code="75001",
+            address_country="France"
         )
 
         customer_data = {

@@ -11,6 +11,6 @@ class Delivery(BaseModel):
         id_driver (int): Unique identifier of the driver assigned to the delivery.
         state (int, optional): Delivery status (0 = pending). Default is 0.
     """
-    id_order: int
-    id_driver: int
-    state: int = 0
+    delivery_id_order: int
+    delivery_id_driver: int
+    delivery_state: int = 0
