@@ -75,6 +75,37 @@ CREATE TABLE project.Order_Items (
     FOREIGN KEY (item_id) REFERENCES project.Items(item_id)
 );
 
+-- Table: Bundles
+CREATE TABLE project.Bundles (
+    bundle_id SERIAL PRIMARY KEY,
+    bundle_name VARCHAR(128),
+    -- bundle reduction: if 20% off, it's 20. Python App handles calculations.
+    bundle_reduction INTEGER CHECK (bundle_reduction > 0 AND bundle_reduction < 100),
+    bundle_description VARCHAR(256),
+    bundle_availability_start_date DATE 
+    bundle_availability_end_date DATE CHECK (bundle_availability_end_date > bundle_availability_start_date)
+);
+
+-- Table: Bundle_Items
+CREATE TABLE project.Bundle_Items (
+    bundle_id INTEGER,
+    item_id INTEGER,
+    item_quantity INTEGER CHECK (item_quantity > 0),
+    PRIMARY KEY (bundle_id, item_id),
+    FOREIGN KEY (bundle_id) REFERENCES project.Bundles(bundle_id),
+    FOREIGN KEY (item_id) REFERENCES project.Items(item_id)
+);
+
+-- Table: Order_Bundles
+CREATE TABLE project.Order_Bundles (
+    order_id INTEGER,
+    bundle_id INTEGER,
+    bundle_quantity INTEGER CHECK (bundle_quantity > 0),
+    PRIMARY KEY (order_id, bundle_id),
+    FOREIGN KEY (order_id) REFERENCES project.Orders(order_id),
+    FOREIGN KEY (bundle_id) REFERENCES project.Bundles(bundle_id)
+);
+
 
 -- Table: Deliveries
 CREATE TABLE project.Deliveries (
