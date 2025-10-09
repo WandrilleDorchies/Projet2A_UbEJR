@@ -35,3 +35,11 @@ class ItemDAO(metaclass=Singleton):
         # pyrefly: ignore
 
         return Item(**raw_created_item)
+
+    def get_all_item(self) -> Optional[list[Item]]:
+        raw_items = self.db_connector.sql_query("SELECT * from Item", [], "all")
+        if raw_items is None:
+            return None
+        # pyrefly: ignore
+        Items = [Item(**raw_item) for raw_item in raw_items]
+        return Items
