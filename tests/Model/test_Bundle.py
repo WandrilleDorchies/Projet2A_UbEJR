@@ -19,7 +19,7 @@ def test_order_constructor_ok():
         bundle_items=[mock_item],
     )
 
-    assert isinstance(bundle_test, Bundle)
+    assert isinstance(bundle_test, Bundle)  
     assert bundle_test.bundle_id == 1
     assert bundle_test.bundle_reduction == 3
     assert bundle_test.bundle_availability_start_date == datetime(2025, 10, 9, 12, 30, 0)
