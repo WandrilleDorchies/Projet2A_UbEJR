@@ -20,6 +20,7 @@ def test_item_constructor_ok():
     assert item_test.item_type == "boisson"
     assert item_test.item_description == "canette 33cl"
     assert item_test.item_stock == 10
+    assert item_test.item_in_menu is True
 
 
 def test_item_constructor_throws_on_incorrect_input():
@@ -32,7 +33,7 @@ def test_item_constructor_throws_on_incorrect_input():
             item_description="canette 33cl",
             item_stock=10,
         )
-    assert "id_item" in str(
+    assert "item_id" in str(
         exception_info.value
     ) and "Input should be a valid integer, unable to parse string as an integer" in str(
         exception_info.value

@@ -21,4 +21,4 @@ class Item(BaseModel):
     item_type: str
     item_description: str
     item_stock: int
-    item_in_menu: bool
+    item_in_menu: bool = True

@@ -12,7 +12,7 @@ class AddressDAO(metaclass=Singleton):
     def __init__(self, db_connector: DBConnector):
         self.db_connector = db_connector
 
-    def get_address(self, customer_id) -> Optional[Address]:
+    def get_address(self, customer_id: int) -> Optional[Address]:
         """
         Retrieve the address associated with a given customer.
 
@@ -29,7 +29,8 @@ class AddressDAO(metaclass=Singleton):
         """
 
         raw_address = self.db_connector.sql_query(
-            "SELECT * FROM Address JOIN Customer USING address_id WHERE customer_id = %(customer_id)s",
+            "SELECT * FROM Address JOIN Customer USING address_id "
+            "WHERE customer_id = %(customer_id)s",
             {"customer_id": customer_id},
             "one",
         )
@@ -58,7 +59,9 @@ class AddressDAO(metaclass=Singleton):
 
         return addresses
 
-    def create_address(self, address_id, number, street, city, postal_code, country) -> Address:
+    def create_address(
+        self, address_id: int, number: int, street: str, city: str, postal_code: int, country: str
+    ) -> Address:
         """
         Create a new address entry in the database.
 
@@ -66,15 +69,15 @@ class AddressDAO(metaclass=Singleton):
         ----
         address_id (int):
             Unique identifier for the address (ignored in insertion since set to DEFAULT).
-        number (str or int):
+        address_number (str or int):
             Street number of the address.
-        street (str):
+        address_street (str):
             Name of the street.
-        city (str):
+        address_city (str):
             City where the address is located.
-        postal_code (str or int):
+        address_postal_code (str or int):
             Postal code of the address.
-        country (str):
+        address_country (str):
             Country of the address.
 
         Returns
@@ -85,7 +88,8 @@ class AddressDAO(metaclass=Singleton):
 
         raw_created_address = self.db_connector.sql_query(
             """
-        INSERT INTO Address (address_id, number, street, city, postal_code, country)
+        INSERT INTO Address (address_id, address_number, address_street, address_city,
+        address_postal_code, address_country)
         VALUES (DEFAULT, %(number)s,%(street)s, %(city)s, %(postal_code)s, %(country)s)
         RETURNING *;
         """,
@@ -94,7 +98,9 @@ class AddressDAO(metaclass=Singleton):
         )
         return Address(**raw_created_address)
 
-    def update_address(self, address_id, number, street, city, postal_code, country):
+    def update_address(
+        self, address_id: int, number: int, street: str, city: str, postal_code: int, country: str
+    ):
         """
         Update an existing address in the database.
 
@@ -102,15 +108,15 @@ class AddressDAO(metaclass=Singleton):
         ----
         address_id (int):
             Unique identifier of the address to update.
-        number (str or int):
+        address_number (str or int):
             Updated street number of the address.
-        street (str):
+        address_street (str):
             Updated street name.
-        city (str):
+        address_city (str):
             Updated city name.
-        postal_code (str or int):
+        address_postal_code (str or int):
             Updated postal code.
-        country (str):
+        address_country (str):
             Updated country name.
 
         Returns
@@ -121,8 +127,10 @@ class AddressDAO(metaclass=Singleton):
 
         raw_update_address = self.db_connector.sql_query(
             """
-        UPDATE Address SET number = %(number)s, street=%(street)s, city=%(city)s,
-        postal_code=%(postal_code)s, country=%(country)s
+        UPDATE Address SET address_number = %(number)s,
+        address_street=%(street)s,
+        address_city=%(city)s,
+        address_postal_code=%(postal_code)s, address_country=%(country)s
         WHERE address_id=%(address_id)s RETURNING *;
         """,
             {"key": 1},
@@ -130,7 +138,7 @@ class AddressDAO(metaclass=Singleton):
         )
         return Address(**raw_update_address)
 
-    def delete_address_by_customer(self, customer_id):
+    def delete_address_by_customer(self, customer_id: int):
         """
         Delete the address associated with a given customer from the database.
 
