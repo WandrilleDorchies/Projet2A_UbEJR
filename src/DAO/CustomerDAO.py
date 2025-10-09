@@ -47,7 +47,7 @@ class CustomerDAO(metaclass=Singleton):
     ):
         raw_update_customer = self.db_connector.sql_query(
             """
-        UPDATE Address SET first_name = %(first_name)s, last_name=%(last_name)s, phone=%(phone)s, mail=%(mail)s,
+        UPDATE User SET first_name = %(first_name)s, last_name=%(last_name)s, phone=%(phone)s, mail=%(mail)s,
         password_hash=%(password_hash)s, address_id=%(address_id)s
         WHERE customer_id=%(customer_id)s RETURNING *;
         """,
