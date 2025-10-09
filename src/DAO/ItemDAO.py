@@ -35,7 +35,9 @@ class ItemDAO(metaclass=Singleton):
 
     # READ
     def get_item_by_id(self, item_id: int) -> Optional[Item]:
-        raw_item = self.db_connector.sql_query("SELECT * from Items WHERE id=%s", [item_id], "one")
+        raw_item = self.db_connector.sql_query(
+            "SELECT * from Items WHERE item_id=%s", [item_id], "one"
+        )
         if raw_item is None:
             return None
         # pyrefly: ignore

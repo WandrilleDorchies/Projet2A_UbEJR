@@ -9,4 +9,10 @@ class ItemService:
         self.item_dao = item_dao
 
     def get_item(self, item_id: int) -> Item | None:
-        self.item_dao.get_item_by_id(item_id)
+        print(f"[ItemService] Getting item with ID: {item_id}")
+        item = self.item_dao.get_item_by_id(item_id)
+        print(f"[ItemService] DAO returned: {item}")
+        return item
+
+
+        
