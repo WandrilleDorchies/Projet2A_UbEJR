@@ -39,11 +39,11 @@ class AddressDAO(metaclass=Singleton):
         )
         if raw_address:
             raw_address = Address(
-                number=raw_address["number"],
-                street=raw_address["street"],
-                city=raw_address["city"],
-                postal_code=raw_address["postal_code"],
-                country=raw_address["country"],
+                address_number=raw_address["number"],
+                address_street=raw_address["street"],
+                address_city=raw_address["city"],
+                address_postal_code=raw_address["postal_code"],
+                address_country=raw_address["country"],
             )
         return raw_address
 
@@ -67,11 +67,11 @@ class AddressDAO(metaclass=Singleton):
 
         list_address = [
             Address(
-                number=address["number"],
-                street=address["street"],
-                city=address["city"],
-                postal_code=address["postal_code"],
-                country=address["country"],
+                address_number=address["number"],
+                address_street=address["street"],
+                address_city=address["city"],
+                address_postal_code=address["postal_code"],
+                address_country=address["country"],
             )
             for address in address_bdd
         ]
@@ -172,10 +172,10 @@ class AddressDAO(metaclass=Singleton):
         )
         if raw_delete_address:
             raw_delete_address = Address(
-                number=raw_delete_address["number"],
-                street=raw_delete_address["street"],
-                city=raw_delete_address["city"],
-                postal_code=raw_delete_address["postal_code"],
-                country=raw_delete_address["country"],
+                address_number=raw_delete_address["number"],
+                address_street=raw_delete_address["street"],
+                address_city=raw_delete_address["city"],
+                address_postal_code=raw_delete_address["postal_code"],
+                address_country=raw_delete_address["country"],
             )
         return raw_delete_address

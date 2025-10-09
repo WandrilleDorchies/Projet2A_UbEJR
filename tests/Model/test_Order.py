@@ -21,6 +21,7 @@ def test_order_constructor_ok():
         time=mock_time,
     )
 
+    assert isinstance(order_test, Order)
     assert order_test.id_order == 1
     assert order_test.client_id == 1
     assert order_test.items[0] == mock_item
@@ -45,6 +46,8 @@ def test_order_constructor_throws_on_incorrect_input():
             date=mock_date,
             time=mock_time,
         )
-    assert "id" in str(
+    assert "id_order" in str(
         exception_info.value
-    ) and "Input should be a valid integer, unable to parse string as an integer" in str(exception_info.value)
+    ) and "Input should be a valid integer, unable to parse string as an integer" in str(
+        exception_info.value
+    )

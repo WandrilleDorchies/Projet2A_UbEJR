@@ -14,8 +14,8 @@ class Address(BaseModel):
         country (str): Country name.
     """
 
-    number: int
-    street: str
-    city: str
-    postal_code: int
-    country: str
+    address_number: int
+    address_street: str
+    address_city: str
+    address_postal_code: int
+    address_country: str
