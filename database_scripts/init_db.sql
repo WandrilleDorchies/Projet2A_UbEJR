@@ -82,7 +82,7 @@ CREATE TABLE project.Bundles (
     -- bundle reduction: if 20% off, it's 20. Python App handles calculations.
     bundle_reduction INTEGER CHECK (bundle_reduction > 0 AND bundle_reduction < 100),
     bundle_description VARCHAR(256),
-    bundle_availability_start_date DATE 
+    bundle_availability_start_date DATE,
     bundle_availability_end_date DATE CHECK (bundle_availability_end_date > bundle_availability_start_date)
 );
 
