@@ -13,14 +13,14 @@ class DeliveryDAO(metaclass=Singleton):
     def __init__(self, db_connector: DBConnector) -> None:
         self.db_connector = db_connector
 
-    def get_delivery_by_id(self, order_id: int) -> Optional[Order]:
-        raw_order = self.db_connector.sql_query(
-            "SELECT * from Order WHERE id=%s", [order_id], "one"
+    def get_delivery_by_id(self, delivery_id: int) -> Optional[Order]:
+        raw_delivery = self.db_connector.sql_query(
+            "SELECT * from Deliveries WHERE delivery_id_order=%s", [delivery_id], "one"
         )
-        if raw_order is None:
+        if raw_delivery is None:
             return None
         # pyrefly: ignore
-        return Order(**raw_order)
+        return Delivery(**raw_delivery)
 
     def get_all_order(self) -> Optional[list[Order]]:
         raw_orders = self.db_connector.sql_query("SELECT * from Order", [], "all")
