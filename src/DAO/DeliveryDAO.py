@@ -13,35 +13,6 @@ class DeliveryDAO(metaclass=Singleton):
     def __init__(self, db_connector: DBConnector) -> None:
         self.db_connector = db_connector
 
-    def get_delivery_by_id(self, delivery_id: int) -> Optional[Order]:
-        raw_delivery = self.db_connector.sql_query(
-            "SELECT * from Deliveries WHERE delivery_id_order=%s", [delivery_id], "one"
-        )
-        if raw_delivery is None:
-            return None
-        # pyrefly: ignore
-        return Delivery(**raw_delivery)
-
-    def get_all_order(self) -> Optional[list[Order]]:
-        raw_orders = self.db_connector.sql_query("SELECT * from Order", [], "all")
-        if raw_orders is None:
-            return None
-        # pyrefly: ignore
-        Orders = [Order(**raw_order) for raw_order in raw_orders]
-
-        return Orders
-
-    def get_all_orders_from_user_id(self, user_id) -> Optional[list[Order]]:
-        raw_orders = self.db_connector.sql_query(
-            "SELECT * from Order WHERE customer_id=%s", [user_id], "all"
-        )
-        if raw_orders is None:
-            return None
-        # pyrefly: ignore
-        Orders = [Order(**raw_order) for raw_order in raw_orders]
-
-        return Orders
-
     def create_delivery(self, order_id, driver_id) -> Delivery:
         # TODO: decide return type
         #     : handle autonumber & check for existing item with similar name
@@ -59,13 +30,35 @@ class DeliveryDAO(metaclass=Singleton):
 
         return Delivery(**raw_created_delivery)
 
-    def update_order(self, order_id, is_paid, is_prepared) -> Order:
+    def get_delivery_by_driver(self, delivery_id_driver: int) -> Optional[Order]:
+        raw_delivery = self.db_connector.sql_query(
+            "SELECT * from Deliveries WHERE delivery_id_driver=%s", [delivery_id_driver], "one"
+        )
+        if raw_delivery is None:
+            return None
+        # pyrefly: ignore
+        return Delivery(**raw_delivery)
+
+    def get_delivery_by_user(self, customer_id: int) -> Optional[Order]:
+        raw_delivery = self.db_connector.sql_query(
+            """SELECT * from Deliveries
+            LEFT JOIN Order ON Deliveries.delivery_id_order = Order.order_id
+            WHERE order_customer_id=%s""",
+            [customer_id],
+            "one",
+        )
+        if raw_delivery is None:
+            return None
+        # pyrefly: ignore
+        return Delivery(**raw_delivery)
+
+    def update_delivery(self, delivery_id, state) -> Delivery:
         # TODO: decide return type
         #     : handle autonumber & check for existing item with similar name
-        raw_update_order = self.db_connector.sql_query(
+        raw_update_delivery = self.db_connector.sql_query(
             """
-        UPDATE Order SET order_is_paid=%(is_paid)s, order_is_prepared=%(is_prepared)s
-        WHERE order_id=%(order_id)s RETURNING *;
+        UPDATE Deliveries SET delivery_state=%(state)s
+        WHERE delivery_id_order=%(delivery_id)s RETURNING *;
         """,
             # TODO: dic with column and values
             {"key": 1},
@@ -73,14 +66,14 @@ class DeliveryDAO(metaclass=Singleton):
         )
         # pyrefly: ignore
 
-        return Order(**raw_update_order)
+        return Delivery(**raw_update_delivery)
 
-    def delete_order(self, order_id) -> None:
+    def delete_delivery(self, delivery_id) -> None:
         # TODO: decide return type
         #     : handle autonumber & check for existing item with similar name
-        raw_delete_order = self.db_connector.sql_query(
+        raw_delete_delivery = self.db_connector.sql_query(
             """
-        DELETE FROM Order WHERE order_id=%s RETURNING *;
+        DELETE FROM Deliveries WHERE delivery_id_order=%s RETURNING *;
         """,
             # TODO: dic with column and values
             {"key": 1},
@@ -88,4 +81,4 @@ class DeliveryDAO(metaclass=Singleton):
         )
         # pyrefly: ignore
 
-        return Order(**raw_delete_order)
+        return Delivery(**raw_delete_delivery)
