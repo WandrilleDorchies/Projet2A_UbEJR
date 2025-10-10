@@ -75,7 +75,7 @@ class TestDriver:
         # Create mock drivers instead of real ones
         existing_drivers = [
             Mock(spec=Driver, driver_phone="0612345678"),
-            Mock(spec=Driver, driver_phone="0798765432"), 
+            Mock(spec=Driver, driver_phone="0798765432"),
             Mock(spec=Driver, driver_phone="0687654321")
         ]
 
@@ -96,22 +96,18 @@ class TestDriver:
     def test_driver_phone_uniqueness_different_formats(self):
         """Test that duplicate phone numbers in different formats raise error"""
         driver1 = self._create_driver(user_id=1, driver_phone="0724368754")
-
-    # Utilisez des formats qui sont vraiment normalisés de la même manière
-    # selon votre méthode _normalize_phone
         equivalent_phones = [
-            "07 24 36 87 54",      # Devient +33724368754
-            "07-24-36-87-54",      # Devient +33724368754
-            "+33724368754",        # Déjà normalisé
+            "07 24 36 87 54",      # decome +33724368754
+            "07-24-36-87-54",      # become +33724368754
+            "+33724368754",        # already normalized
         ]
 
         for phone in equivalent_phones:
-        # Vérifiez d'abord que la normalisation fonctionne
             normalized_new = self._normalize_phone(phone)
             normalized_existing = self._normalize_phone(driver1.driver_phone)
 
-            # Debug: affichez les normalisations pour vérifier
-            print(f"Testing: {phone} -> {normalized_new} vs {driver1.driver_phone} -> {normalized_existing}")
+            print(f"Testing: {phone} -> {normalized_new} vs {driver1.driver_phone} ->"
+                    f"{normalized_existing}")
 
             if normalized_new == normalized_existing:
                 with pytest.raises(ValueError, match="Phone number already used"):
@@ -138,28 +134,25 @@ class TestDriver:
         This handles different formats of the same phone number.
         Raises ValueError if the phone number is invalid.
         """
-        # Validation basique
         if not phone or not isinstance(phone, str):
             raise ValueError("Phone number must be a non-empty string")
-        
-        # Extraction des chiffres
+
         if phone.startswith('+'):
             digits = ''.join(filter(str.isdigit, phone[1:]))
             normalized = self._format_international_phone(digits)
         else:
             digits = ''.join(filter(str.isdigit, phone))
             normalized = self._format_national_phone(digits)
-        
-        # Validation de la longueur
+
         self._validate_phone_length(normalized)
-        
+
         return normalized
 
     def _format_international_phone(self, digits):
         """Format international phone numbers"""
         if not digits:
             raise ValueError("Phone number must contain digits")
-        
+
         if digits.startswith('33'):
             return '+' + digits
         elif digits.startswith('0'):
@@ -171,7 +164,7 @@ class TestDriver:
         """Format national phone numbers"""
         if not digits:
             raise ValueError("Phone number must contain digits")
-        
+
         if digits.startswith('0'):
             return '+33' + digits[1:]
         else:
@@ -180,16 +173,18 @@ class TestDriver:
     def _validate_phone_length(self, normalized_phone):
         """Validate phone number length after normalization"""
         digits_only = ''.join(filter(str.isdigit, normalized_phone))
-        
+
         if len(digits_only) < 10:
-            raise ValueError(f"Phone number too short: {len(digits_only)} digits after normalization (minimum 10)")
-        
+            raise ValueError(f"Phone number too short: {len(digits_only)} digits"
+                    f"after normalization (minimum 10)")
+
         if len(digits_only) > 15:
-            raise ValueError(f"Phone number too long: {len(digits_only)} digits after normalization")
-        
-        # Validation spécifique pour les numéros français
+            raise ValueError(f"Phone number too long:{len(digits_only)} digits after normalization")
+
+        # Validation for french phone numbers
         if normalized_phone.startswith('+33') and len(normalized_phone) != 12:
-            raise ValueError(f"French phone number must have 10 digits total, got {len(normalized_phone)-3} digits after normalization")
+            raise ValueError(f"French phone number must have 10 digits total,"
+                f"got {len(normalized_phone)-3} digits after normalization")
 
     def test_driver_creation_phone_alphabet_string(self):
         """Test that a word instead of a phone number raises ValueError in normalization"""
@@ -205,18 +200,17 @@ class TestDriver:
 
     def test_driver_creation_phone_valid_after_normalization(self):
         """Test that valid phone numbers pass validation after normalization"""
-        # Test avec différents formats valides
         valid_phones = [
-            "0724368754",           # Format français standard
-            "07 24 36 87 54",       # Avec espaces
-            "07-24-36-87-54",       # Avec tirets
-            "+33724368754",         # Format international
-            "+33 7 24 36 87 54",    # International avec espaces
+            "0724368754",
+            "07 24 36 87 54",
+            "07-24-36-87-54",
+            "+33724368754",
+            "+33 7 24 36 87 54",
         ]
-        
+
         for phone in valid_phones:
             driver = self._create_driver(driver_phone=phone)
             assert driver.driver_phone is not None
-            # La normalisation devrait convertir tout en +33724368754
+            # should convert everything in +33724368754
             normalized = self._normalize_phone(phone)
             assert normalized == "+33724368754"
