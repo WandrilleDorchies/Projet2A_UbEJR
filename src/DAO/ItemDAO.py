@@ -13,14 +13,17 @@ class ItemDAO(metaclass=Singleton):
         self.db_connector = db_connector
 
     # CREATE
-    def create_item(self, item_name, item_price, item_type, item_description, item_stock) -> Item:
+    def create_item(self, item_id, item_name, item_price, item_type, item_description, item_stock) -> Item:
         raw_created_item = self.db_connector.sql_query(
             """
-        INSERT INTO Items (id_item, name, price, item_type, description, stock)
-        VALUES (DEFAULT, %(item_name)s, %(item_price)s, %(item_type)s, %(item_description)s, %(item_stock)s)
+        INSERT INTO Items (item_id, item_name, item_price, item_type,
+        item_description, item_stock, item_in_menu)
+        VALUES (%(item_id)s, %(item_name)s, %(item_price)s, %(item_type)s,
+        %(item_description)s, %(item_stock)s, DEFAULT)
         RETURNING *;
         """,
             {
+                "item_id":item_id,
                 "item_name": item_name,
                 "item_price": item_price,
                 "item_type": item_type,
@@ -44,7 +47,7 @@ class ItemDAO(metaclass=Singleton):
         return Item(**raw_item)
 
     def get_all_items(self) -> Optional[list[Item]]:
-        raw_items = self.db_connector.sql_query("SELECT * from Item", [], "all")
+        raw_items = self.db_connector.sql_query("SELECT * from Items", [], "all")
         if raw_items is None:
             return None
         # pyrefly: ignore
@@ -58,5 +61,5 @@ class ItemDAO(metaclass=Singleton):
     def delete_item_by_id(self, item_id) -> None:
         # TODO: prevent deleting items present in Bundle_Items
         self.db_connector.sql_query(
-            "DELETE * FROM Item WHERE item_id = %(item_id)s", {"item_id": item_id}, None
+            "DELETE FROM Items WHERE item_id = %(item_id)s", {"item_id": item_id}, None
         )

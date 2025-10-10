@@ -14,17 +14,19 @@ class ItemService:
         print(f"[ItemService] DAO returned: {item}")
         return item
 
-    def create_item(self, name, price, type, description, stock) -> None:
+    def create_item(self, id: int, name: str, price: int, type: str, description: str, stock: int) -> None:
         print(
-            f"[ItemService] Creating item: name={name}, price={price},\n"
-            f"  type={type}, description={description}, stock={stock}"
+            f"[ItemService] Creating item: item_name={name}, item_price={price},\n"
+            f"  item_type={type}, item_description={description}, item_stock={stock}"
         )
 
-        new_item = Item(name=name, price=price, type=type, description=description, stock=stock)
+        new_item = Item(item_id=id,item_name=name,
+        item_price=price,item_type=type,item_description=description,item_stock=stock)
 
         print(f"[ItemService] New Item object created: {new_item}")
 
-        created_item = self.item_dao.create_item(new_item)
+        created_item = self.item_dao.create_item(item_id=id,item_name=name,
+        item_price=price,item_type=type,item_description=description,item_stock=stock)
         print(f"[ItemService] DAO returned after creation: {created_item}")
         return created_item
 
@@ -77,5 +79,5 @@ class ItemService:
         if item is None:
             raise ValueError(f"[ItemService] Cannot delete: item with ID {item_id} not found.")
 
-        self.item_dao.delete_item(item_id)
+        self.item_dao.delete_item_by_id(item_id)
         print(f"[ItemService] Item with ID {item_id} has been deleted.")

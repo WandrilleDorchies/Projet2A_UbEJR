@@ -23,3 +23,36 @@ def get_item_by_id(item_id: int):
         print("ERROR: Exception caught in controller")
         traceback.print_exc()
         raise HTTPException(status_code=400, detail=f"Invalid request: {e}") from e
+
+@item_router.post("/", status_code=status.HTTP_201_CREATED)
+def create_item(item_id: int,
+        item_name: str,
+        item_price: float,
+        item_type: str,
+        item_description: str,
+        item_stock: int):
+    try:
+        print(f"DEBUG: Calling item_service.create_item({item_id,item_name,
+        item_price,item_type,item_description,item_stock})")
+        item = item_service.create_item(item_id,item_name,
+        item_price,item_type,item_description,item_stock)
+        print(f"DEBUG: item_service returned: {item}")
+        return item
+    except Exception as e:
+        print("ERROR: Exception caught in controller")
+        traceback.print_exc()
+        raise HTTPException(status_code=400, detail=f"Invalid request: {e}") from e
+
+
+@item_router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_item(item_id: int):
+    try:
+        print(f"DEBUG: Calling item_service.delete_item({item_id})")
+        item_service.delete_item(item_id)
+        print(f"DEBUG: item_service deleted item {item_id}")
+        return
+    except Exception as e:
+        print("ERROR: Exception caught in controller")
+        traceback.print_exc()
+        raise HTTPException(status_code=400, detail=f"Invalid request: {e}") from e
+
