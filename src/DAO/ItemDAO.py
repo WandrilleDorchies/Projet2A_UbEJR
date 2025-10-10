@@ -13,7 +13,9 @@ class ItemDAO(metaclass=Singleton):
         self.db_connector = db_connector
 
     # CREATE
-    def create_item(self, item_id, item_name, item_price, item_type, item_description, item_stock) -> Item:
+    def create_item(
+        self, item_id, item_name, item_price, item_type, item_description, item_stock
+    ) -> Item:
         raw_created_item = self.db_connector.sql_query(
             """
         INSERT INTO Items (item_id, item_name, item_price, item_type,
@@ -23,7 +25,7 @@ class ItemDAO(metaclass=Singleton):
         RETURNING *;
         """,
             {
-                "item_id":item_id,
+                "item_id": item_id,
                 "item_name": item_name,
                 "item_price": item_price,
                 "item_type": item_type,
