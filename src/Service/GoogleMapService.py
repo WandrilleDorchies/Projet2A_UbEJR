@@ -89,11 +89,11 @@ class GoogleMapService:
 
         try:
             address_validated = Address(
-                number=int(number),
-                street=street,
-                city=city,
-                postal_code=int(postal_code),
-                country=country,
+                address_number=int(number),
+                address_street=street,
+                address_city=city,
+                address_postal_code=int(postal_code),
+                address_country=country,
             )
             return address_validated
 
