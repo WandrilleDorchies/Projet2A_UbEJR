@@ -1,16 +1,65 @@
 import hashlib
-from typing import Literal, Optional
+import secrets
+from typing import TYPE_CHECKING, Literal, Optional
 
 from src.DAO.UserRepo import UserRepo
-from src.Model.User import User
+
+if TYPE_CHECKING:
+    from src.Model.User import User
 
 
-def hash_password(password: str, salt: Optional[str] = None) -> str:
+def create_salt() -> str:
+    """
+    Generate a salt
+
+    Return
+    ------
+        str: A string of 256 character
+    """
+    return secrets.token_hex(128)
+
+
+def hash_password(password: str, salt: str) -> str:
+    """
+    Hash a password with SHA-256
+
+    Parameters
+    ----------
+    password: str
+        The password of an user
+
+    salt: str
+        Additionnal string unique for each user
+
+    Return
+    ------
+        str: The hashed password and salt
+    """
     return hashlib.sha256(salt.encode() + password.encode()).hexdigest()
 
 
 def check_password_strength(password: str) -> Literal[True]:  # noqa: C901
-    SpecialSym: list[str] = ["$", "@", "#", "%", "!", "?"]
+    """
+    Validate that a password meets security requirements.
+
+    Requirements:
+    - At least 6 characters long
+    - At least one digit (0-9)
+    - At least one uppercase letter (A-Z)
+    - At least one lowercase letter (a-z)
+    - At least one special character ($@#%!?)
+
+    Parameters
+    ----------
+    password : str
+        Password to validate
+
+    Returns
+    -------
+    bool:
+        True if password meets all requirements, else raise a ValueError
+    """
+    symbols: list[str] = ["$", "@", "#", "%", "!", "?"]
 
     if len(password) < 6:
         raise ValueError("Length should be at least 6 characters")
@@ -24,7 +73,7 @@ def check_password_strength(password: str) -> Literal[True]:  # noqa: C901
             has_upper = True
         elif 97 <= ord(char) <= 122:
             has_lower = True
-        elif char in SpecialSym:
+        elif char in symbols:
             has_sym = True
 
     if not has_digit:
@@ -41,3 +90,31 @@ def check_password_strength(password: str) -> Literal[True]:  # noqa: C901
 
     return True
 
+
+def validate_password(username: str, password: str) -> bool:
+    """
+    Validate username and password combination
+
+    Parameters
+    ----------
+    username : str
+        Username to validate
+    password : str
+        Password to check
+
+    Returns
+    -------
+    bool
+        True if the password is correct, else raise en Error
+    """
+    user: Optional[User] = UserRepo().get_by_username(username)
+
+    if user is None:
+        raise ValueError(f"user with username {username} not found")
+
+    test_password: str = hash_password(password, user.salt)
+
+    if user.password != test_password:
+        raise ValueError("Incorrect password")
+
+    return True
