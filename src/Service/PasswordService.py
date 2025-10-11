@@ -67,11 +67,11 @@ def check_password_strength(password: str) -> Literal[True]:  # noqa: C901
     has_digit = has_upper = has_lower = has_sym = False
 
     for char in password:
-        if 48 <= ord(char) <= 57:
+        if char.isdigit():
             has_digit = True
-        elif 65 <= ord(char) <= 90:
+        elif char.isupper():
             has_upper = True
-        elif 97 <= ord(char) <= 122:
+        elif char.islower():
             has_lower = True
         elif char in symbols:
             has_sym = True
@@ -91,14 +91,14 @@ def check_password_strength(password: str) -> Literal[True]:  # noqa: C901
     return True
 
 
-def validate_password(username: str, password: str) -> bool:
+def validate_password(user_id: int, password: str) -> bool:
     """
     Validate username and password combination
 
     Parameters
     ----------
-    username : str
-        Username to validate
+    user_id : int
+        Id of the user
     password : str
         Password to check
 
@@ -107,10 +107,10 @@ def validate_password(username: str, password: str) -> bool:
     bool
         True if the password is correct, else raise en Error
     """
-    user: Optional[User] = UserRepo().get_by_username(username)
+    user: Optional[User] = UserRepo().get_by_id(user_id)
 
     if user is None:
-        raise ValueError(f"user with username {username} not found")
+        raise ValueError(f"User {user_id} not found")
 
     test_password: str = hash_password(password, user.salt)
 
