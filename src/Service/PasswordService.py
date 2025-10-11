@@ -1,11 +1,9 @@
 import hashlib
 import secrets
-from typing import TYPE_CHECKING, Literal, Optional
+from typing import Literal, Optional
 
 from src.DAO.UserRepo import UserRepo
-
-if TYPE_CHECKING:
-    from src.Model.User import User
+from src.Model.User import User
 
 
 def create_salt() -> str:
@@ -86,12 +84,12 @@ def check_password_strength(password: str) -> Literal[True]:  # noqa: C901
         raise ValueError("Password should have at least one lowercase letter")
 
     if not has_sym:
-        raise ValueError("Password should have at least one of the symbols $@#%?!")
+        raise ValueError("Password should have at least one special symbol")
 
     return True
 
 
-def validate_password(user_id: int, password: str) -> bool:
+def validate_password(user_id: int, password: str, user_repo: UserRepo) -> Optional[User]:
     """
     Validate username and password combination
 
@@ -104,10 +102,10 @@ def validate_password(user_id: int, password: str) -> bool:
 
     Returns
     -------
-    bool
-        True if the password is correct, else raise en Error
+    User
+        User authentificated
     """
-    user: Optional[User] = UserRepo().get_by_id(user_id)
+    user: Optional[User] = user_repo.get_by_id(user_id)
 
     if user is None:
         raise ValueError(f"User {user_id} not found")
@@ -117,4 +115,4 @@ def validate_password(user_id: int, password: str) -> bool:
     if user.password != test_password:
         raise ValueError("Incorrect password")
 
-    return True
+    return user
