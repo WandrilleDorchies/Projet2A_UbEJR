@@ -9,11 +9,11 @@ def test_validate_address_ok():
     result = GMService.validate_address(adress)
 
     assert isinstance(result, Address)
-    assert result.number == 51
-    assert result.street == "Rue Blaise Pascal"
-    assert result.city == "Bruz"
-    assert result.postal_code == 35170
-    assert result.country == "France"
+    assert result.address_number == 51
+    assert result.address_street == "Rue Blaise Pascal"
+    assert result.address_city == "Bruz"
+    assert result.address_postal_code == 35170
+    assert result.address_country == "France"
 
 
 def test_validate_address_unknown():
