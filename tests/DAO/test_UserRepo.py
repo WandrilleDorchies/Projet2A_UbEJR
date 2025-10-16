@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import TYPE_CHECKING, Literal, Optional, Union
 
 from src.DAO.UserRepo import UserRepo
@@ -12,13 +13,21 @@ class MockDBConnector:
         query: str,
         data: Optional[Union[tuple, list, dict]] = None,
         return_type: Union[Literal["one"], Literal["all"]] = "one",
-    ):
+    ) -> dict[str, str] | None:
         match query:
             case "SELECT * from users WHERE id=%s":
                 if not data:
                     raise Exception
-                id_user = data[0]
-                return {"id": id_user, "username": "janjak", "password": "myHashedPassword", "salt": "mySalt"}
+                id_user: int = data[0]
+                print(id_user)
+                return {
+                    "id": id_user,
+                    "first_name": "jan",
+                    "last_name": "jak",
+                    "created_at": datetime.now(),
+                    "password": "myHashedPassword",
+                    "salt": "mySalt",
+                }
 
 
 def test_get_user_by_id():
@@ -26,4 +35,3 @@ def test_get_user_by_id():
     user: User = user_repo.get_by_id(1)
     assert user is not None
     assert user.id == 1
-    assert user.username == "janjak"

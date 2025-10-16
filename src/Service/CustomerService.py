@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from src.DAO.UserRepo import UserRepo
 from src.Model.User import User
 from src.Service.PasswordService import check_password_strength, create_salt, hash_password
@@ -30,6 +32,8 @@ class UserService:
         salt = create_salt()
 
         hashed_password = hash_password(password, salt)
+
+        new_user = User(first_name, last_name, hashed_password, salt, created_at=datetime.now())
 
         new_user = self.user_repo.insert_into_db(
             salt=salt,

@@ -18,19 +18,10 @@ class UserRepo:
         # pyrefly: ignore
         return User(**raw_user)
 
-    def get_by_username(self, username: str) -> Optional[User]:
-        raw_user = self.db_connector.sql_query(
-            "SELECT * from users WHERE username=%s", [username], "one"
-        )
-        if raw_user is None:
-            return None
-        # pyrefly: ignore
-        return User(**raw_user)
-
-    def insert_into_db(self, username: str, salt: str, hashed_password: str) -> User:
+    def insert_into_db(self, user: User) -> User:
         raw_created_user = self.db_connector.sql_query(
             """
-        INSERT INTO users (id, username, salt, password)
+        INSERT INTO users (id, first_name, last_name, password)
         VALUES (DEFAULT, %(username)s, %(salt)s, %(password)s)
         RETURNING *;
         """,
