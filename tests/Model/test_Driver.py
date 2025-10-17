@@ -32,7 +32,7 @@ class TestDriver:
         data = {**self.mock_user_data, **self.mock_driver_data, **overrides}
         return Driver(**data)
 
-    def test_driver_creation_valid_data(self):
+    def test_driver_constructor_ok(self):
         """Test creating a driver with valid data"""
         driver = self._create_driver()
 
@@ -44,7 +44,7 @@ class TestDriver:
         assert driver.driver_is_delivering is False
         assert isinstance(driver.created_at, datetime)
 
-    def test_driver_creation_with_is_delivering_true(self):
+    def test_driver_constructor_delivering_true_ok(self):
         """Test creating a driver with driver_is_delivering set to True"""
         driver = self._create_driver(driver_is_delivering=True)
         assert driver.driver_is_delivering is True
