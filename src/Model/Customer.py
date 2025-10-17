@@ -1,5 +1,5 @@
-from Address import Address
-from User import User
+from .Address import Address
+from .User import User
 
 
 class Customer(User):

@@ -1,48 +1,21 @@
-from datetime import datetime
+from src.DAO.CustomerDAO import CustomerDAO
 
-from src.DAO.UserRepo import UserRepo
-from src.Model.User import User
-from src.Service.PasswordService import check_password_strength, create_salt, hash_password
+from .UserService import UserService
 
 
-class UserService:
-    def __init__(self, user_repo: UserRepo):
-        self.user_repo = user_repo
+class CustomerService:
+    def __init__(self, user_service: UserService, customer_dao: CustomerDAO):
+        self.user_service = user_service
+        self.customer_dao = customer_dao
 
-    def create_user(self, password: str, first_name: str, last_name: str) -> User:
-        """
-        Create a new user with a unique salt and hashed password.
+    def create_customer():
+        pass
 
-        Parameters
-        ----------
-        password : str
-            Plain text password (before hash)
-        first_name : str
-            User's first name
-        last_name : str
-            User's last name
+    def update_customer():
+        pass
 
-        Returns
-        -------
-        User
-            The created user
-        """
-        check_password_strength(password)
+    def delete_customer():
+        pass
 
-        salt = create_salt()
-
-        hashed_password = hash_password(password, salt)
-
-        new_user = User(first_name, last_name, hashed_password, salt, created_at=datetime.now())
-
-        new_user = self.user_repo.insert_into_db(
-            salt=salt,
-            hashed_password=hashed_password,
-            first_name=first_name,
-            last_name=last_name,
-        )
-
-        return new_user
-
-    def get_user(self, user_id: int) -> User | None:
-        return self.user_repo.get_by_id(user_id)
+    def get_customer_by_id():
+        pass

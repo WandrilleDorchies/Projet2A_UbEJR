@@ -14,7 +14,7 @@ class CustomerDAO(metaclass=Singleton):
 
     def get_customer_by_id(self, customer_id) -> Optional[Customer]:
         raw_customer = self.db_connector.sql_query(
-            "SELECT * from Customers WHERE id=%s", [customer_id], "one"
+            "SELECT * from Customers WHERE customer_id=%s", [customer_id], "one"
         )
         if raw_customer is None:
             return None
@@ -43,6 +43,15 @@ class CustomerDAO(metaclass=Singleton):
         %(last_name)s, %(phone)s, %(mail)s, %(password_hash)s, %(address_id)s )
         RETURNING *;
         """,
+            {
+                "first_name": first_name,
+                "last_name": last_name,
+                "phone": phone,
+                "mail": mail,
+                "password_hash": password_hash,
+                "address_id": address_id,
+            },
+            "one",
         )
         return Customer(**raw_created_customer)
 
@@ -56,7 +65,15 @@ class CustomerDAO(metaclass=Singleton):
         customer_password_hash=%(password_hash)s, customer_address_id=%(address_id)s
         WHERE customer_id=%(customer_id)s RETURNING *;
         """,
-            {"key": 1},
+            {
+                "first_name": first_name,
+                "last_name": last_name,
+                "phone": phone,
+                "mail": mail,
+                "password_hash": password_hash,
+                "address_id": address_id,
+                "customer_id": customer_id,
+            },
             "one",
         )
         return Customer(**raw_update_customer)
@@ -66,6 +83,7 @@ class CustomerDAO(metaclass=Singleton):
             """
         DELETE FROM Customers WHERE customer_id=%s
         """,
+            [customer_id],
             "one",
         )
         return Customer(**raw_delete_customer)

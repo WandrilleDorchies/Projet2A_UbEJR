@@ -3,14 +3,14 @@ from typing import Optional
 
 from src.Model.Bundle import Bundle
 from src.Model.Item import Item
+from src.utils.Singleton import Singleton
 
 from .DBConnector import DBConnector
 
 
-class BundleDAO:
+class BundleDAO(metaclass=Singleton):
     def __init__(self, db_connector: DBConnector):
         self.db_connector = db_connector
-
 
     def insert_bundle(
         self,
@@ -42,7 +42,6 @@ class BundleDAO:
         # pyrefly: ignore
 
         return Bundle(**raw_created_bundle)
-
 
     def get_bundle_by_id(self, bundle_id: int) -> Optional[Bundle]:
         """
@@ -80,7 +79,6 @@ class BundleDAO:
 
         return bundles
 
-
     def update_bundle(
         self,
         bundle_id: int,
@@ -102,7 +100,6 @@ class BundleDAO:
         )
 
         return Bundle(**raw_update_bundle)
-
 
     def delete_bundle(self, bundle_id: int):
         raw_delete_address = self.db_connector.sql_query(
