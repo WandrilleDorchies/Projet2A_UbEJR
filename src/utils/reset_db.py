@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 
-from DAO.DBConnector import DBConnector
+from src.DAO.DBConnector import DBConnector
 
 from .singleton import Singleton
 

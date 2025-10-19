@@ -1,5 +1,6 @@
 from typing import Optional
 
+from src.Model.Address import Address
 from src.Model.Customer import Customer
 from src.utils.singleton import Singleton
 
@@ -31,16 +32,32 @@ class CustomerDAO(metaclass=Singleton):
         return list_customer
 
     def create_customer(
-        self, customer_id, first_name, last_name, phone, mail, password_hash, address_id
+        self,
+        first_name: str,
+        last_name: str,
+        phone: str,
+        mail: str,
+        password_hash: str,
+        address: Address,
     ) -> Customer:
+        address_id = Address.address_id
+
         raw_created_customer = self.db_connector.sql_query(
             """
         INSERT INTO Customer (customer_id,
-        customer_first_name, customer_last_name, customer_phone, customer_mail,
-        customer_password_hash,
-        customer_address_id)
-        VALUES (DEFAULT, %(first_name)s,
-        %(last_name)s, %(phone)s, %(mail)s, %(password_hash)s, %(address_id)s )
+                              customer_first_name,
+                              customer_last_name,
+                              customer_phone,
+                              customer_mail,
+                              customer_password_hash,
+                              customer_address_id)
+        VALUES (DEFAULT,
+                %(first_name)s,
+                %(last_name)s,
+                %(phone)s,
+                %(mail)s,
+                %(password_hash)s,
+                %(address_id)s)
         RETURNING *;
         """,
             {
@@ -60,10 +77,14 @@ class CustomerDAO(metaclass=Singleton):
     ):
         raw_update_customer = self.db_connector.sql_query(
             """
-        UPDATE Customer SET customer_first_name = %(first_name)s, customer_last_name=%(last_name)s,
-        customer_phone=%(phone)s, customer_mail=%(mail)s,
-        customer_password_hash=%(password_hash)s, customer_address_id=%(address_id)s
-        WHERE customer_id=%(customer_id)s RETURNING *;
+        UPDATE Customer SET customer_first_name = %(first_name)s,
+                            customer_last_name=%(last_name)s,
+                            customer_phone=%(phone)s,
+                            customer_mail=%(mail)s,
+                            customer_password_hash=%(password_hash)s,
+                            customer_address_id=%(address_id)s
+        WHERE customer_id=%(customer_id)s
+        RETURNING *;
         """,
             {
                 "first_name": first_name,

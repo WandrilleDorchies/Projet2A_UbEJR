@@ -29,9 +29,8 @@ class AddressDAO(metaclass=Singleton):
         """
 
         raw_address = self.db_connector.sql_query(
-            "SELECT * FROM Address JOIN Customer USING address_id "
-            "WHERE customer_id = %(customer_id)s",
-            {"customer_id": customer_id},
+            "SELECT * FROM Address JOIN Customer USING address_id WHERE customer_id = %s",
+            [customer_id],
             "one",
         )
         if raw_address is None:
@@ -60,15 +59,13 @@ class AddressDAO(metaclass=Singleton):
         return addresses
 
     def create_address(
-        self, address_id: int, number: int, street: str, city: str, postal_code: int, country: str
+        self, number: int, street: str, city: str, postal_code: int, country: str
     ) -> Address:
         """
         Create a new address entry in the database.
 
         Args
         ----
-        address_id (int):
-            Unique identifier for the address (ignored in insertion since set to DEFAULT).
         address_number (str or int):
             Street number of the address.
         address_street (str):
@@ -93,7 +90,13 @@ class AddressDAO(metaclass=Singleton):
         VALUES (DEFAULT, %(number)s,%(street)s, %(city)s, %(postal_code)s, %(country)s)
         RETURNING *;
         """,
-            {"key": 1},
+            {
+                "number": number,
+                "street": street,
+                "city": city,
+                "postal_code": postal_code,
+                "country": country,
+            },
             "one",
         )
         return Address(**raw_created_address)
@@ -133,7 +136,14 @@ class AddressDAO(metaclass=Singleton):
         address_postal_code=%(postal_code)s, address_country=%(country)s
         WHERE address_id=%(address_id)s RETURNING *;
         """,
-            {"key": 1},
+            {
+                "number": number,
+                "street": street,
+                "city": city,
+                "postal_code": postal_code,
+                "country": country,
+                "adress_id": address_id,
+            },
             "one",
         )
         return Address(**raw_update_address)
@@ -157,6 +167,7 @@ class AddressDAO(metaclass=Singleton):
             """
         DELETE FROM Address JOIN Customers Using (address_id) WHERE customer_id=%s
         """,
+            [customer_id],
             "one",
         )
 

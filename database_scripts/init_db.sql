@@ -19,7 +19,7 @@ CREATE TABLE project.Customers (
     customer_phone VARCHAR(16),
     customer_email VARCHAR(128),
     customer_password_hash VARCHAR(512) NOT NULL,
-    customer_salt CHAR(256) NOT NULL
+    customer_salt CHAR(256) NOT NULL,
     customer_address_id INTEGER,
     FOREIGN KEY (customer_address_id) REFERENCES Addresses(address_id)
 );

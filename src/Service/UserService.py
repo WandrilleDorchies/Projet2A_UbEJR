@@ -9,7 +9,7 @@ class UserService:
     def __init__(self, user_repo: UserRepo):
         self.user_repo = user_repo
 
-    def create_user(self, password: str, first_name: str, last_name: str) -> User:
+    def create_hashed_password(self, password: str) -> str:
         """
         Create a new user with a unique salt and hashed password.
 
@@ -17,15 +17,11 @@ class UserService:
         ----------
         password : str
             Plain text password (before hash)
-        first_name : str
-            User's first name
-        last_name : str
-            User's last name
 
         Returns
         -------
-        User
-            The created user
+        str
+            The hashed password
         """
         check_password_strength(password)
 
@@ -33,16 +29,7 @@ class UserService:
 
         hashed_password = hash_password(password, salt)
 
-        new_user = User(first_name, last_name, hashed_password, salt, created_at=datetime.now())
-
-        new_user = self.user_repo.insert_into_db(
-            salt=salt,
-            hashed_password=hashed_password,
-            first_name=first_name,
-            last_name=last_name,
-        )
-
-        return new_user
+        return hashed_password
 
     def get_user(self, user_id: int) -> User | None:
         return self.user_repo.get_by_id(user_id)

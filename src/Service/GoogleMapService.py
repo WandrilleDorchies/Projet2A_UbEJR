@@ -6,6 +6,7 @@ from typing import Optional
 import googlemaps
 from dotenv import load_dotenv
 
+from src.DAO.AddressDAO import AddressDAO
 from src.Model.Address import Address
 
 load_dotenv()
@@ -27,7 +28,7 @@ class GoogleMapService:
         Maximum delivery distance from ENSAI
     """
 
-    def __init__(self) -> None:
+    def __init__(self, address_dao: AddressDAO) -> None:
         self.__gmaps = googlemaps.Client(key=os.environ["GOOGLE_MAPS_API_KEY"])
         self.ensai_address = "51 Rue Blaise Pascal, 35170 Bruz, France"
 
@@ -39,6 +40,7 @@ class GoogleMapService:
             (self.coord_rennes[0] - self.coord_ensai["lat"]) ** 2
             + (self.coord_rennes[1] - self.coord_ensai["lng"]) ** 2
         )
+        self.address_dao = address_dao
 
     def validate_address(self, address: str) -> Optional[Address]:
         """
@@ -88,12 +90,12 @@ class GoogleMapService:
                 country = component["long_name"]
 
         try:
-            address_validated = Address(
-                address_number=int(number),
-                address_street=street,
-                address_city=city,
-                address_postal_code=int(postal_code),
-                address_country=country,
+            address_validated = self.address_dao.create_address(
+                number=int(number),
+                street=street,
+                city=city,
+                postal_code=int(postal_code),
+                country=country,
             )
             return address_validated
 

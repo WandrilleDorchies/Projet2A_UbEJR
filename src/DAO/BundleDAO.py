@@ -3,7 +3,7 @@ from typing import Optional
 
 from src.Model.Bundle import Bundle
 from src.Model.Item import Item
-from src.utils.Singleton import Singleton
+from src.utils.singleton import Singleton
 
 from .DBConnector import DBConnector
 
