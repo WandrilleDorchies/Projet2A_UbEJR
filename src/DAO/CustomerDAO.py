@@ -19,7 +19,15 @@ class CustomerDAO(metaclass=Singleton):
         )
         if raw_customer is None:
             return None
-        # pyrefly: ignore
+        return Customer(**raw_customer)
+
+    def get_customer_by_email(self, email: str) -> Optional[Customer]:
+        """Get customer by email (for login)"""
+        raw_customer = self.db_connector.sql_query(
+            "SELECT * FROM Customers WHERE customer_email=%s", [email], "one"
+        )
+        if raw_customer is None:
+            return None
         return Customer(**raw_customer)
 
     def get_all_customer(self) -> Optional[list[Customer]]:

@@ -29,7 +29,8 @@ CREATE TABLE project.Admins (
     admin_id SERIAL PRIMARY KEY,
     admin_first_name VARCHAR(128),
     admin_last_name VARCHAR(128),
-    admin_password_hash VARCHAR(512)
+    admin_password_hash VARCHAR(512),
+    admin_salt CHAR(256)
 );
 
 -- Table: Drivers
@@ -38,6 +39,7 @@ CREATE TABLE project.Drivers (
     driver_first_name VARCHAR(128),
     driver_last_name VARCHAR(128),
     driver_password_hash VARCHAR(512),
+    driver_salt CHAR(256),
     driver_is_delivering BOOLEAN,
     driver_phone VARCHAR(16)
 );

@@ -29,7 +29,9 @@ class AddressDAO(metaclass=Singleton):
         """
 
         raw_address = self.db_connector.sql_query(
-            "SELECT * FROM Address JOIN Customer USING address_id WHERE customer_id = %s",
+            """SELECT a.* FROM Addresses a
+               JOIN Customers c ON a.address_id = c.customer_address_id
+               WHERE c.customer_id = %(customer_id)s""",
             [customer_id],
             "one",
         )
@@ -165,10 +167,14 @@ class AddressDAO(metaclass=Singleton):
 
         raw_delete_address = self.db_connector.sql_query(
             """
-        DELETE FROM Address JOIN Customers Using (address_id) WHERE customer_id=%s
-        """,
+            DELETE FROM Addresses
+            WHERE address_id = (
+                SELECT customer_address_id FROM Customers WHERE customer_id=%s
+            )
+            RETURNING *;
+            """,
             [customer_id],
             "one",
-        )
+            )
 
         return Address(**raw_delete_address)
