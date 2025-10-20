@@ -24,6 +24,20 @@ def get_item_by_id(item_id: int):
         traceback.print_exc()
         raise HTTPException(status_code=400, detail=f"Invalid request: {e}") from e
 
+@item_router.get("/", status_code=status.HTTP_200_OK)
+def get_all_item():
+    try:
+        print("DEBUG: Calling item_service.get_all_item()")
+        items = item_service.get_all_item()
+        print(f"DEBUG: item_service returned: {items}")
+        if items is None:
+            raise HTTPException(status_code=404, detail="Nothing found")
+        return items
+    except Exception as e:
+        print("ERROR: Exception caught in controller")
+        traceback.print_exc()
+        raise HTTPException(status_code=400, detail=f"Invalid request: {e}") from e
+
 @item_router.post("/", status_code=status.HTTP_201_CREATED)
 def create_item(item_id: int,
         item_name: str,
