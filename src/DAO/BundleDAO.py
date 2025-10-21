@@ -102,9 +102,9 @@ class BundleDAO(metaclass=Singleton):
         return Bundle(**raw_update_bundle)
 
     def delete_bundle(self, bundle_id: int):
-        raw_delete_address = self.db_connector.sql_query(
+        raw_delete_bundle = self.db_connector.sql_query(
             """ DELETE FROM Bundle WHERE bundle_id=%s """,
             "one",
         )
 
-        return Bundle(**raw_delete_address)
+        return Bundle(**raw_delete_bundle)

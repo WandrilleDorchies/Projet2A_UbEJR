@@ -94,7 +94,9 @@ CREATE TABLE project.Bundle_Items (
     item_quantity INTEGER CHECK (item_quantity > 0),
     PRIMARY KEY (bundle_id, item_id),
     FOREIGN KEY (bundle_id) REFERENCES project.Bundles(bundle_id),
-    FOREIGN KEY (item_id) REFERENCES project.Items(item_id)
+    -- ON DELETE RESTRICT is the default behavior
+    -- explicits the prevention of deleting items that are in a bundle
+    FOREIGN KEY (item_id) REFERENCES project.Items(item_id) ON DELETE RESTRICT
 );
 
 -- Table: Order_Bundles
