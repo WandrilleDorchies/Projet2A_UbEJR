@@ -72,7 +72,6 @@ CREATE TABLE test.Order_Items (
     order_id INTEGER,
     item_id INTEGER,
     item_quantity INTEGER CHECK (item_quantity > 0),
-    item_price FLOAT(24) CHECK (item_price >= 0),
     PRIMARY KEY (order_id, item_id),
     FOREIGN KEY (order_id) REFERENCES test.Orders(order_id),
     FOREIGN KEY (item_id) REFERENCES test.Items(item_id)
@@ -147,7 +146,7 @@ INSERT INTO Items (item_name, item_price, item_type, item_description, item_stoc
 VALUES
 ('Galette-Saucisse', 4.5, 'Plat', 'La fameuse galette-saucisse de l''EJR', 50, true),
 ('Coca-Cola 33cl', 0.5, 'Boisson', 'Canette de Coca-Cola', 100, true),
-('Tiramisu', 2.0, 'Dessert', 'Dessert italien au café', 30, true),
+('Tiramisu', 2.0, 'Dessert', 'Tiramisu-holic', 30, true),
 ('Banh-Mi', 4.5, 'Plat', 'Sandwich vietnamien', 40, false);
 
 INSERT INTO Bundles (bundle_name, bundle_reduction, bundle_description, bundle_availability_start_date, bundle_availability_end_date)
@@ -165,11 +164,11 @@ VALUES
 (1, 1, '2025-10-21', '12:30:00', true, true),
 (2, 0, '2025-10-21', '13:00:00', false, false);
 
-INSERT INTO Order_Items (order_id, item_id, item_quantity, item_price)
+INSERT INTO Order_Items (order_id, item_id, item_quantity)
 VALUES
-(1, 1, 1, 4.5),  
-(1, 2, 1, 0.5), 
-(2, 4, 2, 4.5); 
+(1, 1, 1),  
+(1, 2, 1), 
+(2, 4, 2); 
 
 INSERT INTO Order_Bundles (order_id, bundle_id, bundle_quantity)
 VALUES

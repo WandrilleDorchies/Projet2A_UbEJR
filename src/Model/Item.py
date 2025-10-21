@@ -22,3 +22,11 @@ class Item(BaseModel):
     item_description: str
     item_stock: int
     item_in_menu: bool = False
+
+    def __eq__(self, other):
+        if not isinstance(other, Item):
+            return False
+        return self.item_id == other.item_id
+
+    def __hash__(self):
+        return hash(self.item_id)

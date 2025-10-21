@@ -72,7 +72,6 @@ CREATE TABLE project.Order_Items (
     order_id INTEGER,
     item_id INTEGER,
     item_quantity INTEGER CHECK (item_quantity > 0),
-    item_price FLOAT(24) CHECK (item_price >= 0),
     PRIMARY KEY (order_id, item_id),
     FOREIGN KEY (order_id) REFERENCES project.Orders(order_id),
     FOREIGN KEY (item_id) REFERENCES project.Items(item_id)
