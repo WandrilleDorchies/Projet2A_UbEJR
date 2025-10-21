@@ -1,6 +1,5 @@
 from typing import Optional
 
-from src.Model.Address import Address
 from src.Model.Customer import Customer
 from src.utils.singleton import Singleton
 
@@ -24,7 +23,7 @@ class CustomerDAO(metaclass=Singleton):
     def get_customer_by_email(self, email: str) -> Optional[Customer]:
         """Get customer by email (for login)"""
         raw_customer = self.db_connector.sql_query(
-            "SELECT * FROM Customers WHERE customer_email=%s", [email], "one"
+            "SELECT * FROM Customers WHERE customer_email='%s'", [email], "one"
         )
         if raw_customer is None:
             return None
@@ -46,10 +45,8 @@ class CustomerDAO(metaclass=Singleton):
         phone: str,
         mail: str,
         password_hash: str,
-        address: Address,
+        address_id: int,
     ) -> Customer:
-        address_id = Address.address_id
-
         raw_created_customer = self.db_connector.sql_query(
             """
         INSERT INTO Customer (customer_id,
@@ -60,12 +57,12 @@ class CustomerDAO(metaclass=Singleton):
                               customer_password_hash,
                               customer_address_id)
         VALUES (DEFAULT,
-                %(first_name)s,
-                %(last_name)s,
-                %(phone)s,
-                %(mail)s,
-                %(password_hash)s,
-                %(address_id)s)
+                '%(first_name)s',
+                '%(last_name)s',
+                '%(phone)s',
+                '%(mail)s',
+                '%(password_hash)s',
+                 %(address_id)s)
         RETURNING *;
         """,
             {
@@ -81,15 +78,22 @@ class CustomerDAO(metaclass=Singleton):
         return Customer(**raw_created_customer)
 
     def update_customer(
-        self, customer_id, first_name, last_name, phone, mail, password_hash, address_id
+        self,
+        customer_id: int,
+        first_name: str,
+        last_name: str,
+        phone: str,
+        mail: str,
+        password_hash: str,
+        address_id: int,
     ):
         raw_update_customer = self.db_connector.sql_query(
             """
-        UPDATE Customer SET customer_first_name = %(first_name)s,
-                            customer_last_name=%(last_name)s,
-                            customer_phone=%(phone)s,
-                            customer_mail=%(mail)s,
-                            customer_password_hash=%(password_hash)s,
+        UPDATE Customer SET customer_first_name = '%(first_name)s',
+                            customer_last_name='%(last_name)s',
+                            customer_phone='%(phone)s',
+                            customer_mail='%(mail)s',
+                            customer_password_hash='%(password_hash)s',
                             customer_address_id=%(address_id)s
         WHERE customer_id=%(customer_id)s
         RETURNING *;
@@ -107,12 +111,11 @@ class CustomerDAO(metaclass=Singleton):
         )
         return Customer(**raw_update_customer)
 
-    def delete_customer(self, customer_id):
-        raw_delete_customer = self.db_connector.sql_query(
+    def delete_customer(self, customer_id: int):
+        self.db_connector.sql_query(
             """
         DELETE FROM Customers WHERE customer_id=%s
         """,
             [customer_id],
-            "one",
+            "none",
         )
-        return Customer(**raw_delete_customer)

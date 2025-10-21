@@ -37,7 +37,6 @@ class AddressDAO(metaclass=Singleton):
         )
         if raw_address is None:
             return None
-        # pyrefly: ignore
         return Address(**raw_address)
 
     def get_all_addresses(self) -> Optional[list[Address]]:
@@ -89,7 +88,7 @@ class AddressDAO(metaclass=Singleton):
             """
         INSERT INTO Address (address_id, address_number, address_street, address_city,
         address_postal_code, address_country)
-        VALUES (DEFAULT, %(number)s,%(street)s, %(city)s, %(postal_code)s, %(country)s)
+        VALUES (DEFAULT, %(number)s, '%(street)s', '%(city)s', %(postal_code)s, '%(country)s')
         RETURNING *;
         """,
             {
@@ -133,9 +132,9 @@ class AddressDAO(metaclass=Singleton):
         raw_update_address = self.db_connector.sql_query(
             """
         UPDATE Address SET address_number = %(number)s,
-        address_street=%(street)s,
-        address_city=%(city)s,
-        address_postal_code=%(postal_code)s, address_country=%(country)s
+        address_street='%(street)s',
+        address_city='%(city)s',
+        address_postal_code=%(postal_code)s, address_country='%(country)s'
         WHERE address_id=%(address_id)s RETURNING *;
         """,
             {
@@ -175,6 +174,6 @@ class AddressDAO(metaclass=Singleton):
             """,
             [customer_id],
             "one",
-            )
+        )
 
         return Address(**raw_delete_address)

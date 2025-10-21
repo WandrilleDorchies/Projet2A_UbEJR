@@ -21,7 +21,7 @@ CREATE TABLE project.Customers (
     customer_password_hash VARCHAR(512) NOT NULL,
     customer_salt CHAR(256) NOT NULL,
     customer_address_id INTEGER,
-    FOREIGN KEY (customer_address_id) REFERENCES Addresses(address_id)
+    FOREIGN KEY (customer_address_id) REFERENCES project.Addresses(address_id)
 );
 
 -- Table: Admins
@@ -53,7 +53,7 @@ CREATE TABLE project.Orders (
     order_time TIME,
     order_is_paid BOOLEAN,
     order_is_prepared BOOLEAN,
-    FOREIGN KEY (order_customer_id) REFERENCES Customers(customer_id)
+    FOREIGN KEY (order_customer_id) REFERENCES project.Customers(customer_id)
 );
 
 -- Table: Items
