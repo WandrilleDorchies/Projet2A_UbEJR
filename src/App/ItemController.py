@@ -24,6 +24,7 @@ def get_item_by_id(item_id: int):
         traceback.print_exc()
         raise HTTPException(status_code=400, detail=f"Invalid request: {e}") from e
 
+
 @item_router.get("/", status_code=status.HTTP_200_OK)
 def get_all_item():
     try:
@@ -38,18 +39,25 @@ def get_all_item():
         traceback.print_exc()
         raise HTTPException(status_code=400, detail=f"Invalid request: {e}") from e
 
+
 @item_router.post("/", status_code=status.HTTP_201_CREATED)
-def create_item(item_id: int,
-        item_name: str,
-        item_price: float,
-        item_type: str,
-        item_description: str,
-        item_stock: int):
+def create_item(
+    item_id: int,
+    item_name: str,
+    item_price: float,
+    item_type: str,
+    item_description: str,
+    item_stock: int,
+):
     try:
-        print(f"DEBUG: Calling item_service.create_item({item_id,item_name,
-        item_price,item_type,item_description,item_stock})")
-        item = item_service.create_item(item_id,item_name,
-        item_price,item_type,item_description,item_stock)
+        print(
+            f"DEBUG: Calling item_service.create_item({
+                item_id, item_name, item_price, item_type, item_description, item_stock
+            })"
+        )
+        item = item_service.create_item(
+            item_id, item_name, item_price, item_type, item_description, item_stock
+        )
         print(f"DEBUG: item_service returned: {item}")
         return item
     except Exception as e:
@@ -68,5 +76,9 @@ def delete_item(item_id: int):
     except Exception as e:
         print("ERROR: Exception caught in controller")
         traceback.print_exc()
-        raise HTTPException(status_code=400, detail=f"Invalid request: {e}") from e
-
+        if "foreign key constraint" in str(e):
+            raise HTTPException(
+                status_code=403, detail=f"Forbidden - cannot delete item in bundles: {e}"
+            ) from e
+        else:
+            raise HTTPException(status_code=400, detail=f"Invalid request: {e}") from e
