@@ -14,6 +14,12 @@ class ItemService:
         print(f"[ItemService] DAO returned: {item}")
         return item
 
+    def get_all_item(self) -> list[Item] | None:
+        print("[ItemService] Getting all items")
+        items = self.item_dao.get_all_item()
+        print(f"[ItemService] DAO returned: {items}")
+        return items
+
     def create_item(
         self, id: int, name: str, price: int, type: str, description: str, stock: int
     ) -> None:
