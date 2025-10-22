@@ -29,4 +29,4 @@ class Order(BaseModel):
     order_time: time
     order_is_paid: bool = False
     order_is_prepared: bool = False
-    order_items: Dict[Item, int]
+    order_items: list[Item, int]
