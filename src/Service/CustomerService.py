@@ -30,11 +30,35 @@ class CustomerService:
             first_name, last_name, phone, mail, hashed_password, address_id
         )
 
-    def update_customer():
-        pass
+    def update_item(self, customer_id: int, update) -> None:
 
-    def delete_customer():
-        pass
+        update_message_parts = []
+        for field, value in update.customer():
+            update_message_parts.append(f"{field}={value}")
+
+        print(f"[CustomerService] Updating customer: {", ".join(update_message_parts)}")
+
+        updated_customer = self.customer_dao.update_customer(customer_id=id, update=update)
+        print(f"[CustomerService] DAO returned after creation: {updated_customer}")
+        return updated_customer
+
+    def delete_customer(self, customer_id : int) -> None:
+        """
+        Deletes a customer from the database by its ID.
+
+        Parameters
+        ----------
+        customer_id : int
+        The ID of the customer to delete.
+        """
+        print(f"[CustomerService] Deleting customer with ID: {customer_id}")
+
+        customer = self.customer_dao.get_customer_by_id(customer_id)
+        if customer is None:
+            raise ValueError(f"[CustomerService] Cannot delete: customer with ID {customer_id} not found.")
+
+        self.customer_dao.delete_customer_by_id(customer_id)
+        print(f"[CustomerService] Customer with ID {customer_id} has been deleted.")
 
     def get_customer_by_id():
         pass
