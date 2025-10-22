@@ -63,39 +63,28 @@ class ItemDAO(metaclass=Singleton):
         return [Item(**raw_item) for raw_item in raw_items] if raw_items else None
 
     # UPDATE
-    def update_item(
-        self,
-        item_id: int,
-        item_name: str,
-        item_price: float,
-        item_type: str,
-        item_description: str,
-        item_stock: int,
-        item_in_menu: bool,
-    ) -> Optional[Item]:
-        raw_item = self.db_connector.sql_query(
-            """
-            UPDATE Items
-            SET item_name = %(item_name)s,
-                item_price = %(item_price)s,
-                item_type = %(item_type)s,
-                item_description = %(item_description)s,
-                item_stock = %(item_stock)s,
-                item_in_menu = %(item_in_menu)s
-            WHERE item_id=%s
-            RETURNING *;
-            """,
-            {
-                "item_name": item_name,
-                "item_price": item_price,
-                "item_type": item_type,
-                "item_description": item_description,
-                "item_stock": item_stock,
-                "item_in_menu": item_in_menu,
-            },
+    def update_item(self, item_id: int, update: dict) -> Item:
+        if not update:
+            raise ValueError("At least one value should be updated")
+
+        updated_fields = []
+        for field in update.keys():
+            updated_fields.append(f"{field} = %({field})s")
+
+        params = {"item_id": item_id}
+        for field_name, value in update.items():
+            params[field_name] = value
+
+        raw_update_item = self.db_connector.sql_query(
+            f"""
+        UPDATE Items SET {", ".join(updated_fields)}
+        WHERE item_id = %(item_id)s RETURNING *;
+        """,
+            params,
             "one",
         )
-        return Item(**raw_item)
+
+        return Item(**raw_update_item)
 
     # DELETE
     def delete_item_by_id(self, item_id: int) -> None:

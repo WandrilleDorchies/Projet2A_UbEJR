@@ -66,6 +66,43 @@ def create_item(
         raise HTTPException(status_code=400, detail=f"Invalid request: {e}") from e
 
 
+@item_router.put("/{item_id}", status_code=status.HTTP_200_OK)
+def update_item(
+    item_id: int,
+    item_name: str = None,
+    item_price: float = None,
+    item_type: str = None,
+    item_description: str = None,
+    item_stock: int = None,
+):
+    try:
+        print(
+            f"DEBUG: Calling item_service.update_item({
+                item_id, item_name, item_price, item_type, item_description, item_stock
+            })"
+        )
+
+        update = {}
+
+        # TODO réfléchir à une meilleur impélmentation du dictionnaire mdrrrr
+        update = {
+            key: value for key, value in [
+                ("item_name", item_name),
+                ("item_price", item_price),
+                ("item_type", item_type),
+                ("item_description", item_description),
+                ("item_stock", item_stock)
+            ] if value is not None }
+
+        updated_item = item_service.update_item(item_id, update)
+        print(f"DEBUG: item_service returned: {updated_item}")
+        return updated_item
+    except Exception as e:
+        print("ERROR: Exception caught in controller")
+        traceback.print_exc()
+        raise HTTPException(status_code=400, detail=f"Invalid request: {e}") from e
+
+
 @item_router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_item(item_id: int):
     try:

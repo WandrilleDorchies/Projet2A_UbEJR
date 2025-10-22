@@ -102,9 +102,7 @@ class AddressDAO(metaclass=Singleton):
         )
         return Address(**raw_created_address)
 
-    def update_address(
-        self, address_id: int, number: int, street: str, city: str, postal_code: int, country: str
-    ):
+    def update_address(self, address_id: int, update: dict):
         """
         Update an existing address in the database.
 
@@ -112,16 +110,8 @@ class AddressDAO(metaclass=Singleton):
         ----
         address_id (int):
             Unique identifier of the address to update.
-        address_number (str or int):
-            Updated street number of the address.
-        address_street (str):
-            Updated street name.
-        address_city (str):
-            Updated city name.
-        address_postal_code (str or int):
-            Updated postal code.
-        address_country (str):
-            Updated country name.
+        ? (str or int):
+            ?.
 
         Returns
         -------
@@ -129,51 +119,24 @@ class AddressDAO(metaclass=Singleton):
             The updated Address object reflecting the new information stored in the database.
         """
 
+        if not update:
+            raise ValueError("At least one value should be updated")
+
+        updated_fields = []
+        for field in update.keys():
+            updated_fields.append(f"{field} = %({field})s")
+
+        params = {"address_id": address_id}
+        for field_name, value in update.address():
+            params[field_name] = value
+
         raw_update_address = self.db_connector.sql_query(
-            """
-        UPDATE Address SET address_number = %(number)s,
-        address_street='%(street)s',
-        address_city='%(city)s',
-        address_postal_code=%(postal_code)s, address_country='%(country)s'
-        WHERE address_id=%(address_id)s RETURNING *;
+            f"""
+        UPDATE Adresses SET {", ".join(updated_fields)}
+        WHERE address_id = %(address_id)s RETURNING *;
         """,
-            {
-                "number": number,
-                "street": street,
-                "city": city,
-                "postal_code": postal_code,
-                "country": country,
-                "adress_id": address_id,
-            },
+            params,
             "one",
         )
+
         return Address(**raw_update_address)
-
-    def delete_address_by_customer(self, customer_id: int):
-        """
-        Delete the address associated with a given customer from the database.
-
-        Args
-        ----
-        customer_id (int):
-            Unique identifier of the customer whose address should be deleted.
-
-        Returns
-        -------
-        Address or None
-            The deleted Address object if the operation was successful, None otherwise.
-        """
-
-        raw_delete_address = self.db_connector.sql_query(
-            """
-            DELETE FROM Addresses
-            WHERE address_id = (
-                SELECT customer_address_id FROM Customers WHERE customer_id=%s
-            )
-            RETURNING *;
-            """,
-            [customer_id],
-            "one",
-        )
-
-        return Address(**raw_delete_address)
