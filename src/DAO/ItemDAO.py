@@ -67,13 +67,10 @@ class ItemDAO(metaclass=Singleton):
         if not update:
             raise ValueError("At least one value should be updated")
 
-        updated_fields = []
-        for field in update.keys():
-            updated_fields.append(f"{field} = %({field})s")
+        updated_fields = [f"{field} = %({field})s" for field in update.keys()]
 
-        params = {"item_id": item_id}
-        for field_name, value in update.items():
-            params[field_name] = value
+        params = {field_name: value for field_name, value in update.items()}
+        params["item_id"] = item_id
 
         raw_update_item = self.db_connector.sql_query(
             f"""
