@@ -65,16 +65,6 @@ CREATE TABLE project.Items (
     item_in_menu BOOLEAN DEFAULT false
 );
 
--- Table: Orders_Items 
-CREATE TABLE project.Order_Items (
-    order_id INTEGER,
-    item_id INTEGER,
-    item_quantity INTEGER CHECK (item_quantity > 0),
-    item_price FLOAT(24) CHECK (item_price >= 0),
-    PRIMARY KEY (order_id, item_id),
-    FOREIGN KEY (order_id) REFERENCES project.Orders(order_id),
-    FOREIGN KEY (item_id) REFERENCES project.Items(item_id)
-);
 
 -- Table: Bundles
 CREATE TABLE project.Bundles (
@@ -98,17 +88,24 @@ CREATE TABLE project.Bundle_Items (
     -- explicits the prevention of deleting items that are in a bundle
     FOREIGN KEY (item_id) REFERENCES project.Items(item_id) ON DELETE RESTRICT
 );
+-- Table: Orderable
+CREATE TABLE project.Orderables
+    orderable_id SERIAL PRIMARY KEY,
+    orderable_external_id INTEGER NOT NULL,
+    orderable_type VARCHAR(8) NOT NULL CHECK (orderable_type IN ('item', 'bundle')),
+    CONSTRAINT unique_orderable UNIQUE (external_orderable_id, orderable_type)
 
--- Table: Order_Bundles
-CREATE TABLE project.Order_Bundles (
+-- linking items and bundle to orderable
+-- Table: Order_contents
+CREATE TABLE project.Order_contents (
     order_id INTEGER,
-    bundle_id INTEGER,
-    bundle_quantity INTEGER CHECK (bundle_quantity > 0),
-    PRIMARY KEY (order_id, bundle_id),
+    orderable_id INTEGER,
+    orderable_quantity INTEGER CHECK (item_quantity > 0),
+    -- item_price FLOAT(24) CHECK (item_price >= 0),
+    PRIMARY KEY (order_id, orderable_id),
     FOREIGN KEY (order_id) REFERENCES project.Orders(order_id),
-    FOREIGN KEY (bundle_id) REFERENCES project.Bundles(bundle_id)
+    FOREIGN KEY (item_id) REFERENCES project.Orderables(orderable_id)
 );
-
 
 -- Table: Deliveries
 CREATE TABLE project.Deliveries (
@@ -120,3 +117,27 @@ CREATE TABLE project.Deliveries (
     FOREIGN KEY (delivery_id_driver) REFERENCES project.Drivers(driver_id)
 );
 
+-- Table: Orders_Items 
+/*
+CREATE TABLE project.Order_Items (
+    order_id INTEGER,
+    item_id INTEGER,
+    item_quantity INTEGER CHECK (item_quantity > 0),
+    item_price FLOAT(24) CHECK (item_price >= 0),
+    PRIMARY KEY (order_id, item_id),
+    FOREIGN KEY (order_id) REFERENCES project.Orders(order_id),
+    FOREIGN KEY (item_id) REFERENCES project.Items(item_id)
+);
+*/
+
+-- Table: Order_Bundles
+/*
+CREATE TABLE project.Order_Bundles (
+    order_id INTEGER,
+    bundle_id INTEGER,
+    bundle_quantity INTEGER CHECK (bundle_quantity > 0),
+    PRIMARY KEY (order_id, bundle_id),
+    FOREIGN KEY (order_id) REFERENCES project.Orders(order_id),
+    FOREIGN KEY (bundle_id) REFERENCES project.Bundles(bundle_id)
+);
+*/
