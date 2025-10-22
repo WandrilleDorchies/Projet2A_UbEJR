@@ -39,4 +39,3 @@ def test_item_constructor_throws_on_incorrect_input():
         exception_info.value
     )
 
-    

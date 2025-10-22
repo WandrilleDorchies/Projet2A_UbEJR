@@ -1,8 +1,8 @@
+from datetime import date, time
+
 from src.DAO.DBConnector import DBConnector
 from src.DAO.OrderDAO import OrderDAO
 from src.Model.Item import Item
-
-from datetime import date, time
 
 
 def test_get_order_by_id():
