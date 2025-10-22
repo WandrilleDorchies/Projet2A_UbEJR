@@ -48,7 +48,7 @@ class ItemDAO(metaclass=Singleton):
         # pyrefly: ignore
         return Item(**raw_item)
 
-    def get_all_items(self) -> Optional[list[Item]]:
+    def get_all_item(self) -> Optional[list[Item]]:
         raw_items = self.db_connector.sql_query("SELECT * from Items", [], "all")
         if raw_items is None:
             return None
@@ -57,6 +57,28 @@ class ItemDAO(metaclass=Singleton):
         return Items
 
     # UPDATE
+    def update_item(self, item_id: int, update: dict) -> Item:
+        if not update:
+            raise ValueError("At least one value should be updated")
+
+        updated_fields = []
+        for field in update.keys():
+            updated_fields.append(f"{field} = %({field})s")
+
+        params = {"item_id": item_id}
+        for field_name, value in update.items():
+            params[field_name] = value
+
+        raw_update_item = self.db_connector.sql_query(
+            f"""
+        UPDATE Items SET {", ".join(updated_fields)}
+        WHERE item_id = %(item_id)s RETURNING *;
+        """,
+            params,
+            "one",
+        )
+
+        return Item(**raw_update_item)
 
     # DELETE
 
