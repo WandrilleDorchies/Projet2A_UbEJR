@@ -21,7 +21,7 @@ CREATE TABLE project.Customers (
     customer_password_hash VARCHAR(512) NOT NULL,
     customer_salt CHAR(256) NOT NULL,
     customer_address_id INTEGER,
-    FOREIGN KEY (customer_address_id) REFERENCES Addresses(address_id)
+    FOREIGN KEY (customer_address_id) REFERENCES project.Addresses(address_id)
 );
 
 -- Table: Admins
@@ -29,7 +29,8 @@ CREATE TABLE project.Admins (
     admin_id SERIAL PRIMARY KEY,
     admin_first_name VARCHAR(128),
     admin_last_name VARCHAR(128),
-    admin_password_hash VARCHAR(512)
+    admin_password_hash VARCHAR(512),
+    admin_salt CHAR(256)
 );
 
 -- Table: Drivers
@@ -38,6 +39,7 @@ CREATE TABLE project.Drivers (
     driver_first_name VARCHAR(128),
     driver_last_name VARCHAR(128),
     driver_password_hash VARCHAR(512),
+    driver_salt CHAR(256),
     driver_is_delivering BOOLEAN,
     driver_phone VARCHAR(16)
 );
@@ -51,7 +53,7 @@ CREATE TABLE project.Orders (
     order_time TIME,
     order_is_paid BOOLEAN,
     order_is_prepared BOOLEAN,
-    FOREIGN KEY (order_customer_id) REFERENCES Customers(customer_id)
+    FOREIGN KEY (order_customer_id) REFERENCES project.Customers(customer_id)
 );
 
 -- Table: Items

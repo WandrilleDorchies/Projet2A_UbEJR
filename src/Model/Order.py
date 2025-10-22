@@ -1,5 +1,5 @@
 from datetime import date, time
-from typing import List
+from typing import Dict
 
 from pydantic import BaseModel
 
@@ -29,4 +29,4 @@ class Order(BaseModel):
     order_time: time
     order_is_paid: bool = False
     order_is_prepared: bool = False
-    order_items: List[Item]
+    order_items: Dict[Item, int]

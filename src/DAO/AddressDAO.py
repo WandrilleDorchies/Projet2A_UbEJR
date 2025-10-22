@@ -29,13 +29,14 @@ class AddressDAO(metaclass=Singleton):
         """
 
         raw_address = self.db_connector.sql_query(
-            "SELECT * FROM Address JOIN Customer USING address_id WHERE customer_id = %s",
+            """SELECT a.* FROM Addresses a
+               JOIN Customers c ON a.address_id = c.customer_address_id
+               WHERE c.customer_id = %(customer_id)s""",
             [customer_id],
             "one",
         )
         if raw_address is None:
             return None
-        # pyrefly: ignore
         return Address(**raw_address)
 
     def get_all_addresses(self) -> Optional[list[Address]]:
@@ -87,7 +88,7 @@ class AddressDAO(metaclass=Singleton):
             """
         INSERT INTO Address (address_id, address_number, address_street, address_city,
         address_postal_code, address_country)
-        VALUES (DEFAULT, %(number)s,%(street)s, %(city)s, %(postal_code)s, %(country)s)
+        VALUES (DEFAULT, %(number)s, '%(street)s', '%(city)s', %(postal_code)s, '%(country)s')
         RETURNING *;
         """,
             {
@@ -131,9 +132,9 @@ class AddressDAO(metaclass=Singleton):
         raw_update_address = self.db_connector.sql_query(
             """
         UPDATE Address SET address_number = %(number)s,
-        address_street=%(street)s,
-        address_city=%(city)s,
-        address_postal_code=%(postal_code)s, address_country=%(country)s
+        address_street='%(street)s',
+        address_city='%(city)s',
+        address_postal_code=%(postal_code)s, address_country='%(country)s'
         WHERE address_id=%(address_id)s RETURNING *;
         """,
             {
@@ -165,8 +166,12 @@ class AddressDAO(metaclass=Singleton):
 
         raw_delete_address = self.db_connector.sql_query(
             """
-        DELETE FROM Address JOIN Customers Using (address_id) WHERE customer_id=%s
-        """,
+            DELETE FROM Addresses
+            WHERE address_id = (
+                SELECT customer_address_id FROM Customers WHERE customer_id=%s
+            )
+            RETURNING *;
+            """,
             [customer_id],
             "one",
         )
