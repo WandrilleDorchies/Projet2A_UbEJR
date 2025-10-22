@@ -51,12 +51,11 @@ class ItemService:
         return created_item
 
     def update_item(self, id: int, update) -> None:
-
         update_message_parts = []
         for field, value in update.items():
             update_message_parts.append(f"{field}={value}")
 
-        print(f"[ItemService] Updating item: {", ".join(update_message_parts)}")
+        print(f"[ItemService] Updating item: {', '.join(update_message_parts)}")
 
         updated_item = self.item_dao.update_item(item_id=id, update=update)
         print(f"[ItemService] DAO returned after creation: {updated_item}")
