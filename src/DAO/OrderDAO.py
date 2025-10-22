@@ -63,7 +63,7 @@ class OrderDAO(metaclass=Singleton):
         return Order(**raw_order)
 
     def get_all_orders(self) -> Optional[List[Order]]:
-        raw_orders = self.db_connector.sql_query("SELECT * from Orders", "all")
+        raw_orders = self.db_connector.sql_query("SELECT * from Orders", return_type="all")
 
         if not raw_orders:
             return None

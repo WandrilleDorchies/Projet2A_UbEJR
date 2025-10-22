@@ -16,8 +16,9 @@ CREATE TABLE test.Customers (
     customer_id SERIAL PRIMARY KEY,
     customer_first_name VARCHAR(128),
     customer_last_name VARCHAR(128),
+    customer_created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     customer_phone VARCHAR(16),
-    customer_email VARCHAR(128),
+    customer_mail VARCHAR(128),
     customer_password_hash VARCHAR(512) NOT NULL,
     customer_salt CHAR(256) NOT NULL,
     customer_address_id INTEGER,
@@ -29,6 +30,7 @@ CREATE TABLE test.Admins (
     admin_id SERIAL PRIMARY KEY,
     admin_first_name VARCHAR(128),
     admin_last_name VARCHAR(128),
+    admin_created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     admin_password_hash VARCHAR(512),
     admin_salt CHAR(256)
 );
@@ -38,6 +40,7 @@ CREATE TABLE test.Drivers (
     driver_id SERIAL PRIMARY KEY,
     driver_first_name VARCHAR(128),
     driver_last_name VARCHAR(128),
+    driver_created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     driver_password_hash VARCHAR(512),
     driver_salt CHAR(256),
     driver_is_delivering BOOLEAN,
@@ -120,14 +123,13 @@ CREATE TABLE test.Deliveries (
 );
 
 
-
 INSERT INTO Addresses (address_number, address_street, address_city, address_postal_code, address_country)
 VALUES
 (7, 'Contour Antoine de Saint-Exupery', 'Bruz', '35170', 'France'),
 (95, 'Rue Papu', 'Rennes', '35000', 'France'),
 (8, 'Avenue de la Brocéliande', 'Chartres-de-Bretagne', '35131', 'France');
 
-INSERT INTO Customers (customer_first_name, customer_last_name, customer_phone, customer_email, customer_password_hash, customer_salt, customer_address_id)
+INSERT INTO Customers (customer_first_name, customer_last_name, customer_phone, customer_mail, customer_password_hash, customer_salt, customer_address_id)
 VALUES
 ('Ronan', 'LE SAOUT', '0612345678', 'ronan.le-saout@email.com', 'hash1', 'salt1', 1),
 ('Mental', 'CRASHOUT', '0699988777', 'aled.prozaczopixan@email.com', 'hash2', 'salt2', 2),

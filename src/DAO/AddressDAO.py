@@ -12,32 +12,58 @@ class AddressDAO(metaclass=Singleton):
     def __init__(self, db_connector: DBConnector):
         self.db_connector = db_connector
 
-    def get_address(self, customer_id: int) -> Optional[Address]:
+    def get_address_by_id(self, address_id: int) -> Optional[Address]:
         """
-        Retrieve the address associated with a given customer.
+        Retrieve the address associated with a given id.
 
         Args
         ----
-        customer_id (int):
-            Unique identifier of the customer whose address is requested.
+        address_id (int):
+            Unique identifier of the adress
 
         Returns
         -------
         Address or None
             An Address object containing the customer's address information
-            if found in the database, None otherwise.
         """
 
         raw_address = self.db_connector.sql_query(
-            """SELECT a.* FROM Addresses a
-               JOIN Customers c ON a.address_id = c.customer_address_id
-               WHERE c.customer_id = %(customer_id)s""",
+            """SELECT *
+               FROM Addresses
+               WHERE address_id = %(address_id)s;
+            """,
+            [address_id],
+            "one",
+        )
+
+        return Address(**raw_address) if raw_address else None
+
+    def get_address_by_customer_id(self, customer_id: int) -> Optional[Address]:
+        """
+        Retrieve the address associated with a given customer id.
+
+        Args
+        ----
+        customer_id (int):
+            Unique identifier of the customer
+
+        Returns
+        -------
+        Address or None
+            An Address object containing the customer's address information
+        """
+
+        raw_address = self.db_connector.sql_query(
+            """SELECT a.*
+               FROM Addresses AS a
+               INNER JOIN Customers AS c ON a.address_id=c.customer_address_id
+               WHERE address_id = %(customer_id)s;
+            """,
             [customer_id],
             "one",
         )
-        if raw_address is None:
-            return None
-        return Address(**raw_address)
+
+        return Address(**raw_address) if raw_address else None
 
     def get_all_addresses(self) -> Optional[list[Address]]:
         """
@@ -50,7 +76,7 @@ class AddressDAO(metaclass=Singleton):
             None otherwise.
         """
 
-        raw_addresses = self.db_connector.sql_query("SELECT * FROM Address", "all")
+        raw_addresses = self.db_connector.sql_query("SELECT * FROM Addresses", return_type="all")
 
         if raw_addresses is None:
             return None
@@ -86,9 +112,9 @@ class AddressDAO(metaclass=Singleton):
 
         raw_created_address = self.db_connector.sql_query(
             """
-        INSERT INTO Address (address_id, address_number, address_street, address_city,
+        INSERT INTO Addresses (address_id, address_number, address_street, address_city,
         address_postal_code, address_country)
-        VALUES (DEFAULT, %(number)s, '%(street)s', '%(city)s', %(postal_code)s, '%(country)s')
+        VALUES (DEFAULT, %(number)s, %(street)s, %(city)s, %(postal_code)s, %(country)s)
         RETURNING *;
         """,
             {
@@ -122,19 +148,16 @@ class AddressDAO(metaclass=Singleton):
         if not update:
             raise ValueError("At least one value should be updated")
 
-        updated_fields = []
-        for field in update.keys():
-            updated_fields.append(f"{field} = %({field})s")
+        updated_fields = [f"{field} = %({field})s" for field in update.keys()]
 
-        params = {"address_id": address_id}
-        for field_name, value in update.address():
-            params[field_name] = value
+        params = {field_name: value for field_name, value in update.address()}
+        params["address_id"] = address_id
 
         raw_update_address = self.db_connector.sql_query(
             f"""
-        UPDATE Adresses SET {", ".join(updated_fields)}
-        WHERE address_id = %(address_id)s RETURNING *;
-        """,
+            UPDATE Adresses SET {", ".join(updated_fields)}
+            WHERE address_id = %(address_id)s RETURNING *;
+            """,
             params,
             "one",
         )

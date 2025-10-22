@@ -1,88 +1,79 @@
-import os
-from datetime import date, time
-
-from dotenv import load_dotenv
-
-from src.DAO.DBConnector import DBConnector
-from src.DAO.OrderDAO import OrderDAO
-from src.Model.Item import Item
-
-load_dotenv()
-
-os.system("pdm run python -m src.utils.reset_db test")
+from datetime import date
 
 
-def test_get_order_by_id():
-    order_dao = OrderDAO(DBConnector(test=True))
-    order = order_dao.get_order_by_id(1)
+class TestOrderDAO:
+    def test_create_order(self, order_dao, sample_customer, clean_database):
+        order = order_dao.create_order(sample_customer.customer_id)
 
-    assert order.order_id == 1
-    assert order.order_state == 1
-    assert order.order_date == date(2025, 10, 21)
-    assert order.order_time == time(12, 30)
-    assert order.order_is_paid is True
-    assert order.order_is_prepared is True
+        assert order is not None
+        assert order.order_id > 0
+        assert order.order_customer_id == sample_customer.customer_id
+        assert order.order_state == 0
+        assert order.order_date == date.today()
+        assert order.order_is_paid is False
+        assert order.order_is_prepared is False
+        assert order.order_items == {} or order.order_items is None
 
+    def test_get_order_by_id_exists(self, order_dao, sample_customer, clean_database):
+        created_order = order_dao.create_order(sample_customer.customer_id)
 
-def test_get_items_of_order():
-    order_dao = OrderDAO(DBConnector(test=True))
-    items = order_dao._get_items_in_order(1)
+        retrieved_order = order_dao.get_order_by_id(created_order.order_id)
 
-    assert list(items)[0] == Item(
-        item_id=1,
-        item_name="Galette-Saucisse",
-        item_price=4.5,
-        item_type="Plat",
-        item_description="La fameuse galette-saucisse de lEJR",
-        item_stock=50,
-        item_in_menu=True,
-    )
+        assert retrieved_order is not None
+        assert retrieved_order.order_id == created_order.order_id
+        assert retrieved_order.order_customer_id == sample_customer.customer_id
 
-    assert list(items)[1] == Item(
-        item_id=2,
-        item_name="Coca-Cola 33cl",
-        item_price=0.5,
-        item_type="Boisson",
-        item_description="Canette de Coca-Cola",
-        item_stock=100,
-        item_in_menu=True,
-    )
+    def test_get_order_by_id_not_exists(self, order_dao, clean_database):
+        retrieved_order = order_dao.get_order_by_id(9999)
 
+        assert retrieved_order is None
 
-def test_get_all_order():
-    order_dao = OrderDAO(DBConnector(test=True))
-    items = order_dao.get_all_orders()
+    def test_get_all_orders_empty(self, order_dao, clean_database):
+        orders = order_dao.get_all_orders()
 
-    assert len(items) == 2
-    assert items[0].order_id == 1
-    assert items[1].order_id == 2
+        assert orders is None or orders == []
 
+    def test_get_all_orders_multiple(self, order_dao, sample_customer, clean_database):
+        order_dao.create_order(sample_customer.customer_id)
+        order_dao.create_order(sample_customer.customer_id)
+        order_dao.create_order(sample_customer.customer_id)
 
-def test_get_item_qty():
-    order_dao = OrderDAO(DBConnector(test=True))
-    qty = order_dao._get_quantity_of_item(2, 4)
+        orders = order_dao.get_all_orders()
 
-    assert qty == 2
+        assert orders is not None
+        assert len(orders) == 3
+        assert all(order.order_customer_id == sample_customer.customer_id for order in orders)
 
+    def test_update_order_payment_status(self, order_dao, sample_customer, clean_database):
+        created_order = order_dao.create_order(sample_customer.customer_id)
 
-def test_create_order():
-    order_dao = OrderDAO(DBConnector(test=True))
-    order = order_dao.create_order(3)
+        updated_order = order_dao.update_order(
+            order_id=created_order.order_id, is_paid=True, is_prepared=False
+        )
 
-    assert order.order_id == 3
+        assert updated_order.order_is_paid is True
+        assert updated_order.order_is_prepared is False
 
+    def test_update_order_preparation_status(self, order_dao, sample_customer, clean_database):
+        created_order = order_dao.create_order(sample_customer.customer_id)
 
-def test_update_order():
-    pass
+        updated_order = order_dao.update_order(
+            order_id=created_order.order_id, is_paid=True, is_prepared=True
+        )
 
+        assert updated_order.order_is_paid is True
+        assert updated_order.order_is_prepared is True
 
-def test_delete_order():
-    pass
+    def test_update_order_both_statuses(self, order_dao, sample_customer, clean_database):
+        created_order = order_dao.create_order(sample_customer.customer_id)
 
+        updated_order = order_dao.update_order(
+            order_id=created_order.order_id, is_paid=True, is_prepared=True
+        )
 
-def test_item_from_order():
-    pass
+        assert updated_order.order_is_paid is True
+        assert updated_order.order_is_prepared is True
 
-
-def test_remove_item_from_order():
-    pass
+        retrieved_order = order_dao.get_order_by_id(created_order.order_id)
+        assert retrieved_order.order_is_paid is True
+        assert retrieved_order.order_is_prepared is True

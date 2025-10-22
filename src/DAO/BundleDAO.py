@@ -32,7 +32,7 @@ class BundleDAO(metaclass=Singleton):
         orderable_id = self.orderable_dao.create_orderable("bundle")
         raw_bundle = self.db_connector.sql_query(
             """
-            INSERT INTO Bundle (orderable_id, bundle_name,
+            INSERT INTO Bundles (bundle_id, orderable_id, bundle_name,
                                 bundle_reduction, bundle_description,
                                 bundle_availability_start_date,
                                 bundle_availability_end_date)
@@ -54,12 +54,13 @@ class BundleDAO(metaclass=Singleton):
         )
 
         bundle_id = raw_bundle["bundle_id"]
-        for item, qty in bundle_items:
+        for item, qty in bundle_items.items():
             self.db_connector.sql_query(
-                """INSERT INTO Bundle_Items
-                   VALUES(bundle_id, item_id, item_quantity);
+                """INSERT INTO Bundle_Items (bundle_id, item_id, item_quantity)
+                   VALUES (%(bundle_id)s, %(item_id)s, %(item_quantity)s);
                 """,
                 {"bundle_id": bundle_id, "item_id": item.item_id, "item_quantity": qty},
+                "none",
             )
 
         raw_bundle["bundle_items"] = self._get_items_from_bundle(bundle_id)
@@ -83,7 +84,7 @@ class BundleDAO(metaclass=Singleton):
         """
 
         raw_bundle = self.db_connector.sql_query(
-            "SELECT * FROM Bundle WHERE bundle_id = %s",
+            "SELECT * FROM Bundles WHERE bundle_id = %s",
             [bundle_id],
             "one",
         )
@@ -105,7 +106,7 @@ class BundleDAO(metaclass=Singleton):
             An Bundle object or None if not found
         """
         raw_bundle = self.db_connector.sql_query(
-            "SELECT * FROM Bundle WHERE orderable_id = %s",
+            "SELECT * FROM Bundles WHERE orderable_id = %s",
             [orderable_id],
             "one",
         )
@@ -113,7 +114,7 @@ class BundleDAO(metaclass=Singleton):
         return Bundle(**raw_bundle) if raw_bundle else None
 
     def get_all_bundle(self) -> Optional[List[Bundle]]:
-        raw_bundles = self.db_connector.sql_query("SELECT * FROM Bundle", "all")
+        raw_bundles = self.db_connector.sql_query("SELECT * FROM Bundles", return_type="all")
 
         if not raw_bundles:
             return None
@@ -137,7 +138,7 @@ class BundleDAO(metaclass=Singleton):
     ):
         raw_bundle = self.db_connector.sql_query(
             """
-            UPDATE Bundle
+            UPDATE Bundles
             SET bundle_name = %(bundle_name)s,
                 bundle_reduction = %(bundle_reduction)s,
                 bundle_description = %(bundle_description)s,
@@ -166,6 +167,7 @@ class BundleDAO(metaclass=Singleton):
                    VALUES(bundle_id, item_id, item_quantity);
                 """,
                 {"bundle_id": bundle_id, "item_id": item.item_id, "item_quantity": qty},
+                "none",
             )
 
         raw_bundle["bundle_items"] = self._get_items_from_bundle(bundle_id)
@@ -173,7 +175,7 @@ class BundleDAO(metaclass=Singleton):
 
     def delete_bundle(self, bundle_id: int):
         raw_bundle = self.db_connector.sql_query(
-            """ DELETE FROM Bundle WHERE bundle_id=%s
+            """ DELETE FROM Bundles WHERE bundle_id=%s
                 RETURNING *;""",
             [bundle_id],
             "one",
@@ -207,9 +209,16 @@ class BundleDAO(metaclass=Singleton):
             "all",
         )
 
-        item_attributes = [dict(list(raw_item.items())[:-1]) for raw_item in raw_items]
-        quantities = [raw_item["item_quantity"] for raw_item in raw_items]
-        items = [Item(**item_attribute) for item_attribute in item_attributes]
+        if not raw_items:
+            return {}
 
-        items_in_order = {item: quantity for item, quantity in zip(items, quantities, strict=False)}
-        return items_in_order
+        items_dict = {}
+        for raw_item in raw_items:
+            quantity = raw_item["item_quantity"]
+
+            item_data = {k: v for k, v in raw_item.items() if k != "item_quantity"}
+            item = Item(**item_data)
+
+            items_dict[item] = quantity
+
+        return items_dict

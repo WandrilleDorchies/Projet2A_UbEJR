@@ -44,7 +44,7 @@ class DriverDAO(metaclass=Singleton):
         return Driver(**raw_driver)
 
     def get_all_drivers(self) -> Optional[list[Driver]]:
-        raw_drivers = self.db_connector.sql_query("SELECT * FROM Drivers", [], "all")
+        raw_drivers = self.db_connector.sql_query("SELECT * FROM Drivers", return_type="all")
         if raw_drivers is None:
             return None
         return [Driver(**raw_driver) for raw_driver in raw_drivers]

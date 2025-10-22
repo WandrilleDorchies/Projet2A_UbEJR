@@ -16,8 +16,9 @@ CREATE TABLE project.Customers (
     customer_id SERIAL PRIMARY KEY,
     customer_first_name VARCHAR(128),
     customer_last_name VARCHAR(128),
+    customer_created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     customer_phone VARCHAR(16),
-    customer_email VARCHAR(128),
+    customer_mail VARCHAR(128),
     customer_password_hash VARCHAR(512) NOT NULL,
     customer_salt CHAR(256) NOT NULL,
     customer_address_id INTEGER,
@@ -29,6 +30,7 @@ CREATE TABLE project.Admins (
     admin_id SERIAL PRIMARY KEY,
     admin_first_name VARCHAR(128),
     admin_last_name VARCHAR(128),
+    admin_created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     admin_password_hash VARCHAR(512),
     admin_salt CHAR(256)
 );
@@ -38,6 +40,7 @@ CREATE TABLE project.Drivers (
     driver_id SERIAL PRIMARY KEY,
     driver_first_name VARCHAR(128),
     driver_last_name VARCHAR(128),
+    driver_created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     driver_password_hash VARCHAR(512),
     driver_salt CHAR(256),
     driver_is_delivering BOOLEAN,
