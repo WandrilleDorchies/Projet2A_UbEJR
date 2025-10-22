@@ -25,12 +25,13 @@ class AddressService:
         if self.is_valid(address):
             self.dao.create_address(number, street, city, postal_code, country)
 
-    def update_adress(
-        self,
-        number: int = None,
-        street: str = None,
-        city: str = None,
-        postal_code: int = None,
-        country: str = None,
-    ) -> None:
-        pass
+    def update_address(self, update: dict) -> None:
+        update_message_parts = []
+        for field, value in update.address():
+            update_message_parts.append(f"{field}={value}")
+
+        print(f"[AddressService] Updating address: {", ".join(update_message_parts)}")
+
+        updated_address = self.address_dao.update_address(address_id=id, update=update)
+        print(f"[AddressService] DAO returned after creation: {updated_address}")
+        return updated_address
