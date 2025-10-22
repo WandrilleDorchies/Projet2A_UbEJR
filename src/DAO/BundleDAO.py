@@ -1,47 +1,70 @@
 from datetime import datetime
-from typing import Optional
+from typing import Dict, List, Optional
 
 from src.Model.Bundle import Bundle
 from src.Model.Item import Item
 from src.utils.singleton import Singleton
 
 from .DBConnector import DBConnector
+from .ItemDAO import ItemDAO
+from .OrderableDAO import OrderableDAO
 
 
 class BundleDAO(metaclass=Singleton):
-    def __init__(self, db_connector: DBConnector):
-        self.db_connector = db_connector
+    db_connector: DBConnector
+    orderable_dao: OrderableDAO
+    item_dao: ItemDAO
 
-    def insert_bundle(
+    def __init__(self, db_connector: DBConnector, orderable_dao: OrderableDAO, item_dao: ItemDAO):
+        self.db_connector = db_connector
+        self.orderable_dao = orderable_dao
+        self.item_dao = item_dao
+
+    def create_bundle(
         self,
-        bundle_id: int,
+        bundle_name: str,
         bundle_reduction: int,
+        bundle_description: str,
         bundle_availability_start_date: datetime,
         bundle_availability_end_date: datetime,
-        bundle_items: list[Item],
+        bundle_items: Dict[Item, int],
     ):
-        raw_created_bundle = self.db_connector.sql_query(
+        orderable_id = self.orderable_dao.create_orderable("bundle")
+        raw_bundle = self.db_connector.sql_query(
             """
-        INSERT INTO Bundle (bundle_id, bundle_reduction,
-                            bundle_availability_start_date,
-                            bundle_availability_end_date, bundle_items)
-        VALUES (DEFAULT, %(bundle_id)s, %(bundle_reduction)s,
-        %(bundle_availability_start_date)s,
-        %(bundle_availability_end_date)s, %(bundle_items)s)
-        RETURNING *;
-        """,
+            INSERT INTO Bundle (orderable_id, bundle_name,
+                                bundle_reduction, bundle_description,
+                                bundle_availability_start_date,
+                                bundle_availability_end_date)
+            VALUES
+            (DEFAULT, %(orderable_id)s, %(bundle_name)s, %(bundle_reduction)s,
+             %(bundle_description)s, %(bundle_availability_start_date)s,
+             %(bundle_availability_end_date)s)
+            RETURNING *;
+            """,
             {
-                "bundle_id": bundle_id,
+                "orderable_id": orderable_id,
+                "bundle_name": bundle_name,
                 "bundle_reduction": bundle_reduction,
+                "bundle_description": bundle_description,
                 "bundle_availability_start_date": bundle_availability_start_date,
                 "bundle_availability_end_date": bundle_availability_end_date,
-                "bundle_items": bundle_items,
             },
             "one",
         )
-        # pyrefly: ignore
 
-        return Bundle(**raw_created_bundle)
+        bundle_id = raw_bundle["bundle_id"]
+        for item, qty in bundle_items:
+            self.db_connector.sql_query(
+                """INSERT INTO Bundle_Items
+                   VALUES(bundle_id, item_id, item_quantity);
+                """,
+                {"bundle_id": bundle_id, "item_id": item.item_id, "item_quantity": qty},
+            )
+
+        raw_bundle["bundle_items"] = self._get_items_from_bundle(bundle_id)
+
+        return Bundle(**raw_bundle)
 
     def get_bundle_by_id(self, bundle_id: int) -> Optional[Bundle]:
         """
@@ -60,51 +83,133 @@ class BundleDAO(metaclass=Singleton):
         """
 
         raw_bundle = self.db_connector.sql_query(
-            "SELECT * FROM Bundle WHERE bundle_id = %(bundle_id)s",
-            {"bundle_id": bundle_id},
+            "SELECT * FROM Bundle WHERE bundle_id = %s",
+            [bundle_id],
             "one",
         )
-        if raw_bundle is None:
-            return None
-        # pyrefly: ignore
-        return Bundle(**raw_bundle)
+        raw_bundle["bundle_items"] = self._get_items_from_bundle(bundle_id)
+        return Bundle(**raw_bundle) if raw_bundle else None
 
-    def get_all_bundle(self) -> Optional[list[Bundle]]:
+    def get_bundle_by_orderable_id(self, orderable_id: int) -> Optional[Bundle]:
+        """
+        Retrieve the bundle associated with a given oderable id.
+
+        Args
+        ----
+        orderable_id (int):
+            Unique identifier of the orderable object
+
+        Returns
+        -------
+        Bundle or None
+            An Bundle object or None if not found
+        """
+        raw_bundle = self.db_connector.sql_query(
+            "SELECT * FROM Bundle WHERE orderable_id = %s",
+            [orderable_id],
+            "one",
+        )
+        raw_bundle["bundle_items"] = self._get_items_from_bundle(raw_bundle["bundle_id"])
+        return Bundle(**raw_bundle) if raw_bundle else None
+
+    def get_all_bundle(self) -> Optional[List[Bundle]]:
         raw_bundles = self.db_connector.sql_query("SELECT * FROM Bundle", "all")
 
-        if raw_bundles is None:
+        if not raw_bundles:
             return None
 
-        bundles = [Bundle(**raw_bundle) for raw_bundle in raw_bundles]
+        Bundles = []
+        for raw_bundle in raw_bundles:
+            raw_bundle["bundle_items"] = self._get_items_from_bundle(raw_bundle["order_id"])
+            Bundles.append(Bundle(**raw_bundle))
 
-        return bundles
+        return Bundles
 
     def update_bundle(
         self,
         bundle_id: int,
+        bundle_name: str,
         bundle_reduction: int,
+        bundle_description: str,
         bundle_availability_start_date: datetime,
         bundle_availability_end_date: datetime,
-        bundle_items: list[Item],
+        bundle_items: Dict[Item, str],
     ):
-        raw_update_bundle = self.db_connector.sql_query(
+        raw_bundle = self.db_connector.sql_query(
             """
-        UPDATE Bundle SET bundle_reduction = %(bundle_reduction)s,
-        bundle_availability_start_date=%(bundle_availability_start_date)s,
-        bundle_availability_end_date=%(bundle_availability_end_date)s,
-        bundle_items=%(bundle_items)s
-        WHERE bundle_id=%(bundle_id)s RETURNING *;
-        """,
-            {"key": 1},
+            UPDATE Bundle
+            SET bundle_name = %(bundle_name)s,
+                bundle_reduction = %(bundle_reduction)s,
+                bundle_description = %(bundle_description)s,
+                bundle_availability_start_date=%(bundle_availability_start_date)s,
+                bundle_availability_end_date=%(bundle_availability_end_date)s
+            WHERE bundle_id=%(bundle_id)s RETURNING *;
+            """,
+            {
+                "bundle_name": bundle_name,
+                "bundle_reduction": bundle_reduction,
+                "bundle_description": bundle_description,
+                "bundle_availability_start_date": bundle_availability_start_date,
+                "bundle_availability_end_date": bundle_availability_end_date,
+            },
             "one",
         )
+        self.db_connector.sql_query(
+            """DELETE FROM Bundle_Items WHERE bundle_id=%s;
+                """,
+            [bundle_id],
+            "none",
+        )
+        for item, qty in bundle_items:
+            self.db_connector.sql_query(
+                """INSERT INTO Bundle_Items
+                   VALUES(bundle_id, item_id, item_quantity);
+                """,
+                {"bundle_id": bundle_id, "item_id": item.item_id, "item_quantity": qty},
+            )
 
-        return Bundle(**raw_update_bundle)
+        raw_bundle["bundle_items"] = self._get_items_from_bundle(bundle_id)
+        return Bundle(**raw_bundle)
 
     def delete_bundle(self, bundle_id: int):
-        raw_delete_bundle = self.db_connector.sql_query(
-            """ DELETE FROM Bundle WHERE bundle_id=%s """,
+        raw_bundle = self.db_connector.sql_query(
+            """ DELETE FROM Bundle WHERE bundle_id=%s
+                RETURNING *;""",
+            [bundle_id],
             "one",
         )
+        if raw_bundle:
+            orderable_id = raw_bundle["orderable_id"]
+            self.db_connector.sql_query(
+                """DELETE FROM Orderables WHERE orderable_id=%s;
+                """,
+                [orderable_id],
+                "none",
+            )
+            self.db_connector.sql_query(
+                """DELETE FROM Bundle_Items WHERE bundle_id=%s;
+                """,
+                [bundle_id],
+                "none",
+            )
 
-        return Bundle(**raw_delete_bundle)
+        return None
+
+    def _get_items_from_bundle(self, bundle_id: int) -> Dict[Item, int]:
+        raw_items = self.db_connector.sql_query(
+            """
+            SELECT i.*, bi.item_id, bi.item_quantity
+            FROM Bundle_Items AS bi
+            INNER JOIN Items AS i ON bi.item_id=i.item_id
+            WHERE bi.bundle_id=%s;
+            """,
+            [bundle_id],
+            "all",
+        )
+
+        item_attributes = [dict(list(raw_item.items())[:-1]) for raw_item in raw_items]
+        quantities = [raw_item["item_quantity"] for raw_item in raw_items]
+        items = [Item(**item_attribute) for item_attribute in item_attributes]
+
+        items_in_order = {item: quantity for item, quantity in zip(items, quantities, strict=False)}
+        return items_in_order

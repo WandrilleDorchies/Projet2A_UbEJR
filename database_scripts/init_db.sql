@@ -59,6 +59,7 @@ CREATE TABLE project.Orders (
 -- Table: Items
 CREATE TABLE project.Items (
     item_id SERIAL PRIMARY KEY,
+    orderable_id INTEGER NOT NULL,
     item_name VARCHAR(128),
     item_price FLOAT(24) CHECK (item_price >= 0),
     item_type VARCHAR(32),
@@ -71,6 +72,7 @@ CREATE TABLE project.Items (
 -- Table: Bundles
 CREATE TABLE project.Bundles (
     bundle_id SERIAL PRIMARY KEY,
+    orderable_id INTEGER NOT NULL,
     bundle_name VARCHAR(128),
     -- bundle reduction: if 20% off, it's 20. Python App handles calculations.
     bundle_reduction INTEGER CHECK (bundle_reduction > 0 AND bundle_reduction < 100),
@@ -91,22 +93,20 @@ CREATE TABLE project.Bundle_Items (
     FOREIGN KEY (item_id) REFERENCES project.Items(item_id) ON DELETE RESTRICT
 );
 -- Table: Orderable
-CREATE TABLE project.Orderables
+CREATE TABLE project.Orderables (
     orderable_id SERIAL PRIMARY KEY,
-    orderable_external_id INTEGER NOT NULL,
-    orderable_type VARCHAR(8) NOT NULL CHECK (orderable_type IN ('item', 'bundle')),
-    CONSTRAINT unique_orderable UNIQUE (external_orderable_id, orderable_type)
-
+    orderable_type VARCHAR(8) NOT NULL CHECK (orderable_type IN ('item', 'bundle'))
+);
 -- linking items and bundle to orderable
 -- Table: Order_contents
 CREATE TABLE project.Order_contents (
     order_id INTEGER,
     orderable_id INTEGER,
-    orderable_quantity INTEGER CHECK (item_quantity > 0),
+    orderable_quantity INTEGER,
     -- item_price FLOAT(24) CHECK (item_price >= 0),
     PRIMARY KEY (order_id, orderable_id),
     FOREIGN KEY (order_id) REFERENCES project.Orders(order_id),
-    FOREIGN KEY (item_id) REFERENCES project.Orderables(orderable_id)
+    FOREIGN KEY (orderable_id) REFERENCES project.Orderables(orderable_id)
 );
 
 -- Table: Deliveries
@@ -118,6 +118,7 @@ CREATE TABLE project.Deliveries (
     FOREIGN KEY (delivery_id_order) REFERENCES project.Orders(order_id),
     FOREIGN KEY (delivery_id_driver) REFERENCES project.Drivers(driver_id)
 );
+
 
 -- Table: Orders_Items 
 /*

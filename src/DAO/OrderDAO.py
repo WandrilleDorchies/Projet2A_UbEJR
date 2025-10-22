@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Dict, List, Optional
 
+from src.Model.Bundle import Bundle
 from src.Model.Item import Item
 from src.Model.Order import Order
 from src.utils.singleton import Singleton
@@ -14,34 +15,7 @@ class OrderDAO(metaclass=Singleton):
     def __init__(self, db_connector: DBConnector) -> None:
         self.db_connector = db_connector
 
-    def get_order_by_id(self, order_id: int) -> Optional[Order]:
-        raw_order = self.db_connector.sql_query(
-            """SELECT *
-               FROM Orders
-               WHERE order_id=%s""",
-            [order_id],
-            "one",
-        )
-
-        if raw_order is None:
-            return None
-
-        raw_order["order_items"] = self._get_items_in_order(order_id)
-        return Order(**raw_order)
-
-    def get_all_orders(self) -> Optional[List[Order]]:
-        raw_orders = self.db_connector.sql_query("SELECT * from Orders", [], "all")
-
-        if not raw_orders:
-            return None
-
-        Orders = []
-        for raw_order in raw_orders:
-            raw_order["order_items"] = self._get_items_in_order(raw_order["order_id"])
-            Orders.append(Order(**raw_order))
-
-        return Orders
-
+    # CREATE
     def create_order(self, customer_id: int) -> Order:
         raw_order = self.db_connector.sql_query(
             """
@@ -63,7 +37,7 @@ class OrderDAO(metaclass=Singleton):
             """,
             {
                 "customer_id": customer_id,
-                "order_date": datetime.today().strftime('%Y-%m-%d'),
+                "order_date": datetime.today().strftime("%Y-%m-%d"),
                 "order_time": datetime.now(),
             },
             "one",
@@ -72,6 +46,36 @@ class OrderDAO(metaclass=Singleton):
         raw_order["order_items"] = {}
         return Order(**raw_order)
 
+    # READ
+    def get_order_by_id(self, order_id: int) -> Optional[Order]:
+        raw_order = self.db_connector.sql_query(
+            """SELECT *
+               FROM Orders
+               WHERE order_id=%s""",
+            [order_id],
+            "one",
+        )
+
+        if raw_order is None:
+            return None
+
+        raw_order["order_items"] = self._get_orderables_in_order(order_id)
+        return Order(**raw_order)
+
+    def get_all_orders(self) -> Optional[List[Order]]:
+        raw_orders = self.db_connector.sql_query("SELECT * from Orders", "all")
+
+        if not raw_orders:
+            return None
+
+        Orders = []
+        for raw_order in raw_orders:
+            raw_order["order_items"] = self._get_orderables_in_order(raw_order["order_id"])
+            Orders.append(Order(**raw_order))
+
+        return Orders
+
+    # UPDATE
     def update_order(self, order_id, is_paid, is_prepared) -> Order:
         raw_order = self.db_connector.sql_query(
             """
@@ -81,9 +85,10 @@ class OrderDAO(metaclass=Singleton):
             {"is_paid": is_paid, "is_prepared": is_prepared, "order_id": order_id},
             "one",
         )
-        raw_order["order_items"] = self._get_items_in_order(order_id)
+        raw_order["order_items"] = self._get_orderables_in_order(order_id)
         return Order(**raw_order)
 
+    # DELETE
     def delete_order(self, order_id) -> None:
         self.db_connector.sql_query(
             """
@@ -94,64 +99,63 @@ class OrderDAO(metaclass=Singleton):
         )
         self.db_connector.sql_query(
             """
-            DELETE FROM Order_Items WHERE order_id=%s;
+            DELETE FROM Order_contents WHERE order_id=%s;
             """,
             [order_id],
             "none",
         )
-
         return None
 
-    def add_item_to_order(self, item_id: int, order_id: int) -> Order:
-        if self._get_quantity_of_item(item_id, order_id) >= 1:
+    def add_orderable_to_order(self, orderable_id: int, order_id: int) -> Order:
+        if self._get_quantity_of_orderables(orderable_id, order_id) >= 1:
             self.db_connector.sql_query(
-                """UPDATE Order_Items
-                   SET item_quantity=item_quantity+1
-                   WHERE order_id=%(order_id)s AND item_id=%(item_id)s;
+                """UPDATE Order_contents
+                   SET orderable_quantity=orderable_quantity+1
+                   WHERE order_id=%(order_id)s AND item_id=%(orderable_id)s;
                 """,
-                {"order_id": order_id, "item_id": item_id},
+                {"order_id": order_id, "orderable_id": orderable_id},
                 "one",
             )
 
         else:
             self.db_connector.sql_query(
                 """INSERT INTO Order_Items
-                   VALUES (%(order_id)s, %(item_id)s, 1);
+                   VALUES (%(order_id)s, %(orderable_id)s, 1);
                 """,
-                {"order_id": order_id, "item_id": item_id},
+                {"order_id": order_id, "orderable_id": orderable_id},
                 "one",
             )
 
         return self.get_order_by_id(order_id)
 
-    def remove_item_from_order(self, order_id: int, item_id: int) -> Order:
-        if self._get_quantity_of_item(order_id, item_id) == 1:
+    def remove_orderable_from_order(self, order_id: int, orderable_id: int) -> Order:
+        if self._get_quantity_of_orderables(order_id, orderable_id) == 1:
             self.db_connector.sql_query(
-                """DELETE FROM Order_Items
-                   WHERE order_id=%(order_id)s AND item_id=%(item_id)s;
+                """DELETE FROM Order_contents
+                   WHERE order_id=%(order_id)s AND orderable_id=%(orderable_id)s;
                 """,
-                {"order_id": order_id, "item_id": item_id},
+                {"order_id": order_id, "orderable_id": orderable_id},
                 "one",
             )
         else:
             self.db_connector.sql_query(
-                """UPDATE Order_Items
-                   SET item_quantity=item_quantity-1
-                   WHERE order_id=%(order_id)s AND item_id=%(item_id)s;
+                """UPDATE Order_contents
+                   SET orderable_quantity=orderable_quantity-1
+                   WHERE order_id=%(order_id)s AND orderable_id=%(orderable_id)s;
                 """,
-                {"order_id": order_id, "item_id": item_id},
+                {"order_id": order_id, "orderable_id": orderable_id},
                 "one",
             )
 
         return self.get_order_by_id(order_id)
 
-    def _get_quantity_of_item(self, order_id: int, item_id: int) -> int:
+    def _get_quantity_of_orderables(self, order_id: int, orderable_id: int) -> int:
         result = self.db_connector.sql_query(
-            """SELECT item_quantity
-               FROM Order_Items
-               WHERE order_id=%(order_id)s AND item_id=%(item_id)s;
+            """SELECT orderable_quantity
+               FROM Order_contents
+               WHERE order_id=%(order_id)s AND orderable_id=%(orderable_id)s;
             """,
-            {"item_id": item_id, "order_id": order_id},
+            {"order_id": order_id, "orderable_id": orderable_id},
             "one",
         )
         if result is not None:
@@ -159,23 +163,60 @@ class OrderDAO(metaclass=Singleton):
 
         return 0
 
-    def _get_items_in_order(self, order_id: int) -> Optional[Dict[Item, int]]:
-        raw_items = self.db_connector.sql_query(
+    def _get_orderables_in_order(self, order_id: int) -> Optional[Dict[Item | Bundle, int]]:
+        raw_orderables = self.db_connector.sql_query(
             """
-            SELECT i.*, oi.item_quantity
-            FROM Items as i
-            INNER JOIN Order_Items AS oi ON i.item_id=oi.item_id
-            WHERE oi.order_id=%s;
+            SELECT oc.orderable_id, oc.orderable_quantity, o.orderable_type
+            FROM Order_contents AS oc
+            JOIN Orderables AS o ON oc.orderable_id = o.orderable_id
+            WHERE oc.order_id = %s
             """,
             [order_id],
             "all",
         )
-        if not raw_items:
+        if not raw_orderables:
             return None
 
-        item_attributes = [dict(list(raw_item.items())[:-1]) for raw_item in raw_items]
-        quantities = [raw_item["item_quantity"] for raw_item in raw_items]
-        items = [Item(**item_attribute) for item_attribute in item_attributes]
+        products_dict = {}
+        for raw in raw_orderables:
+            orderable_id = raw["orderable_id"]
+            quantity = raw["orderable_quantity"]
+            orderable_type = raw["orderable_type"]
 
-        items_in_order = {item: quantity for item, quantity in zip(items, quantities, strict=False)}
-        return items_in_order
+            if orderable_type == "item":
+                product = self.item_dao.get_item_by_orderable_id(orderable_id)
+            elif orderable_type == "bundle":
+                product = self.bundle_dao.get_bundle_by_orderable_id(orderable_id)
+
+            if product:
+                products_dict[product] = quantity
+
+        return products_dict
+
+    def _get_products_in_order(self, order_id: int) -> Dict[Bundle | Item, int]:
+        raw_products = self.db_connector.sql_query(
+            """
+            SELECT op.product_id, op.product_quantity, p.product_type
+            FROM Order_Products op
+            JOIN Products p ON op.product_id = p.product_id
+            WHERE op.order_id = %s
+            """,
+            [order_id],
+            "all",
+        )
+
+        products_dict = {}
+        for raw in raw_products:
+            product_id = raw["product_id"]
+            quantity = raw["product_quantity"]
+            product_type = raw["product_type"]
+
+            if product_type == "item":
+                product = self.item_dao.get_item_by_product_id(product_id)
+            elif product_type == "bundle":
+                product = self.bundle_dao.get_bundle_by_product_id(product_id)
+
+            if product:
+                products_dict[product] = quantity
+
+        return products_dict

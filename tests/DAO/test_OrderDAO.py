@@ -1,8 +1,15 @@
+import os
+from datetime import date, time
+
+from dotenv import load_dotenv
+
 from src.DAO.DBConnector import DBConnector
 from src.DAO.OrderDAO import OrderDAO
 from src.Model.Item import Item
 
-from datetime import date, time
+load_dotenv()
+
+os.system("pdm run python -m src.utils.reset_db test")
 
 
 def test_get_order_by_id():
@@ -21,21 +28,25 @@ def test_get_items_of_order():
     order_dao = OrderDAO(DBConnector(test=True))
     items = order_dao._get_items_in_order(1)
 
-    assert list(items)[0] == Item(item_id=1,
-                                  item_name='Galette-Saucisse',
-                                  item_price=4.5,
-                                  item_type='Plat',
-                                  item_description='La fameuse galette-saucisse de l''EJR',
-                                  item_stock=50,
-                                  item_in_menu=True)
+    assert list(items)[0] == Item(
+        item_id=1,
+        item_name="Galette-Saucisse",
+        item_price=4.5,
+        item_type="Plat",
+        item_description="La fameuse galette-saucisse de lEJR",
+        item_stock=50,
+        item_in_menu=True,
+    )
 
-    assert list(items)[1] == Item(item_id=2,
-                                  item_name='Coca-Cola 33cl',
-                                  item_price=0.5,
-                                  item_type='Boisson',
-                                  item_description='Canette de Coca-Cola',
-                                  item_stock=100,
-                                  item_in_menu=True)
+    assert list(items)[1] == Item(
+        item_id=2,
+        item_name="Coca-Cola 33cl",
+        item_price=0.5,
+        item_type="Boisson",
+        item_description="Canette de Coca-Cola",
+        item_stock=100,
+        item_in_menu=True,
+    )
 
 
 def test_get_all_order():

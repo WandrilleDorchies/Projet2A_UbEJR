@@ -59,6 +59,7 @@ CREATE TABLE test.Orders (
 -- Table: Items
 CREATE TABLE test.Items (
     item_id SERIAL PRIMARY KEY,
+    orderable_id INTEGER NOT NULL,
     item_name VARCHAR(128),
     item_price FLOAT(24) CHECK (item_price >= 0),
     item_type VARCHAR(32),
@@ -67,19 +68,11 @@ CREATE TABLE test.Items (
     item_in_menu BOOLEAN DEFAULT false
 );
 
--- Table: Orders_Items 
-CREATE TABLE test.Order_Items (
-    order_id INTEGER,
-    item_id INTEGER,
-    item_quantity INTEGER CHECK (item_quantity > 0),
-    PRIMARY KEY (order_id, item_id),
-    FOREIGN KEY (order_id) REFERENCES test.Orders(order_id),
-    FOREIGN KEY (item_id) REFERENCES test.Items(item_id)
-);
 
 -- Table: Bundles
 CREATE TABLE test.Bundles (
     bundle_id SERIAL PRIMARY KEY,
+    orderable_id INTEGER NOT NULL,
     bundle_name VARCHAR(128),
     -- bundle reduction: if 20% off, it's 20. Python App handles calculations.
     bundle_reduction INTEGER CHECK (bundle_reduction > 0 AND bundle_reduction < 100),
@@ -95,19 +88,26 @@ CREATE TABLE test.Bundle_Items (
     item_quantity INTEGER CHECK (item_quantity > 0),
     PRIMARY KEY (bundle_id, item_id),
     FOREIGN KEY (bundle_id) REFERENCES test.Bundles(bundle_id),
-    FOREIGN KEY (item_id) REFERENCES test.Items(item_id)
+    -- ON DELETE RESTRICT is the default behavior
+    -- explicits the prevention of deleting items that are in a bundle
+    FOREIGN KEY (item_id) REFERENCES test.Items(item_id) ON DELETE RESTRICT
 );
-
--- Table: Order_Bundles
-CREATE TABLE test.Order_Bundles (
+-- Table: Orderable
+CREATE TABLE test.Orderables (
+    orderable_id SERIAL PRIMARY KEY,
+    orderable_type VARCHAR(8) NOT NULL CHECK (orderable_type IN ('item', 'bundle'))
+);
+-- linking items and bundle to orderable
+-- Table: Order_contents
+CREATE TABLE test.Order_contents (
     order_id INTEGER,
-    bundle_id INTEGER,
-    bundle_quantity INTEGER CHECK (bundle_quantity > 0),
-    PRIMARY KEY (order_id, bundle_id),
+    orderable_id INTEGER,
+    orderable_quantity INTEGER,
+    -- item_price FLOAT(24) CHECK (item_price >= 0),
+    PRIMARY KEY (order_id, orderable_id),
     FOREIGN KEY (order_id) REFERENCES test.Orders(order_id),
-    FOREIGN KEY (bundle_id) REFERENCES test.Bundles(bundle_id)
+    FOREIGN KEY (orderable_id) REFERENCES test.Orderables(orderable_id)
 );
-
 
 -- Table: Deliveries
 CREATE TABLE test.Deliveries (
@@ -142,37 +142,47 @@ VALUES
 ('Lewis', 'HAMILTON', 'hash_driver1', 'salt_driver1', false, '0707070707'),
 ('Max', 'VERSTAPPEN', 'hash_driver2', 'salt_driver2', true, '0606060606');
 
-INSERT INTO Items (item_name, item_price, item_type, item_description, item_stock, item_in_menu)
+INSERT INTO Items (orderable_id, item_name, item_price, item_type, item_description, item_stock, item_in_menu)
 VALUES
-('Galette-Saucisse', 4.5, 'Plat', 'La fameuse galette-saucisse de l''EJR', 50, true),
-('Coca-Cola 33cl', 0.5, 'Boisson', 'Canette de Coca-Cola', 100, true),
-('Tiramisu', 2.0, 'Dessert', 'Tiramisu-holic', 30, true),
-('Banh-Mi', 4.5, 'Plat', 'Sandwich vietnamien', 40, false);
+(1, 'Galette-Saucisse', 4.5, 'Plat', 'La fameuse galette-saucisse de l''EJR', 50, true),
+(2, 'Coca-Cola 33cl', 0.5, 'Boisson', 'Canette de Coca-Cola', 100, true),
+(3, 'Tiramisu', 2.0, 'Dessert', 'Tiramisu-holic', 30, true),
+(4, 'Banh-Mi', 4.5, 'Plat', 'Sandwich vietnamien', 40, false);
 
-INSERT INTO Bundles (bundle_name, bundle_reduction, bundle_description, bundle_availability_start_date, bundle_availability_end_date)
+INSERT INTO Bundles (orderable_id, bundle_name, bundle_reduction, bundle_description, bundle_availability_start_date, bundle_availability_end_date)
 VALUES
-('Menu Galette-Saucisse', 6, 'Galette-Saucisse + Boisson + Dessert', '2025-01-01', '2025-12-31');
+(5, 'Menu Galette-Saucisse', 30, 'Galette-Saucisse + Boisson + Dessert', '2025-01-01', '2025-12-31'),
+(6, 'Menu Accompagnement', 10, 'Boisson + Dessert', '2025-01-01', '2025-12-31');
 
 INSERT INTO Bundle_Items (bundle_id, item_id, item_quantity)
 VALUES
 (1, 1, 1),
 (1, 2, 1),
-(1, 3, 1);
+(1, 3, 1),
+(2, 3, 1),
+(2, 2, 1);
+
 
 INSERT INTO Orders (order_customer_id, order_state, order_date, order_time, order_is_paid, order_is_prepared)
 VALUES
 (1, 1, '2025-10-21', '12:30:00', true, true),
 (2, 0, '2025-10-21', '13:00:00', false, false);
 
-INSERT INTO Order_Items (order_id, item_id, item_quantity)
+INSERT INTO Orderables (orderable_type)
+VALUES
+('item'),
+('item'),
+('item'),
+('item'),
+('bundle'),
+('bundle');
+
+INSERT INTO Order_contents (order_id, orderable_id, orderable_quantity)
 VALUES
 (1, 1, 1),  
 (1, 2, 1), 
-(2, 4, 2); 
-
-INSERT INTO Order_Bundles (order_id, bundle_id, bundle_quantity)
-VALUES
-(1, 1, 1);  
+(1, 5, 1),
+(2, 4, 2);
 
 INSERT INTO Deliveries (delivery_id_order, delivery_id_driver, delivery_state)
 VALUES
