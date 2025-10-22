@@ -4,12 +4,9 @@ from datetime import datetime
 from typing import Optional
 
 import googlemaps
-from dotenv import load_dotenv
 
 from src.DAO.AddressDAO import AddressDAO
 from src.Model.Address import Address
-
-load_dotenv()
 
 
 class GoogleMapService:
@@ -27,6 +24,8 @@ class GoogleMapService:
     radius : float
         Maximum delivery distance from ENSAI
     """
+
+    addressDAO: AddressDAO
 
     def __init__(self, address_dao: AddressDAO) -> None:
         self.__gmaps = googlemaps.Client(key=os.environ["GOOGLE_MAPS_API_KEY"])
@@ -88,7 +87,7 @@ class GoogleMapService:
 
             if "country" in component["types"]:
                 country = component["long_name"]
-
+        print(result[0]["address_components"])
         try:
             address_validated = self.address_dao.create_address(
                 number=int(number),

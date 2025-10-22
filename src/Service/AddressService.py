@@ -30,7 +30,7 @@ class AddressService:
         for field, value in update.address():
             update_message_parts.append(f"{field}={value}")
 
-        print(f"[AddressService] Updating address: {", ".join(update_message_parts)}")
+        print(f"[AddressService] Updating address: {', '.join(update_message_parts)}")
 
         updated_address = self.address_dao.update_address(address_id=id, update=update)
         print(f"[AddressService] DAO returned after creation: {updated_address}")

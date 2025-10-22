@@ -163,7 +163,7 @@ class OrderDAO(metaclass=Singleton):
 
         return 0
 
-    def _get_orderables_in_order(self, order_id: int) -> Optional[Dict[Item | Bundle, int]]:
+    def _get_orderables_in_order(self, order_id: int) -> Dict[Item | Bundle, int]:
         raw_orderables = self.db_connector.sql_query(
             """
             SELECT oc.orderable_id, oc.orderable_quantity, o.orderable_type
@@ -175,7 +175,7 @@ class OrderDAO(metaclass=Singleton):
             "all",
         )
         if not raw_orderables:
-            return None
+            return {}
 
         products_dict = {}
         for raw in raw_orderables:

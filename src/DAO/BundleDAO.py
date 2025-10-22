@@ -88,8 +88,11 @@ class BundleDAO(metaclass=Singleton):
             [bundle_id],
             "one",
         )
+        if raw_bundle is None:
+            return None
+
         raw_bundle["bundle_items"] = self._get_items_from_bundle(bundle_id)
-        return Bundle(**raw_bundle) if raw_bundle else None
+        return Bundle(**raw_bundle)
 
     def get_bundle_by_orderable_id(self, orderable_id: int) -> Optional[Bundle]:
         """
@@ -121,7 +124,7 @@ class BundleDAO(metaclass=Singleton):
 
         Bundles = []
         for raw_bundle in raw_bundles:
-            raw_bundle["bundle_items"] = self._get_items_from_bundle(raw_bundle["order_id"])
+            raw_bundle["bundle_items"] = self._get_items_from_bundle(raw_bundle["bundle_id"])
             Bundles.append(Bundle(**raw_bundle))
 
         return Bundles
@@ -152,6 +155,7 @@ class BundleDAO(metaclass=Singleton):
                 "bundle_description": bundle_description,
                 "bundle_availability_start_date": bundle_availability_start_date,
                 "bundle_availability_end_date": bundle_availability_end_date,
+                "bundle_id": bundle_id,
             },
             "one",
         )
@@ -161,10 +165,10 @@ class BundleDAO(metaclass=Singleton):
             [bundle_id],
             "none",
         )
-        for item, qty in bundle_items:
+        for item, qty in bundle_items.items():
             self.db_connector.sql_query(
                 """INSERT INTO Bundle_Items
-                   VALUES(bundle_id, item_id, item_quantity);
+                   VALUES(%(bundle_id)s, %(item_id)s, %(item_quantity)s);
                 """,
                 {"bundle_id": bundle_id, "item_id": item.item_id, "item_quantity": qty},
                 "none",
@@ -175,13 +179,22 @@ class BundleDAO(metaclass=Singleton):
 
     def delete_bundle(self, bundle_id: int):
         raw_bundle = self.db_connector.sql_query(
-            """ DELETE FROM Bundles WHERE bundle_id=%s
-                RETURNING *;""",
+            """ SELECT *
+                FROM Bundles
+                WHERE bundle_id=%s;
+            """,
             [bundle_id],
             "one",
         )
         if raw_bundle:
             orderable_id = raw_bundle["orderable_id"]
+
+            self.db_connector.sql_query(
+                """DELETE FROM Bundle_Items WHERE bundle_id=%s;
+                """,
+                [bundle_id],
+                "none",
+            )
             self.db_connector.sql_query(
                 """DELETE FROM Orderables WHERE orderable_id=%s;
                 """,
@@ -189,10 +202,10 @@ class BundleDAO(metaclass=Singleton):
                 "none",
             )
             self.db_connector.sql_query(
-                """DELETE FROM Bundle_Items WHERE bundle_id=%s;
-                """,
+                """ DELETE FROM Bundles WHERE bundle_id=%s
+                    RETURNING *;""",
                 [bundle_id],
-                "none",
+                "one",
             )
 
         return None

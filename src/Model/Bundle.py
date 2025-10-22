@@ -8,7 +8,9 @@ from .Orderable import Orderable
 class Bundle(Orderable):
     bundle_id: int
     orderable_id: int
+    bundle_name: str
     bundle_reduction: int
+    bundle_description: str
     bundle_availability_start_date: datetime
     bundle_availability_end_date: datetime
     bundle_items: Dict[Item, int]

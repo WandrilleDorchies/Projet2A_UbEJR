@@ -26,7 +26,7 @@ class Item(Orderable):
     item_in_menu: bool = False
 
     def __init__(self, **args):
-        args["orderable_type"] = "bundle"
+        args["orderable_type"] = "item"
         super().__init__(**args)
 
     def __eq__(self, other):

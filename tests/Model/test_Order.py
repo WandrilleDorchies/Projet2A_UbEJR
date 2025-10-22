@@ -16,7 +16,7 @@ def test_order_constructor_ok():
         order_customer_id=1,
         order_date=date(2025, 5, 5),
         order_time=time(12, 30),
-        order_items=[mock_item],
+        order_items={mock_item: 1},
     )
 
     assert isinstance(order_test, Order)
@@ -25,7 +25,8 @@ def test_order_constructor_ok():
     assert order_test.order_state == 0
     assert order_test.order_date == date(2025, 5, 5)
     assert order_test.order_time == time(12, 30)
-    assert order_test.order_items[0] == mock_item
+    assert list(order_test.order_items)[0] == mock_item
+    assert list(order_test.order_items.values())[0] == 1
     assert order_test.order_is_paid is False
     assert order_test.order_is_prepared is False
 

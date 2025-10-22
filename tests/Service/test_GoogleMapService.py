@@ -1,10 +1,9 @@
-from src.DAO.AddressDAO import AddressDAO
 from src.Model.Address import Address
 from src.Service.GoogleMapService import GoogleMapService
 
 
-def test_validate_address_ok():
-    GMService = GoogleMapService(AddressDAO)
+def test_validate_address_ok(address_dao):
+    GMService = GoogleMapService(address_dao)
     adress = "51 Rue Blaise Pascal, 35170 Bruz, France"
 
     result = GMService.validate_address(adress)
@@ -17,8 +16,8 @@ def test_validate_address_ok():
     assert result.address_country == "France"
 
 
-def test_validate_address_unknown():
-    GMService = GoogleMapService(AddressDAO)
+def test_validate_address_unknown(address_dao):
+    GMService = GoogleMapService(address_dao)
     adress = "Whisky vert : jugez cinq fox d'aplomb"
 
     result = GMService.validate_address(adress)
@@ -26,8 +25,8 @@ def test_validate_address_unknown():
     assert not result
 
 
-def test_validate_address_too_far():
-    GMService = GoogleMapService(AddressDAO)
+def test_validate_address_too_far(address_dao):
+    GMService = GoogleMapService(address_dao)
     adress = "44 Rue Pierre Maître, 51100 Reims, France"
 
     result = GMService.validate_address(adress)
@@ -35,8 +34,8 @@ def test_validate_address_too_far():
     assert not result
 
 
-def test_get_path_to_rennes():
-    GMService = GoogleMapService(AddressDAO)
+def test_get_path_to_rennes(address_dao):
+    GMService = GoogleMapService(address_dao)
     destination = "Place de la Mairie, 35000 Rennes, France"
 
     result = GMService.get_path(destination)
@@ -47,8 +46,8 @@ def test_get_path_to_rennes():
     assert "steps" in result
 
 
-def test_get_path_to_invalid_destination():
-    GMService = GoogleMapService(AddressDAO)
+def test_get_path_to_invalid_destination(address_dao):
+    GMService = GoogleMapService(address_dao)
     destination = "Whisky vert : jugez cinq fox d'aplomb"
 
     result = GMService.get_path(destination)

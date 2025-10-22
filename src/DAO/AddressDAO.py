@@ -30,7 +30,7 @@ class AddressDAO(metaclass=Singleton):
         raw_address = self.db_connector.sql_query(
             """SELECT *
                FROM Addresses
-               WHERE address_id = %(address_id)s;
+               WHERE address_id = %s;
             """,
             [address_id],
             "one",
@@ -109,14 +109,13 @@ class AddressDAO(metaclass=Singleton):
         Address
             The newly created Address object containing the inserted information.
         """
-
         raw_created_address = self.db_connector.sql_query(
             """
-        INSERT INTO Addresses (address_id, address_number, address_street, address_city,
-        address_postal_code, address_country)
-        VALUES (DEFAULT, %(number)s, %(street)s, %(city)s, %(postal_code)s, %(country)s)
-        RETURNING *;
-        """,
+            INSERT INTO Addresses (address_id, address_number, address_street, address_city,
+            address_postal_code, address_country)
+            VALUES (DEFAULT, %(number)s, %(street)s, %(city)s, %(postal_code)s, %(country)s)
+            RETURNING *;
+            """,
             {
                 "number": number,
                 "street": street,
@@ -126,6 +125,7 @@ class AddressDAO(metaclass=Singleton):
             },
             "one",
         )
+        print(raw_created_address)
         return Address(**raw_created_address)
 
     def update_address(self, address_id: int, update: dict):

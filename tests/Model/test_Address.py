@@ -6,6 +6,7 @@ from src.Model.Address import Address
 
 def test_address_constructor_ok():
     ensai = Address(
+        address_id=1,
         address_number=51,
         address_street="Rue Blaise Pascal",
         address_city="Bruz",
@@ -14,6 +15,7 @@ def test_address_constructor_ok():
     )
 
     assert isinstance(ensai, Address)
+    assert ensai.address_id == 1
     assert ensai.address_number == 51
     assert ensai.address_street == "Rue Blaise Pascal"
     assert ensai.address_city == "Bruz"

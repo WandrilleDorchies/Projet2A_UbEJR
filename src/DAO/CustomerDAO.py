@@ -60,7 +60,7 @@ class CustomerDAO(metaclass=Singleton):
             },
             "one",
         )
-        address = self.address_dao.get_address_by_id(int(raw_customer["customer_address_id"]))
+        address = self.address_dao.get_address_by_id(raw_customer["customer_address_id"])
         raw_customer["customer_address"] = address
         mapped_args = self._map_db_to_model(raw_customer)
         return Customer(**mapped_args)
