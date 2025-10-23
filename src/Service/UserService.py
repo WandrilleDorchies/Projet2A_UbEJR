@@ -66,6 +66,7 @@ class UserService:
     def logout(self):
         pass 
     
-    def create_user(user_id, name, password, type):
+    def create_user():
         pass
         #user = self.user_repo.insert_into_db()
+
