@@ -42,7 +42,6 @@ def get_all_item():
 
 @item_router.post("/", status_code=status.HTTP_201_CREATED)
 def create_item(
-    item_id: int,
     item_name: str,
     item_price: float,
     item_type: str,
@@ -52,11 +51,11 @@ def create_item(
     try:
         print(
             f"DEBUG: Calling item_service.create_item({
-                item_id, item_name, item_price, item_type, item_description, item_stock
+                item_name, item_price, item_type, item_description, item_stock
             })"
         )
         item = item_service.create_item(
-            item_id, item_name, item_price, item_type, item_description, item_stock
+            item_name, item_price, item_type, item_description, item_stock
         )
         print(f"DEBUG: item_service returned: {item}")
         return item
@@ -86,13 +85,16 @@ def update_item(
 
         # TODO réfléchir à une meilleur impélmentation du dictionnaire mdrrrr
         update = {
-            key: value for key, value in [
+            key: value
+            for key, value in [
                 ("item_name", item_name),
                 ("item_price", item_price),
                 ("item_type", item_type),
                 ("item_description", item_description),
-                ("item_stock", item_stock)
-            ] if value is not None }
+                ("item_stock", item_stock),
+            ]
+            if value is not None
+        }
 
         updated_item = item_service.update_item(item_id, update)
         print(f"DEBUG: item_service returned: {updated_item}")

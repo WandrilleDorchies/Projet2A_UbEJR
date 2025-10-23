@@ -149,7 +149,6 @@ class AddressDAO(metaclass=Singleton):
             raise ValueError("At least one value should be updated")
 
         updated_fields = [f"{field} = %({field})s" for field in update.keys()]
-
         params = {field_name: value for field_name, value in update.address()}
         params["address_id"] = address_id
 
@@ -163,3 +162,10 @@ class AddressDAO(metaclass=Singleton):
         )
 
         return Address(**raw_update_address)
+
+    def delete_address_by_id(self, address_id: int) -> None:
+        self.db_connector.sql_query(
+            "DELETE FROM Addresses WHERE address_id = %(address_id)s",
+            {"address_id": address_id},
+            None,
+        )
