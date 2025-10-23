@@ -159,7 +159,7 @@ class OrderDAO(metaclass=Singleton):
 
         else:
             self.db_connector.sql_query(
-                """INSERT INTO Order_Items
+                """INSERT INTO Order_contents
                    VALUES (%(order_id)s, %(orderable_id)s, 1);
                 """,
                 {"order_id": order_id, "orderable_id": orderable_id},

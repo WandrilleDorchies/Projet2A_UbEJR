@@ -21,7 +21,7 @@ class DBConnector:
             self.user = os.environ["POSTGRES_USER"]
             self.password = os.environ["POSTGRES_PASSWORD"]
             if test:
-                self.schema = os.environ["POSTGRES_SCHEMA_TEST"]
+                self.schema = os.environ["POSTGRES_SCHEMA"]
             else:
                 self.schema = os.environ["POSTGRES_SCHEMA"]
 

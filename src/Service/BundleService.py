@@ -1,11 +1,12 @@
-from src.Model.Bundle import Bundle
 from src.DAO.BundleDAO import BundleDAO
+from src.Model.Bundle import Bundle
 
 
 class BundleService:
     bundle_dao: BundleDAO
-    def __init__(self, bundle_dao:BundleDAO):
-        self.bundle_dao=bundle_dao
+
+    def __init__(self, bundle_dao: BundleDAO):
+        self.bundle_dao = bundle_dao
 
     # READ
     def get_bundle(self, bundle_id: int) -> Bundle | None:

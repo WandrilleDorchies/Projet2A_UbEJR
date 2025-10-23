@@ -1,7 +1,10 @@
 from datetime import date
 
+import pytest
+
 
 class TestOrderDAO:
+    # create_order
     def test_create_order(self, order_dao, sample_customer, clean_database):
         order = order_dao.create_order(sample_customer.id)
 
@@ -14,6 +17,7 @@ class TestOrderDAO:
         assert order.order_is_prepared is False
         assert order.order_items == {} or order.order_items is None
 
+    # get_order_by_id
     def test_get_order_by_id_exists(self, order_dao, sample_customer, clean_database):
         created_order = order_dao.create_order(sample_customer.id)
 
@@ -28,6 +32,7 @@ class TestOrderDAO:
 
         assert retrieved_order is None
 
+    # get_all_orders
     def test_get_all_orders_empty(self, order_dao, clean_database):
         orders = order_dao.get_all_orders()
 
@@ -44,6 +49,7 @@ class TestOrderDAO:
         assert len(orders) == 3
         assert all(order.order_customer_id == sample_customer.id for order in orders)
 
+    # update_order
     def test_update_order_payment_status(self, order_dao, sample_customer, clean_database):
         created_order = order_dao.create_order(sample_customer.id)
 
