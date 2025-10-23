@@ -75,18 +75,56 @@ class OrderDAO(metaclass=Singleton):
 
         return Orders
 
+    def get_all_orders_by_customer(self, order_customer_id) -> Optional[List[Order]]:
+        raw_orders = self.db_connector.sql_query(
+            "SELECT * from Orders where order_customer_id=%s", [order_customer_id], "all"
+        )
+
+        if not raw_orders:
+            return None
+
+        Orders = []
+        for raw_order in raw_orders:
+            raw_order["order_items"] = self._get_orderables_in_order(raw_order["order_id"])
+            Orders.append(Order(**raw_order))
+
+        return Orders
+
+    def get_all_orders_prepared(self) -> Optional[List[Order]]:
+        raw_orders = self.db_connector.sql_query(
+            "SELECT * from Orders where order_is_prepared is True", "all"
+        )
+
+        if not raw_orders:
+            return None
+
+        Orders = []
+        for raw_order in raw_orders:
+            raw_order["order_items"] = self._get_orderables_in_order(raw_order["order_id"])
+            Orders.append(Order(**raw_order))
+
+        return Orders
+
     # UPDATE
-    def update_order(self, order_id, is_paid, is_prepared) -> Order:
-        raw_order = self.db_connector.sql_query(
-            """
-            UPDATE Orders SET order_is_paid=%(is_paid)s, order_is_prepared=%(is_prepared)s
+    def update_order(self, order_id: int, update: dict) -> Order:
+        if not update:
+            raise ValueError("At least one value should be updated")
+
+        updated_fields = [f"{field} = %({field})s" for field in update.keys()]
+
+        params = {field_name: value for field_name, value in update.items()}
+        params["order_id"] = order_id
+
+        raw_update_order = self.db_connector.sql_query(
+            f"""
+            UPDATE Orders SET {", ".join(updated_fields)}
             WHERE order_id=%(order_id)s RETURNING *;
             """,
-            {"is_paid": is_paid, "is_prepared": is_prepared, "order_id": order_id},
+            params,
             "one",
         )
-        raw_order["order_items"] = self._get_orderables_in_order(order_id)
-        return Order(**raw_order)
+
+        return Order(**raw_update_order)
 
     # DELETE
     def delete_order(self, order_id) -> None:
