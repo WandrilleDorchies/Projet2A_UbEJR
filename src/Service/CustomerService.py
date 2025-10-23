@@ -30,7 +30,7 @@ class CustomerService:
             first_name, last_name, phone, mail, hashed_password, address_id
         )
 
-    def update_item(self, customer_id: int, update) -> None:
+    def update_customer(self, customer_id: int, update) -> None:
 
         update_message_parts = []
         for field, value in update.customer():
@@ -60,5 +60,23 @@ class CustomerService:
         self.customer_dao.delete_customer_by_id(customer_id)
         print(f"[CustomerService] Customer with ID {customer_id} has been deleted.")
 
-    def get_customer_by_id():
+    def get_customer_by_id(self, customer_id: int)  -> Item | None:
+        print(f"[CustomerService] Getting customer with ID: {customer_id}")
+        customer = self.customer_dao.get_customer_by_id(customer_id)
+        print(f"[CustomerService] DAO returned: {customer}")
+        return customer
+    
+    def get_all_customer(self) -> list[Customer] | None:
+        print("[CustomerService] Getting all customers")
+        customers = self.customer_dao.get_all_item()
+        print(f"[CustomerService] DAO returned: {customers}")
+        return customers
+
+    def order_history(self,customer_id:int) -> list[Order] | None:
+        print(f"[CustomerService] Getting order history with customer ID: {customer_id}")
+        history = self.order_dao.get_all_order_by_customer(customer_id)
+        print(f"[CustomerService] DAO returned: {history}")
+        return history
+
+    def make_order() -> Order :
         pass
