@@ -23,7 +23,7 @@ def test_item_constructor_ok():
     assert item_test.item_type == "boisson"
     assert item_test.item_description == "canette 33cl"
     assert item_test.item_stock == 10
-    assert item_test.item_in_menu is False
+    assert item_test.item_in_menu is True
 
 
 def test_item_constructor_throws_on_incorrect_input():

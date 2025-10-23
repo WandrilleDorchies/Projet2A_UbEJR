@@ -41,13 +41,53 @@ def test_order_constructor_throws_on_incorrect_input():
 
         Bundle(
             bundle_id="one",
-            bundle_reduction=3,
-            bundle_availability_start_date=datetime(2025, 10, 9, 13, 0, 0),
+            orderable_id=1,
+            bundle_name="Menu",
+            bundle_reduction=25,
+            bundle_description="Menu classique",
+            bundle_availability_start_date=datetime(2025, 10, 9, 12, 30, 0),
             bundle_availability_end_date=datetime(2025, 10, 9, 13, 0, 0),
-            bundle_items=[mock_item],
+            bundle_items={mock_item: 1},
         )
     assert "bundle_id" in str(
         exception_info.value
     ) and "Input should be a valid integer, unable to parse string as an integer" in str(
         exception_info.value
     )
+
+
+def test_bundle_price(sample_item):
+    bundle = Bundle(
+        bundle_id=1,
+        orderable_id=1,
+        bundle_name="Menu",
+        bundle_reduction=25,
+        bundle_description="Menu classique",
+        bundle_availability_start_date=datetime(2025, 10, 9, 12, 30, 0),
+        bundle_availability_end_date=datetime(2025, 10, 9, 13, 0, 0),
+        bundle_items={sample_item: 1},
+    )
+
+    assert bundle.bundle_price == sample_item.item_price * (1 - bundle.bundle_reduction / 100)
+
+
+@pytest.mark.parametrize(
+    "params, response",
+    [
+        ((datetime(2025, 10, 9, 12, 30, 0), datetime(2026, 10, 9, 12, 30, 0)), True),
+        ((datetime(2025, 10, 9, 12, 30, 0), datetime(2025, 10, 9, 13, 0, 0)), False),
+    ],
+)
+def test_bundle_check_availability_true(params, response, sample_item):
+    bundle = Bundle(
+        bundle_id=1,
+        orderable_id=1,
+        bundle_name="Menu",
+        bundle_reduction=25,
+        bundle_description="Menu classique",
+        bundle_availability_start_date=params[0],
+        bundle_availability_end_date=params[1],
+        bundle_items={sample_item: 1},
+    )
+
+    assert bundle.check_availability() is response

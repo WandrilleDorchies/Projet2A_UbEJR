@@ -23,7 +23,7 @@ class Item(Orderable):
     item_type: str
     item_description: str
     item_stock: int
-    item_in_menu: bool = False
+    item_in_menu: bool = True
 
     def __init__(self, **args):
         args["orderable_type"] = "item"
@@ -36,9 +36,6 @@ class Item(Orderable):
 
     def __hash__(self):
         return hash(self.item_id)
-
-    def get_price(self) -> float:
-        return self.item_price
 
     def check_availability(self) -> bool:
         """

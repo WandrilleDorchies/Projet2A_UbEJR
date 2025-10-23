@@ -68,7 +68,7 @@ CREATE TABLE test.Items (
     item_type VARCHAR(32),
     item_description VARCHAR(256),
     item_stock INTEGER CHECK (item_stock >= 0),
-    item_in_menu BOOLEAN DEFAULT false
+    item_in_menu BOOLEAN DEFAULT true
 );
 
 

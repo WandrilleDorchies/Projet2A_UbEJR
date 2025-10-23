@@ -7,13 +7,15 @@ from src.Model.Order import Order
 from src.utils.singleton import Singleton
 
 from .DBConnector import DBConnector
+from .OrderableDAO import OrderableDAO
 
 
 class OrderDAO(metaclass=Singleton):
     db_connector: DBConnector
 
-    def __init__(self, db_connector: DBConnector) -> None:
+    def __init__(self, db_connector: DBConnector, orderable_dao: OrderableDAO) -> None:
         self.db_connector = db_connector
+        self.orderable_dao = orderable_dao
 
     # CREATE
     def create_order(self, customer_id: int) -> Order:
@@ -187,34 +189,6 @@ class OrderDAO(metaclass=Singleton):
                 product = self.item_dao.get_item_by_orderable_id(orderable_id)
             elif orderable_type == "bundle":
                 product = self.bundle_dao.get_bundle_by_orderable_id(orderable_id)
-
-            if product:
-                products_dict[product] = quantity
-
-        return products_dict
-
-    def _get_products_in_order(self, order_id: int) -> Dict[Bundle | Item, int]:
-        raw_products = self.db_connector.sql_query(
-            """
-            SELECT op.product_id, op.product_quantity, p.product_type
-            FROM Order_Products op
-            JOIN Products p ON op.product_id = p.product_id
-            WHERE op.order_id = %s
-            """,
-            [order_id],
-            "all",
-        )
-
-        products_dict = {}
-        for raw in raw_products:
-            product_id = raw["product_id"]
-            quantity = raw["product_quantity"]
-            product_type = raw["product_type"]
-
-            if product_type == "item":
-                product = self.item_dao.get_item_by_product_id(product_id)
-            elif product_type == "bundle":
-                product = self.bundle_dao.get_bundle_by_product_id(product_id)
 
             if product:
                 products_dict[product] = quantity

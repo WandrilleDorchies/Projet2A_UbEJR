@@ -15,7 +15,7 @@ class TestItemDAO:
         assert item.item_type == sample_item_data["item_type"]
         assert item.item_description == sample_item_data["item_description"]
         assert item.item_stock == sample_item_data["item_stock"]
-        assert item.item_in_menu is False
+        assert item.item_in_menu is True
 
     def test_get_item_by_id_exists(self, item_dao, sample_item, clean_database):
         retrieved_item = item_dao.get_item_by_id(sample_item.item_id)

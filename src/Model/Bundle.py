@@ -19,7 +19,8 @@ class Bundle(Orderable):
         args["orderable_type"] = "bundle"
         super().__init__(**args)
 
-    def get_price(self) -> float:
+    @property
+    def bundle_price(self) -> float:
         """
         Calculate the price of the bundle according to the reduction
 
@@ -28,7 +29,7 @@ class Bundle(Orderable):
         float:
             Price of the bundle
         """
-        total = sum(item.get_price() * qty for item, qty in self.bundle_items.items())
+        total = sum(item.item_price * qty for item, qty in self.bundle_items.items())
         return total * (1 - self.bundle_reduction / 100)
 
     def check_availability(self) -> bool:
