@@ -144,24 +144,35 @@ class AddressDAO(metaclass=Singleton):
         Address
             The updated Address object reflecting the new information stored in the database.
         """
-
         if not update:
             raise ValueError("At least one value should be updated")
 
-        updated_fields = [f"{field} = %({field})s" for field in update.keys()]
-        params = {field_name: value for field_name, value in update.address()}
-        params["address_id"] = address_id
+        parameters_update = [
+            "address_number",
+            "address_street",
+            "address_city",
+            "address_postal_code",
+            "address_country",
+        ]
+        for key in update.keys():
+            if key not in parameters_update:
+                raise ValueError(f"{key} is not a parameter of Address.")
 
-        raw_update_address = self.db_connector.sql_query(
+        updated_fields = [f"{field} = %({field})s" for field in update.keys()]
+        set_field = ", ".join(updated_fields)
+        params = {**update, "address_id": address_id}
+
+        self.db_connector.sql_query(
             f"""
-            UPDATE Adresses SET {", ".join(updated_fields)}
-            WHERE address_id = %(address_id)s RETURNING *;
+            UPDATE Addresses
+            SET {set_field}
+            WHERE address_id = %(address_id)s;
             """,
             params,
-            "one",
+            "none",
         )
 
-        return Address(**raw_update_address)
+        return self.get_address_by_id(address_id)
 
     def delete_address_by_id(self, address_id: int) -> None:
         self.db_connector.sql_query(

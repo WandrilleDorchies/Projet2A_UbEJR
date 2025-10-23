@@ -112,21 +112,25 @@ class OrderDAO(metaclass=Singleton):
         if not update:
             raise ValueError("At least one value should be updated")
 
+        for key in update.keys():
+            if key not in ["order_is_paid", "order_is_prepared", "order_state"]:
+                raise ValueError(f"{key} is not a parameter of Order.")
+
         updated_fields = [f"{field} = %({field})s" for field in update.keys()]
+        set_field = ", ".join(updated_fields)
+        params = {**update, "order_id": order_id}
 
-        params = {field_name: value for field_name, value in update.items()}
-        params["order_id"] = order_id
-
-        raw_update_order = self.db_connector.sql_query(
+        self.db_connector.sql_query(
             f"""
-            UPDATE Orders SET {", ".join(updated_fields)}
-            WHERE order_id=%(order_id)s RETURNING *;
+            UPDATE Orders
+            SET {set_field}
+            WHERE order_id = %(order_id)s;
             """,
             params,
-            "one",
+            "none",
         )
 
-        return Order(**raw_update_order)
+        return self.get_order_by_id(order_id)
 
     # DELETE
     def delete_order(self, order_id) -> None:
@@ -159,7 +163,7 @@ class OrderDAO(metaclass=Singleton):
 
         else:
             self.db_connector.sql_query(
-                """INSERT INTO Order_Items
+                """INSERT INTO Order_contents
                    VALUES (%(order_id)s, %(orderable_id)s, 1);
                 """,
                 {"order_id": order_id, "orderable_id": orderable_id},

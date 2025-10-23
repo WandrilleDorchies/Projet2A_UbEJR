@@ -67,21 +67,33 @@ class ItemDAO(metaclass=Singleton):
         if not update:
             raise ValueError("At least one value should be updated")
 
+        parameters_update = [
+            "item_name",
+            "item_price",
+            "item_type",
+            "item_description",
+            "item_stock",
+            "item_in_menu",
+        ]
+        for key in update.keys():
+            if key not in parameters_update:
+                raise ValueError(f"{key} is not a parameter of Item.")
+
         updated_fields = [f"{field} = %({field})s" for field in update.keys()]
+        set_field = ", ".join(updated_fields)
+        params = {**update, "item_id": item_id}
 
-        params = {field_name: value for field_name, value in update.items()}
-        params["item_id"] = item_id
-
-        raw_update_item = self.db_connector.sql_query(
+        self.db_connector.sql_query(
             f"""
-        UPDATE Items SET {", ".join(updated_fields)}
-        WHERE item_id = %(item_id)s RETURNING *;
-        """,
+            UPDATE Items
+            SET {set_field}
+            WHERE item_id = %(item_id)s;
+            """,
             params,
-            "one",
+            "none",
         )
 
-        return Item(**raw_update_item)
+        return self.get_item_by_id(item_id)
 
     # DELETE
     def delete_item_by_id(self, item_id: int) -> None:

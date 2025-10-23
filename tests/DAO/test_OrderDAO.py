@@ -48,7 +48,8 @@ class TestOrderDAO:
         created_order = order_dao.create_order(sample_customer.id)
 
         updated_order = order_dao.update_order(
-            order_id=created_order.order_id, is_paid=True, is_prepared=False
+            order_id=created_order.order_id,
+            update={"order_is_paid": True, "order_is_prepared": False},
         )
 
         assert updated_order.order_is_paid is True
@@ -58,7 +59,8 @@ class TestOrderDAO:
         created_order = order_dao.create_order(sample_customer.id)
 
         updated_order = order_dao.update_order(
-            order_id=created_order.order_id, is_paid=True, is_prepared=True
+            order_id=created_order.order_id,
+            update={"order_is_paid": True, "order_is_prepared": True},
         )
 
         assert updated_order.order_is_paid is True
@@ -68,7 +70,8 @@ class TestOrderDAO:
         created_order = order_dao.create_order(sample_customer.id)
 
         updated_order = order_dao.update_order(
-            order_id=created_order.order_id, is_paid=True, is_prepared=True
+            order_id=created_order.order_id,
+            update={"order_is_paid": True, "order_is_prepared": True},
         )
 
         assert updated_order.order_is_paid is True

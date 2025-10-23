@@ -129,53 +129,52 @@ class BundleDAO(metaclass=Singleton):
 
         return Bundles
 
-    def update_bundle(
-        self,
-        bundle_id: int,
-        bundle_name: str,
-        bundle_reduction: int,
-        bundle_description: str,
-        bundle_availability_start_date: datetime,
-        bundle_availability_end_date: datetime,
-        bundle_items: Dict[Item, str],
-    ):
-        raw_bundle = self.db_connector.sql_query(
-            """
-            UPDATE Bundles
-            SET bundle_name = %(bundle_name)s,
-                bundle_reduction = %(bundle_reduction)s,
-                bundle_description = %(bundle_description)s,
-                bundle_availability_start_date=%(bundle_availability_start_date)s,
-                bundle_availability_end_date=%(bundle_availability_end_date)s
-            WHERE bundle_id=%(bundle_id)s RETURNING *;
-            """,
-            {
-                "bundle_name": bundle_name,
-                "bundle_reduction": bundle_reduction,
-                "bundle_description": bundle_description,
-                "bundle_availability_start_date": bundle_availability_start_date,
-                "bundle_availability_end_date": bundle_availability_end_date,
-                "bundle_id": bundle_id,
-            },
-            "one",
-        )
-        self.db_connector.sql_query(
-            """DELETE FROM Bundle_Items WHERE bundle_id=%s;
-                """,
-            [bundle_id],
-            "none",
-        )
-        for item, qty in bundle_items.items():
+    def update_bundle(self, bundle_id: int, update: dict):
+        parameters_update = [
+            "bundle_name",
+            "bundle_reduction",
+            "bundle_description",
+            "bundle_availability_start_date",
+            "bundle_availability_end_date",
+            "bundle_items",
+        ]
+        for key in update.keys():
+            if key not in parameters_update:
+                raise ValueError(f"{key} is not a parameter of Bundle.")
+
+        if update["bundle_items"]:
+            bundle_items = update["bundle_items"]
             self.db_connector.sql_query(
-                """INSERT INTO Bundle_Items
-                   VALUES(%(bundle_id)s, %(item_id)s, %(item_quantity)s);
+                """DELETE FROM Bundle_Items WHERE bundle_id=%s;
                 """,
-                {"bundle_id": bundle_id, "item_id": item.item_id, "item_quantity": qty},
+                [bundle_id],
                 "none",
             )
+            for item, qty in bundle_items.items():
+                self.db_connector.sql_query(
+                    """INSERT INTO Bundle_Items
+                       VALUES(%(bundle_id)s, %(item_id)s, %(item_quantity)s);
+                    """,
+                    {"bundle_id": bundle_id, "item_id": item.item_id, "item_quantity": qty},
+                    "none",
+                )
+            update.pop("bundle_items")
 
-        raw_bundle["bundle_items"] = self._get_items_from_bundle(bundle_id)
-        return Bundle(**raw_bundle)
+        updated_fields = [f"{field} = %({field})s" for field in update.keys()]
+        set_field = ", ".join(updated_fields)
+        params = {**update, "bundle_id": bundle_id}
+
+        self.db_connector.sql_query(
+            f"""
+            UPDATE Bundles
+            SET {set_field}
+            WHERE bundle_id = %(bundle_id)s;
+            """,
+            params,
+            "none",
+        )
+
+        return self.get_bundle_by_id(bundle_id)
 
     def delete_bundle(self, bundle_id: int):
         raw_bundle = self.db_connector.sql_query(

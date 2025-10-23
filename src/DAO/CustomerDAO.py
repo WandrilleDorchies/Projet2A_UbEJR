@@ -92,43 +92,35 @@ class CustomerDAO(metaclass=Singleton):
         list_customer = [Customer(**self._map_db_to_model(customer)) for customer in raw_customers]
         return list_customer
 
-    def update_customer(
-        self,
-        customer_id: int,
-        first_name: str,
-        last_name: str,
-        phone: str,
-        mail: str,
-        password_hash: str,
-        salt: str,
-        address_id: int,
-    ):
-        raw_customer = self.db_connector.sql_query(
-            """
-            UPDATE Customers SET customer_first_name = %(first_name)s,
-                                 customer_last_name=%(last_name)s,
-                                 customer_phone=%(phone)s,
-                                 customer_mail=%(mail)s,
-                                 customer_password_hash=%(password_hash)s,
-                                 customer_salt=%(salt)s,
-                                 customer_address_id=%(address_id)s
-            WHERE customer_id=%(customer_id)s
-            RETURNING *;
+    def update_customer(self, customer_id: int, update: dict):
+        if not update:
+            raise ValueError("At least one value should be updated")
+
+        parameters_update = [
+            "customer_first_name",
+            "customer_last_name",
+            "customer_password_hash",
+            "customer_phone",
+            "customer_mail",
+        ]
+        for key in update.keys():
+            if key not in parameters_update:
+                raise ValueError(f"{key} is not a parameter of Order.")
+
+        updated_fields = [f"{field} = %({field})s" for field in update.keys()]
+        set_field = ", ".join(updated_fields)
+        params = {**update, "customer_id": customer_id}
+
+        self.db_connector.sql_query(
+            f"""
+            UPDATE Customers
+            SET {set_field}
+            WHERE customer_id = %(customer_id)s;
             """,
-            {
-                "first_name": first_name,
-                "last_name": last_name,
-                "phone": phone,
-                "mail": mail,
-                "password_hash": password_hash,
-                "salt": salt,
-                "address_id": address_id,
-                "customer_id": customer_id,
-            },
-            "one",
+            params,
+            "none",
         )
-        mapped_args = self._map_db_to_model(raw_customer)
-        return Customer(**mapped_args)
+        return self.get_customer_by_id(customer_id)
 
     def delete_customer(self, customer_id: int):
         self.db_connector.sql_query(

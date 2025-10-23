@@ -133,12 +133,14 @@ class TestBundleDAO:
         new_bundle_items = {multiple_items[1]: 2, multiple_items[2]: 1}
         updated_bundle = bundle_dao.update_bundle(
             bundle_id=created_bundle.bundle_id,
-            bundle_name="Menu Modifié",
-            bundle_reduction=25,
-            bundle_description="Nouvelle description",
-            bundle_availability_start_date=datetime(2025, 2, 1),
-            bundle_availability_end_date=datetime(2025, 12, 31),
-            bundle_items=new_bundle_items,
+            update={
+                "bundle_name": "Menu Modifié",
+                "bundle_reduction": 25,
+                "bundle_description": "Nouvelle description",
+                "bundle_availability_start_date": datetime(2025, 2, 1),
+                "bundle_availability_end_date": datetime(2025, 12, 31),
+                "bundle_items": new_bundle_items,
+            },
         )
 
         assert updated_bundle.bundle_name == "Menu Modifié"
