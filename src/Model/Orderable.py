@@ -8,5 +8,13 @@ class Orderable(BaseModel, ABC):
     orderable_type: str
 
     @abstractmethod
+    def __eq__(self, other):
+        pass
+
+    @abstractmethod
+    def __hash__(self):
+        pass
+
+    @abstractmethod
     def check_availability(self) -> bool:
         pass

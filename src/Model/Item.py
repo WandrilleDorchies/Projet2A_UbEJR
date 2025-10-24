@@ -29,13 +29,13 @@ class Item(Orderable):
         args["orderable_type"] = "item"
         super().__init__(**args)
 
+    def __hash__(self) -> str:
+        return hash(self.orderable_id)
+
     def __eq__(self, other):
         if not isinstance(other, Item):
             return False
-        return self.item_id == other.item_id
-
-    def __hash__(self):
-        return hash(self.item_id)
+        return self.orderable_id == other.orderable_id
 
     def check_availability(self) -> bool:
         """

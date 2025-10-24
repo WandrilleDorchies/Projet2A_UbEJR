@@ -6,16 +6,29 @@ from src.Model.Item import Item
 from src.Model.Order import Order
 from src.utils.singleton import Singleton
 
+from .BundleDAO import BundleDAO
 from .DBConnector import DBConnector
+from .ItemDAO import ItemDAO
 from .OrderableDAO import OrderableDAO
 
 
 class OrderDAO(metaclass=Singleton):
     db_connector: DBConnector
+    orderable_dao: OrderableDAO
+    item_dao: ItemDAO
+    bundle_dao: BundleDAO
 
-    def __init__(self, db_connector: DBConnector, orderable_dao: OrderableDAO) -> None:
+    def __init__(
+        self,
+        db_connector: DBConnector,
+        orderable_dao: OrderableDAO,
+        item_dao: ItemDAO,
+        bundle_dao: BundleDAO,
+    ) -> None:
         self.db_connector = db_connector
         self.orderable_dao = orderable_dao
+        self.item_dao = item_dao
+        self.bundle_dao = bundle_dao
 
     # CREATE
     def create_order(self, customer_id: int) -> Order:
@@ -94,7 +107,7 @@ class OrderDAO(metaclass=Singleton):
 
     def get_all_orders_prepared(self) -> Optional[List[Order]]:
         raw_orders = self.db_connector.sql_query(
-            "SELECT * from Orders where order_is_prepared is True", "all"
+            "SELECT * from Orders where order_is_prepared is True", return_type="all"
         )
 
         if not raw_orders:
@@ -136,14 +149,14 @@ class OrderDAO(metaclass=Singleton):
     def delete_order(self, order_id) -> None:
         self.db_connector.sql_query(
             """
-            DELETE FROM Orders WHERE order_id=%s;
+            DELETE FROM Order_contents WHERE order_id=%s;
             """,
             [order_id],
             "none",
         )
         self.db_connector.sql_query(
             """
-            DELETE FROM Order_contents WHERE order_id=%s;
+            DELETE FROM Orders WHERE order_id=%s;
             """,
             [order_id],
             "none",
@@ -155,10 +168,10 @@ class OrderDAO(metaclass=Singleton):
             self.db_connector.sql_query(
                 """UPDATE Order_contents
                    SET orderable_quantity=orderable_quantity+1
-                   WHERE order_id=%(order_id)s AND item_id=%(orderable_id)s;
+                   WHERE order_id=%(order_id)s AND orderable_id=%(orderable_id)s;
                 """,
                 {"order_id": order_id, "orderable_id": orderable_id},
-                "one",
+                "none",
             )
 
         else:
@@ -167,7 +180,7 @@ class OrderDAO(metaclass=Singleton):
                    VALUES (%(order_id)s, %(orderable_id)s, 1);
                 """,
                 {"order_id": order_id, "orderable_id": orderable_id},
-                "one",
+                "none",
             )
 
         return self.get_order_by_id(order_id)
@@ -179,7 +192,7 @@ class OrderDAO(metaclass=Singleton):
                    WHERE order_id=%(order_id)s AND orderable_id=%(orderable_id)s;
                 """,
                 {"order_id": order_id, "orderable_id": orderable_id},
-                "one",
+                "none",
             )
         else:
             self.db_connector.sql_query(
@@ -188,7 +201,7 @@ class OrderDAO(metaclass=Singleton):
                    WHERE order_id=%(order_id)s AND orderable_id=%(orderable_id)s;
                 """,
                 {"order_id": order_id, "orderable_id": orderable_id},
-                "one",
+                "none",
             )
 
         return self.get_order_by_id(order_id)
@@ -203,7 +216,7 @@ class OrderDAO(metaclass=Singleton):
             "one",
         )
         if result is not None:
-            return result["item_quantity"]
+            return result["orderable_quantity"]
 
         return 0
 

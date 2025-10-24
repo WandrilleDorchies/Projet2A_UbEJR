@@ -57,8 +57,8 @@ def bundle_dao(db_connector_test, orderable_dao, item_dao):
 
 
 @pytest.fixture
-def order_dao(db_connector_test, orderable_dao):
-    return OrderDAO(db_connector_test, orderable_dao)
+def order_dao(db_connector_test, orderable_dao, item_dao, bundle_dao):
+    return OrderDAO(db_connector_test, orderable_dao, item_dao, bundle_dao)
 
 
 @pytest.fixture

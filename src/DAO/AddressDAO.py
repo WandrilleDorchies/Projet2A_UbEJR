@@ -57,7 +57,7 @@ class AddressDAO(metaclass=Singleton):
             """SELECT a.*
                FROM Addresses AS a
                INNER JOIN Customers AS c ON a.address_id=c.customer_address_id
-               WHERE address_id = %(customer_id)s;
+               WHERE address_id = %s;
             """,
             [customer_id],
             "one",
@@ -78,12 +78,7 @@ class AddressDAO(metaclass=Singleton):
 
         raw_addresses = self.db_connector.sql_query("SELECT * FROM Addresses", return_type="all")
 
-        if raw_addresses is None:
-            return None
-
-        addresses = [Address(**raw_address) for raw_address in raw_addresses]
-
-        return addresses
+        return [Address(**raw_address) for raw_address in raw_addresses] if raw_addresses else None
 
     def create_address(
         self, number: int, street: str, city: str, postal_code: int, country: str

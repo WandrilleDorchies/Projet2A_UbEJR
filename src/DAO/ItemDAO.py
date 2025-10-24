@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 from src.Model.Item import Item
 from src.utils.singleton import Singleton
@@ -113,24 +113,3 @@ class ItemDAO(metaclass=Singleton):
             "one",
         )
         return result["count"] > 0
-
-    def _get_items_in_order(self, order_id: int) -> Optional[Dict[Item, int]]:
-        raw_items = self.db_connector.sql_query(
-            """
-            SELECT i.*, oi.item_quantity
-            FROM Items as i
-            INNER JOIN Order_Items AS oi ON i.item_id=oi.item_id
-            WHERE oi.order_id=%s;
-            """,
-            [order_id],
-            "all",
-        )
-        if not raw_items:
-            return None
-
-        item_attributes = [dict(list(raw_item.items())[:-1]) for raw_item in raw_items]
-        quantities = [raw_item["item_quantity"] for raw_item in raw_items]
-        items = [Item(**item_attribute) for item_attribute in item_attributes]
-
-        items_in_order = {item: quantity for item, quantity in zip(items, quantities, strict=False)}
-        return items_in_order

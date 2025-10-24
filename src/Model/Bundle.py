@@ -19,6 +19,14 @@ class Bundle(Orderable):
         args["orderable_type"] = "bundle"
         super().__init__(**args)
 
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, Bundle):
+            return False
+        return self.orderable_id == other.orderable_id
+
+    def __hash__(self) -> str:
+        return hash(self.orderable_id)
+
     @property
     def bundle_price(self) -> float:
         """

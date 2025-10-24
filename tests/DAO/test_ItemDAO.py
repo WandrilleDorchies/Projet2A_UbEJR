@@ -75,6 +75,15 @@ class TestItemDAO:
         with pytest.raises(ValueError, match="At least one value should be updated"):
             item_dao.update_item(sample_item.item_id, {})
 
+    def test_update_item_invalid_field_raises_error(
+        self, item_dao, sample_item_data, clean_database
+    ):
+        """Test updating with wrong field"""
+        created_item = item_dao.create_item(**sample_item_data)
+
+        with pytest.raises(ValueError, match="not a parameter of Item"):
+            item_dao.update_item(created_item.item_id, {"invalid_field": "value"})
+
     def test_delete_item_not_in_bundle(self, item_dao, sample_item, clean_database):
         item_id = sample_item.item_id
 

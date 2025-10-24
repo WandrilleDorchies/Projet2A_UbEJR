@@ -1,5 +1,7 @@
 from datetime import datetime
 
+import pytest
+
 
 class TestBundleDAO:
     def test_create_bundle_simple(self, bundle_dao, multiple_items, clean_database):
@@ -148,6 +150,23 @@ class TestBundleDAO:
         assert updated_bundle.bundle_description == "Nouvelle description"
         assert len(updated_bundle.bundle_items) == 2
 
+    def test_update_item_invalid_field_raises_error(
+        self, bundle_dao, multiple_items, clean_database
+    ):
+        """Test updating with wrong field"""
+        bundle_items = {multiple_items[0]: 1}
+        created_bundle = bundle_dao.create_bundle(
+            bundle_name="Menu Original",
+            bundle_reduction=10,
+            bundle_description="Description originale",
+            bundle_availability_start_date=datetime(2025, 1, 1),
+            bundle_availability_end_date=datetime(2025, 6, 30),
+            bundle_items=bundle_items,
+        )
+
+        with pytest.raises(ValueError, match="not a parameter of Bundle"):
+            bundle_dao.update_bundle(created_bundle.bundle_id, {"invalid_field": "value"})
+
     def test_delete_bundle(self, bundle_dao, multiple_items, clean_database):
         bundle_items = {multiple_items[0]: 1}
         created_bundle = bundle_dao.create_bundle(
@@ -182,3 +201,17 @@ class TestBundleDAO:
 
         assert len(items_dict) == 2
         assert any(item.item_id == multiple_items[0].item_id for item in items_dict.keys())
+
+    def test_get_items_from_bundle_no_items(self, bundle_dao, clean_database):
+        created_bundle = bundle_dao.create_bundle(
+            bundle_name="Menu Test",
+            bundle_reduction=15,
+            bundle_description="Bundle de test",
+            bundle_availability_start_date=datetime(2025, 1, 1),
+            bundle_availability_end_date=datetime(2025, 12, 31),
+            bundle_items={},
+        )
+
+        items_dict = bundle_dao._get_items_from_bundle(created_bundle.bundle_id)
+
+        assert items_dict == {}
