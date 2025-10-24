@@ -7,6 +7,7 @@ import googlemaps
 
 from src.DAO.AddressDAO import AddressDAO
 from src.Model.Address import Address
+from src.utils.log_decorator import log
 
 
 class GoogleMapService:
@@ -41,6 +42,7 @@ class GoogleMapService:
         )
         self.address_dao = address_dao
 
+    @log
     def validate_address(self, address: str) -> Optional[Address]:
         """
         Validate that an address exists and is within the delivery zone.
@@ -87,7 +89,6 @@ class GoogleMapService:
 
             if "country" in component["types"]:
                 country = component["long_name"]
-        print(result[0]["address_components"])
         try:
             address_validated = self.address_dao.create_address(
                 number=int(number),
@@ -102,6 +103,7 @@ class GoogleMapService:
             print(f"An error occured during the creation of the Address class : {e}")
             return None
 
+    @log
     def get_path(self, destination: str) -> Optional[dict]:
         """
         Compute the driving route from ENSAI to a destination address.
@@ -122,7 +124,7 @@ class GoogleMapService:
             )
 
             if not directions_result:
-                print("No route found.")
+                raise ValueError("No route found.")
                 return None
 
         except Exception as e:

@@ -1,6 +1,7 @@
 from typing import Optional
 
 from src.Model.Driver import Driver
+from src.utils.log_decorator import log
 from src.utils.singleton import Singleton
 
 from .DBConnector import DBConnector
@@ -12,10 +13,11 @@ class DriverDAO(metaclass=Singleton):
     def __init__(self, db_connector: DBConnector):
         self.db_connector = db_connector
 
+    @log
     def create_driver(
         self, first_name: str, last_name: str, phone: str, password_hash: str, salt: str
     ) -> Driver:
-        raw_created_driver = self.db_connector.sql_query(
+        raw_driver = self.db_connector.sql_query(
             """
             INSERT INTO Drivers (driver_id, driver_first_name, driver_last_name,
                                 driver_phone, driver_password_hash, driver_salt,
@@ -33,34 +35,77 @@ class DriverDAO(metaclass=Singleton):
             },
             "one",
         )
-        return Driver(**raw_created_driver)
+        map_driver = self._map_db_to_model(raw_driver)
+        return Driver(**map_driver)
 
+    @log
     def get_driver_by_id(self, driver_id: int) -> Optional[Driver]:
         raw_driver = self.db_connector.sql_query(
             "SELECT * FROM Drivers WHERE driver_id=%s", [driver_id], "one"
         )
+
         if raw_driver is None:
             return None
-        return Driver(**raw_driver)
 
+        map_driver = self._map_db_to_model(raw_driver)
+        return Driver(**map_driver)
+
+    @log
     def get_all_drivers(self) -> Optional[list[Driver]]:
         raw_drivers = self.db_connector.sql_query("SELECT * FROM Drivers", return_type="all")
         if raw_drivers is None:
             return None
-        return [Driver(**raw_driver) for raw_driver in raw_drivers]
+        return [Driver(**self._map_db_to_model(driver)) for driver in raw_drivers]
 
-    def update_driver_delivery_status(self, driver_id: int, is_delivering: bool) -> Driver:
-        raw_updated_driver = self.db_connector.sql_query(
-            """
+    @log
+    def update_driver(self, driver_id: int, update: dict):
+        if not update:
+            raise ValueError("At least one value should be updated")
+
+        parameters_update = [
+            "driver_first_name",
+            "driver_last_name",
+            "driver_password_hash",
+            "driver_salt",
+            "driver_is_delivering",
+            "driver_phone",
+        ]
+        for key in update.keys():
+            if key not in parameters_update:
+                raise ValueError(f"{key} is not a parameter of Order.")
+
+        updated_fields = [f"{field} = %({field})s" for field in update.keys()]
+        set_field = ", ".join(updated_fields)
+        params = {**update, "driver_id": driver_id}
+
+        self.db_connector.sql_query(
+            f"""
             UPDATE Drivers
-            SET driver_is_delivering=%(is_delivering)s
-            WHERE driver_id=%(driver_id)s
-            RETURNING *;
+            SET {set_field}
+            WHERE driver_id = %(driver_id)s;
             """,
-            {"driver_id": driver_id, "is_delivering": is_delivering},
-            "one",
+            params,
+            "none",
         )
-        return Driver(**raw_updated_driver)
+        return self.get_driver_by_id(driver_id)
 
+    @log
     def delete_driver(self, driver_id: int) -> None:
         self.db_connector.sql_query("DELETE FROM Drivers WHERE driver_id=%s", [driver_id], "none")
+
+    @staticmethod
+    def _map_db_to_model(raw_driver: dict) -> dict:
+        """
+        Map the column name of the table into the correct name of the arguments
+        to build a Driver instance (beacause it inherits from User)
+        """
+        return {
+            "id": raw_driver["driver_id"],
+            "first_name": raw_driver["driver_first_name"],
+            "last_name": raw_driver["driver_last_name"],
+            "password": raw_driver["driver_password_hash"],
+            "salt": raw_driver["driver_salt"],
+            "created_at": raw_driver["driver_created_at"],
+            "driver_phone": raw_driver["driver_phone"],
+            "driver_is_delivering": raw_driver["driver_is_delivering"],
+        }

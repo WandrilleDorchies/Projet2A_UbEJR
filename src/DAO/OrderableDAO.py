@@ -1,3 +1,4 @@
+from src.utils.log_decorator import log
 from src.utils.singleton import Singleton
 
 from .DBConnector import DBConnector
@@ -10,6 +11,7 @@ class OrderableDAO(metaclass=Singleton):
         self.db_connector = db_connector
 
     # CREATE
+    @log
     def create_orderable(self, orderable_type: str) -> int:
         """
         Create an orderable

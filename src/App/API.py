@@ -2,6 +2,8 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 
+from src.utils.log_init import initialiser_logs
+
 from .ItemController import item_router
 
 # from .UserController import user_router
@@ -9,6 +11,8 @@ from .ItemController import item_router
 
 def run_app():
     app = FastAPI(title="Projet Info 2A", description="Example project for ENSAI students")
+
+    initialiser_logs("Projet Ub'EJR Eats")
 
     # app.include_router(user_router)
 

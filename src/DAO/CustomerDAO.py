@@ -1,7 +1,8 @@
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 
 from src.Model.Customer import Customer
+from src.utils.log_decorator import log
 from src.utils.singleton import Singleton
 
 from .AddressDAO import AddressDAO
@@ -16,6 +17,7 @@ class CustomerDAO(metaclass=Singleton):
         self.db_connector = db_connector
         self.address_dao = address_dao
 
+    @log
     def create_customer(
         self,
         first_name: str,
@@ -65,6 +67,7 @@ class CustomerDAO(metaclass=Singleton):
         mapped_args = self._map_db_to_model(raw_customer)
         return Customer(**mapped_args)
 
+    @log
     def get_customer_by_id(self, customer_id) -> Optional[Customer]:
         raw_customer = self.db_connector.sql_query(
             "SELECT * from Customers WHERE customer_id=%s", [customer_id], "one"
@@ -74,24 +77,33 @@ class CustomerDAO(metaclass=Singleton):
         mapped_args = self._map_db_to_model(raw_customer)
         return Customer(**mapped_args)
 
-    def get_customer_by_email(self, email: str) -> Optional[Customer]:
+    @log
+    def get_customer_by_email(self, mail: str) -> Optional[Customer]:
         raw_customer = self.db_connector.sql_query(
-            "SELECT * FROM Customers WHERE customer_email=%s", [email], "one"
+            "SELECT * FROM Customers WHERE customer_mail=%s", [mail], "one"
         )
         if raw_customer is None:
             return None
         mapped_args = self._map_db_to_model(raw_customer)
         return Customer(**mapped_args)
 
+    @log
+    def get_all_emails(self) -> List[str]:
+        raw_mails = self.db_connector.sql_query(
+            "SELECT customer_mail FROM Customers;", return_type="all"
+        )
+        return [raw_mail["customer_mail"] for raw_mail in raw_mails] if raw_mails else None
+
+    @log
     def get_all_customer(self) -> Optional[list[Customer]]:
         raw_customers = self.db_connector.sql_query("SELECT * from Customers ", return_type="all")
 
         if raw_customers is None:
             return None
 
-        list_customer = [Customer(**self._map_db_to_model(customer)) for customer in raw_customers]
-        return list_customer
+        return [Customer(**self._map_db_to_model(customer)) for customer in raw_customers]
 
+    @log
     def update_customer(self, customer_id: int, update: dict):
         if not update:
             raise ValueError("At least one value should be updated")
@@ -122,6 +134,7 @@ class CustomerDAO(metaclass=Singleton):
         )
         return self.get_customer_by_id(customer_id)
 
+    @log
     def delete_customer(self, customer_id: int):
         self.db_connector.sql_query(
             """

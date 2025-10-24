@@ -1,6 +1,7 @@
 from typing import Optional
 
 from src.Model.Address import Address
+from src.utils.log_decorator import log
 from src.utils.singleton import Singleton
 
 from .DBConnector import DBConnector
@@ -12,6 +13,7 @@ class AddressDAO(metaclass=Singleton):
     def __init__(self, db_connector: DBConnector):
         self.db_connector = db_connector
 
+    @log
     def get_address_by_id(self, address_id: int) -> Optional[Address]:
         """
         Retrieve the address associated with a given id.
@@ -38,6 +40,7 @@ class AddressDAO(metaclass=Singleton):
 
         return Address(**raw_address) if raw_address else None
 
+    @log
     def get_address_by_customer_id(self, customer_id: int) -> Optional[Address]:
         """
         Retrieve the address associated with a given customer id.
@@ -65,6 +68,7 @@ class AddressDAO(metaclass=Singleton):
 
         return Address(**raw_address) if raw_address else None
 
+    @log
     def get_all_addresses(self) -> Optional[list[Address]]:
         """
         Retrieve all addresses stored in the database.
@@ -80,6 +84,7 @@ class AddressDAO(metaclass=Singleton):
 
         return [Address(**raw_address) for raw_address in raw_addresses] if raw_addresses else None
 
+    @log
     def create_address(
         self, number: int, street: str, city: str, postal_code: int, country: str
     ) -> Address:
@@ -123,6 +128,7 @@ class AddressDAO(metaclass=Singleton):
         print(raw_created_address)
         return Address(**raw_created_address)
 
+    @log
     def update_address(self, address_id: int, update: dict):
         """
         Update an existing address in the database.
@@ -169,6 +175,7 @@ class AddressDAO(metaclass=Singleton):
 
         return self.get_address_by_id(address_id)
 
+    @log
     def delete_address_by_id(self, address_id: int) -> None:
         self.db_connector.sql_query(
             "DELETE FROM Addresses WHERE address_id = %(address_id)s",

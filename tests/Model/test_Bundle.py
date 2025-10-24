@@ -91,3 +91,59 @@ def test_bundle_check_availability_true(params, response, sample_item):
     )
 
     assert bundle.check_availability() is response
+
+
+@pytest.mark.parametrize(
+    "test",
+    [
+        1,
+        "Item",
+        Bundle(
+            bundle_id=1,
+            orderable_id=2,
+            bundle_name="Menu",
+            bundle_reduction=25,
+            bundle_description="Menu classique",
+            bundle_availability_start_date=datetime(2025, 10, 9, 12, 30, 0),
+            bundle_availability_end_date=datetime(2025, 10, 9, 13, 0, 0),
+            bundle_items={},
+        ),
+    ],
+)
+def test_bundle_not_equal(test, sample_item):
+    bundle1 = Bundle(
+        bundle_id=1,
+        orderable_id=1,
+        bundle_name="Menu",
+        bundle_reduction=25,
+        bundle_description="Menu classique",
+        bundle_availability_start_date=datetime(2025, 10, 9, 12, 30, 0),
+        bundle_availability_end_date=datetime(2025, 10, 9, 13, 0, 0),
+        bundle_items={},
+    )
+
+    assert not bundle1 == test
+
+
+def test_bundles_equal(sample_item):
+    bundle1 = Bundle(
+        bundle_id=1,
+        orderable_id=1,
+        bundle_name="Menu",
+        bundle_reduction=25,
+        bundle_description="Menu classique",
+        bundle_availability_start_date=datetime(2025, 10, 9, 12, 30, 0),
+        bundle_availability_end_date=datetime(2025, 10, 9, 13, 0, 0),
+        bundle_items={sample_item: 1},
+    )
+    bundle2 = Bundle(
+        bundle_id=1,
+        orderable_id=1,
+        bundle_name="Menu",
+        bundle_reduction=25,
+        bundle_description="Menu classique",
+        bundle_availability_start_date=datetime(2025, 10, 9, 12, 30, 0),
+        bundle_availability_end_date=datetime(2025, 10, 9, 13, 0, 0),
+        bundle_items={sample_item: 1},
+    )
+    assert bundle1 == bundle2

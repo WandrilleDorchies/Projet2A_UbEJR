@@ -4,6 +4,7 @@ from typing import Dict, List, Optional
 from src.Model.Bundle import Bundle
 from src.Model.Item import Item
 from src.Model.Order import Order
+from src.utils.log_decorator import log
 from src.utils.singleton import Singleton
 
 from .BundleDAO import BundleDAO
@@ -31,6 +32,7 @@ class OrderDAO(metaclass=Singleton):
         self.bundle_dao = bundle_dao
 
     # CREATE
+    @log
     def create_order(self, customer_id: int) -> Order:
         raw_order = self.db_connector.sql_query(
             """
@@ -62,6 +64,7 @@ class OrderDAO(metaclass=Singleton):
         return Order(**raw_order)
 
     # READ
+    @log
     def get_order_by_id(self, order_id: int) -> Optional[Order]:
         raw_order = self.db_connector.sql_query(
             """SELECT *
@@ -77,6 +80,7 @@ class OrderDAO(metaclass=Singleton):
         raw_order["order_items"] = self._get_orderables_in_order(order_id)
         return Order(**raw_order)
 
+    @log
     def get_all_orders(self) -> Optional[List[Order]]:
         raw_orders = self.db_connector.sql_query("SELECT * from Orders", return_type="all")
 
@@ -90,6 +94,7 @@ class OrderDAO(metaclass=Singleton):
 
         return Orders
 
+    @log
     def get_all_orders_by_customer(self, order_customer_id) -> Optional[List[Order]]:
         raw_orders = self.db_connector.sql_query(
             "SELECT * from Orders where order_customer_id=%s", [order_customer_id], "all"
@@ -105,6 +110,7 @@ class OrderDAO(metaclass=Singleton):
 
         return Orders
 
+    @log
     def get_all_orders_prepared(self) -> Optional[List[Order]]:
         raw_orders = self.db_connector.sql_query(
             "SELECT * from Orders where order_is_prepared is True", return_type="all"
@@ -121,6 +127,7 @@ class OrderDAO(metaclass=Singleton):
         return Orders
 
     # UPDATE
+    @log
     def update_order(self, order_id: int, update: dict) -> Order:
         if not update:
             raise ValueError("At least one value should be updated")
@@ -146,6 +153,7 @@ class OrderDAO(metaclass=Singleton):
         return self.get_order_by_id(order_id)
 
     # DELETE
+    @log
     def delete_order(self, order_id) -> None:
         self.db_connector.sql_query(
             """
@@ -163,6 +171,7 @@ class OrderDAO(metaclass=Singleton):
         )
         return None
 
+    @log
     def add_orderable_to_order(self, orderable_id: int, order_id: int) -> Order:
         if self._get_quantity_of_orderables(orderable_id, order_id) >= 1:
             self.db_connector.sql_query(
@@ -185,6 +194,7 @@ class OrderDAO(metaclass=Singleton):
 
         return self.get_order_by_id(order_id)
 
+    @log
     def remove_orderable_from_order(self, order_id: int, orderable_id: int) -> Order:
         if self._get_quantity_of_orderables(order_id, orderable_id) == 1:
             self.db_connector.sql_query(

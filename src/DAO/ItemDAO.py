@@ -1,6 +1,7 @@
 from typing import List, Optional
 
 from src.Model.Item import Item
+from src.utils.log_decorator import log
 from src.utils.singleton import Singleton
 
 from .DBConnector import DBConnector
@@ -16,6 +17,7 @@ class ItemDAO(metaclass=Singleton):
         self.orderable_dao = orderable_dao
 
     # CREATE
+    @log
     def create_item(
         self,
         item_name: str,
@@ -46,23 +48,27 @@ class ItemDAO(metaclass=Singleton):
         return Item(**raw_item)
 
     # READ
+    @log
     def get_item_by_id(self, item_id: int) -> Optional[Item]:
         raw_item = self.db_connector.sql_query(
             "SELECT * from Items WHERE item_id=%s", [item_id], "one"
         )
         return Item(**raw_item) if raw_item else None
 
+    @log
     def get_item_by_orderable_id(self, orderable_id: int) -> Optional[Item]:
         raw_item = self.db_connector.sql_query(
             "SELECT * FROM Items WHERE orderable_id=%s", [orderable_id], "one"
         )
         return Item(**raw_item) if raw_item else None
 
+    @log
     def get_all_items(self) -> Optional[List[Item]]:
         raw_items = self.db_connector.sql_query("SELECT * from Items", return_type="all")
         return [Item(**raw_item) for raw_item in raw_items] if raw_items else None
 
     # UPDATE
+    @log
     def update_item(self, item_id: int, update: dict) -> Item:
         if not update:
             raise ValueError("At least one value should be updated")
@@ -96,6 +102,7 @@ class ItemDAO(metaclass=Singleton):
         return self.get_item_by_id(item_id)
 
     # DELETE
+    @log
     def delete_item_by_id(self, item_id: int) -> None:
         if self._item_is_in_bundle(item_id):
             raise ValueError("The item is in a bundle and cannot be deleted.")

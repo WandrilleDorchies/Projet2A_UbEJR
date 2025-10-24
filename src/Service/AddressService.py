@@ -25,7 +25,10 @@ class AddressService:
         address_postal_code: int,
         address_country: str,
     ) -> None:
-        address: str = f"{address_number} {address_street}, {address_postal_code} {address_city}, {address_country}"
+        address: str = (
+            f"{address_number} {address_street},"
+            f"{address_postal_code} {address_city}, {address_country}"
+        )
 
         if self.is_valid(address):
             self.dao.create_address(

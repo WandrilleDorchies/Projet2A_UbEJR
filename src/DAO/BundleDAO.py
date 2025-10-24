@@ -3,6 +3,7 @@ from typing import Dict, List, Optional
 
 from src.Model.Bundle import Bundle
 from src.Model.Item import Item
+from src.utils.log_decorator import log
 from src.utils.singleton import Singleton
 
 from .DBConnector import DBConnector
@@ -20,6 +21,7 @@ class BundleDAO(metaclass=Singleton):
         self.orderable_dao = orderable_dao
         self.item_dao = item_dao
 
+    @log
     def create_bundle(
         self,
         bundle_name: str,
@@ -67,6 +69,7 @@ class BundleDAO(metaclass=Singleton):
 
         return Bundle(**raw_bundle)
 
+    @log
     def get_bundle_by_id(self, bundle_id: int) -> Optional[Bundle]:
         """
         Retrieve the bundle associated with a given id.
@@ -94,6 +97,7 @@ class BundleDAO(metaclass=Singleton):
         raw_bundle["bundle_items"] = self._get_items_from_bundle(bundle_id)
         return Bundle(**raw_bundle)
 
+    @log
     def get_bundle_by_orderable_id(self, orderable_id: int) -> Optional[Bundle]:
         """
         Retrieve the bundle associated with a given oderable id.
@@ -116,6 +120,7 @@ class BundleDAO(metaclass=Singleton):
         raw_bundle["bundle_items"] = self._get_items_from_bundle(raw_bundle["bundle_id"])
         return Bundle(**raw_bundle) if raw_bundle else None
 
+    @log
     def get_all_bundle(self) -> Optional[List[Bundle]]:
         raw_bundles = self.db_connector.sql_query("SELECT * FROM Bundles", return_type="all")
 
@@ -129,6 +134,7 @@ class BundleDAO(metaclass=Singleton):
 
         return Bundles
 
+    @log
     def update_bundle(self, bundle_id: int, update: dict):
         parameters_update = [
             "bundle_name",
@@ -176,6 +182,7 @@ class BundleDAO(metaclass=Singleton):
 
         return self.get_bundle_by_id(bundle_id)
 
+    @log
     def delete_bundle(self, bundle_id: int):
         raw_bundle = self.db_connector.sql_query(
             """ SELECT *
