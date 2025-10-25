@@ -17,6 +17,7 @@ class CustomerDAO(metaclass=Singleton):
         self.db_connector = db_connector
         self.address_dao = address_dao
 
+    # CREATE
     @log
     def create_customer(
         self,
@@ -67,6 +68,7 @@ class CustomerDAO(metaclass=Singleton):
         mapped_args = self._map_db_to_model(raw_customer)
         return Customer(**mapped_args)
 
+    # READ
     @log
     def get_customer_by_id(self, customer_id: int) -> Optional[Customer]:
         raw_customer = self.db_connector.sql_query(
@@ -91,7 +93,7 @@ class CustomerDAO(metaclass=Singleton):
         return Customer(**mapped_args)
 
     @log
-    def get_all_emails(self) -> List[str]:
+    def get_all_customer_email(self) -> List[str]:
         raw_mails = self.db_connector.sql_query(
             "SELECT customer_mail FROM Customers;", return_type="all"
         )
@@ -111,6 +113,7 @@ class CustomerDAO(metaclass=Singleton):
             print(raw_customer["customer_address"])
         return [Customer(**self._map_db_to_model(customer)) for customer in raw_customers]
 
+    # UPDATE
     @log
     def update_customer(self, customer_id: int, update: dict):
         if not update:
@@ -125,7 +128,7 @@ class CustomerDAO(metaclass=Singleton):
         ]
         for key in update.keys():
             if key not in parameters_update:
-                raise ValueError(f"{key} is not a parameter of Order.")
+                raise ValueError(f"{key} is not a parameter of Customer.")
 
         updated_fields = [f"{field} = %({field})s" for field in update.keys()]
         set_field = ", ".join(updated_fields)
@@ -142,6 +145,7 @@ class CustomerDAO(metaclass=Singleton):
         )
         return self.get_customer_by_id(customer_id)
 
+    # DELETE
     @log
     def delete_customer(self, customer_id: int):
         self.db_connector.sql_query(

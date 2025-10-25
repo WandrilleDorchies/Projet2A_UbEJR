@@ -1,82 +1,112 @@
+from typing import List, Optional
+
 from src.DAO.CustomerDAO import CustomerDAO
+from src.DAO.OrderDAO import OrderDAO
 from src.Model.Address import Address
+from src.Model.Customer import Customer
+from src.Model.Order import Order
 from src.Service.GoogleMapService import GoogleMapService
+from src.utils.log_decorateur import log
 
 from .UserService import UserService
 
 
 class CustomerService:
+    customer_dao: CustomerDAO
+    order_dao: OrderDAO
+
     def __init__(
-        self, user_service: UserService, customer_dao: CustomerDAO, gm_service: GoogleMapService
+        self,
+        user_service: UserService,
+        customer_dao: CustomerDAO,
+        order_dao: OrderDAO,
+        gm_service: GoogleMapService,
     ):
         self.user_service = user_service
         self.customer_dao = customer_dao
+        self.order_dao = order_dao
         self.gm_service = gm_service
 
+    @log
+    def get_customer_by_id(self, customer_id: int) -> Optional[Customer]:
+        customer = self.customer_dao.get_customer_by_id(customer_id)
+        return customer
+
+    @log
+    def get_customer_by_email(self, customer_email: int) -> Optional[Customer]:
+        customer = self.customer_dao.get_customer_by_email(customer_email)
+        return customer
+
+    @log
+    def get_all_customer(self) -> Optional[List[Customer]]:
+        customers = self.customer_dao.get_all_customer()
+        return customers
+
+    @log
+    def get_all_customer_email(self) -> Optional[List[str]]:
+        customers_email = self.customer_dao.get_all_customer_email()
+        return customers_email
+
+    @log
     def create_customer(
         self,
         password: str,
         first_name: str,
         last_name: str,
-        address: str,
+        address: Address,
         phone: str,
         mail: str,
-    ):
+    ) -> Optional[Customer]:
+
         hashed_password: str = self.user_service.create_hashed_password(password)
         customer_address = self.gm_service.validate_address(address)
-        address_id = customer
+        address_id = customer_address.address_id
 
-        return self.customer_dao.create_customer(
-            first_name, last_name, phone, mail, hashed_password, address_id
+        created_customer = self.customer_dao.create_customer(
+            first_name,
+            last_name,
+            phone,
+            mail,
+            hashed_password,
+            address_id
         )
 
-    def update_customer(self, customer_id: int, update) -> None:
+        return created_customer
 
+    @log
+    def update_customer(self, customer_id: int, update) -> Optional[Customer]:
         update_message_parts = []
         for field, value in update.customer():
             update_message_parts.append(f"{field}={value}")
 
-        print(f"[CustomerService] Updating customer: {", ".join(update_message_parts)}")
-
-        updated_customer = self.customer_dao.update_customer(customer_id=id, update=update)
-        print(f"[CustomerService] DAO returned after creation: {updated_customer}")
+        updated_customer = self.customer_dao.update_customer(customer_id=customer_id, update=update)
         return updated_customer
 
-    def delete_customer(self, customer_id : int) -> None:
+    @log
+    def order_history(self, customer_id: int) -> Optional[List[Order]]:
+        history = self.order_dao.get_all_order_by_customer(customer_id)
+        return history
+
+    def make_order() -> Order:
+        # TODO
+        pass
+
+    @log
+    def delete_customer(self, customer_id: int) -> None:
         """
         Deletes a customer from the database by its ID.
 
         Parameters
         ----------
         customer_id : int
-        The ID of the customer to delete.
+            The ID of the customer to delete.
         """
-        print(f"[CustomerService] Deleting customer with ID: {customer_id}")
-
         customer = self.customer_dao.get_customer_by_id(customer_id)
         if customer is None:
-            raise ValueError(f"[CustomerService] Cannot delete: customer with ID {customer_id} not found.")
+            raise ValueError(
+                f"[CustomerService] Cannot delete: customer with ID {customer_id} not found."
+            )
 
         self.customer_dao.delete_customer_by_id(customer_id)
-        print(f"[CustomerService] Customer with ID {customer_id} has been deleted.")
 
-    def get_customer_by_id(self, customer_id: int)  -> Item | None:
-        print(f"[CustomerService] Getting customer with ID: {customer_id}")
-        customer = self.customer_dao.get_customer_by_id(customer_id)
-        print(f"[CustomerService] DAO returned: {customer}")
-        return customer
-    
-    def get_all_customer(self) -> list[Customer] | None:
-        print("[CustomerService] Getting all customers")
-        customers = self.customer_dao.get_all_item()
-        print(f"[CustomerService] DAO returned: {customers}")
-        return customers
 
-    def order_history(self,customer_id:int) -> list[Order] | None:
-        print(f"[CustomerService] Getting order history with customer ID: {customer_id}")
-        history = self.order_dao.get_all_order_by_customer(customer_id)
-        print(f"[CustomerService] DAO returned: {history}")
-        return history
-
-    def make_order() -> Order :
-        pass
