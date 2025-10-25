@@ -180,7 +180,7 @@ class TestOrderDAO:
             item_description="Item de test",
             item_stock=10,
         )
-        order_dao.add_orderable_to_order(item.orderable_id, order.order_id)
+        order_dao.add_orderable_to_order(order.order_id, item.orderable_id)
 
         bundle = bundle_dao.create_bundle(
             bundle_name="Test Bundle",
@@ -190,7 +190,7 @@ class TestOrderDAO:
             bundle_availability_end_date=datetime(2026, 10, 9),
             bundle_items={item: 2},
         )
-        order_dao.add_orderable_to_order(bundle.orderable_id, order.order_id)
+        order_dao.add_orderable_to_order(order.order_id, bundle.orderable_id)
 
         order_dao.delete_order(order.order_id)
 
@@ -211,7 +211,7 @@ class TestOrderDAO:
             item_description="Item de test",
             item_stock=10,
         )
-        updated_order = order_dao.add_orderable_to_order(item.orderable_id, order.order_id)
+        updated_order = order_dao.add_orderable_to_order(order.order_id, item.orderable_id)
 
         assert updated_order is not None
         assert len(updated_order.order_items) == 1
@@ -230,8 +230,8 @@ class TestOrderDAO:
             item_description="Item de test",
             item_stock=10,
         )
-        order_dao.add_orderable_to_order(item.orderable_id, order.order_id)
-        order_dao.add_orderable_to_order(item.orderable_id, order.order_id)
+        order_dao.add_orderable_to_order(order.order_id, item.orderable_id)
+        order_dao.add_orderable_to_order(order.order_id, item.orderable_id)
 
         quantity = order_dao._get_quantity_of_orderables(order.order_id, item.orderable_id)
         assert quantity >= 1

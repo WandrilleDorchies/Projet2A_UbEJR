@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pytest
 from dotenv import load_dotenv
 
@@ -168,3 +170,31 @@ def multiple_items(item_dao, clean_database):
     items.append(item3)
 
     return items
+
+
+@pytest.fixture
+def sample_bundle(multiple_items, bundle_dao, clean_database):
+    bundle_items = {item: 1 for item in multiple_items[:1]}
+    bundle = bundle_dao.create_dao(
+        "Menu",
+        15,
+        "Plat + Boisson",
+        datetime(2025, 10, 9, 12, 30, 0),
+        datetime(2026, 10, 9, 12, 30, 0),
+        bundle_items,
+    )
+
+    return bundle
+
+
+@pytest.fixture
+def sample_order_full(multiple_items, sample_bundle, order_dao, clean_database):
+    order = order_dao.create_order()
+
+    order_dao.add_orderable_to_order(order.order_id, sample_bundle.orderable_id, 1)
+
+    order_with_items = order_dao.add_orderable_to_order(
+        order.order_id, multiple_items[2].orderable_id, 1
+    )
+
+    return order_with_items

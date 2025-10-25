@@ -47,3 +47,7 @@ def test_order_constructor_throws_on_incorrect_input():
     ) and "Input should be a valid integer, unable to parse string as an integer" in str(
         exception_info.value
     )
+
+
+def test_order_calculate_price(sample_order):
+    assert sample_order.order_price == 20
