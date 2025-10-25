@@ -47,3 +47,7 @@ class Item(Orderable):
             True if all the conditions are met
         """
         return self.item_stock > 0 and self.item_in_menu
+
+    @property
+    def price(self) -> float:
+        return self.item_price

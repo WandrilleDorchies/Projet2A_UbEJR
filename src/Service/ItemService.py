@@ -1,25 +1,30 @@
+from typing import List, Optional
+
 from src.DAO.ItemDAO import ItemDAO
+from src.DAO.OrderDAO import OrderDAO
 from src.Model.Item import Item
+from src.utils.log_decorator import log
 
 
 class ItemService:
     item_dao: ItemDAO
+    order_dao: OrderDAO
 
-    def __init__(self, item_dao: ItemDAO):
+    def __init__(self, item_dao: ItemDAO, order_dao: OrderDAO):
         self.item_dao = item_dao
+        self.order_dao = order_dao
 
-    def get_item(self, item_id: int) -> Item | None:
-        print(f"[ItemService] Getting item with ID: {item_id}")
+    @log
+    def get_item(self, item_id: int) -> Optional[Item]:
         item = self.item_dao.get_item_by_id(item_id)
-        print(f"[ItemService] DAO returned: {item}")
         return item
 
-    def get_all_item(self) -> list[Item] | None:
-        print("[ItemService] Getting all items")
+    @log
+    def get_all_item(self) -> Optional[List[Item]]:
         items = self.item_dao.get_all_item()
-        print(f"[ItemService] DAO returned: {items}")
         return items
 
+    @log
     def create_item(
         self,
         item_name: str,
@@ -27,12 +32,7 @@ class ItemService:
         item_type: str,
         item_description: str,
         item_stock: int,
-    ) -> None:
-        print(
-            f"[ItemService] Creating item: item_name={item_name}, item_price={item_price},\n"
-            f"  item_type={item_type}, item_description={item_description}, item_stock={item_stock}"
-        )
-
+    ) -> Optional[Item]:
         created_item = self.item_dao.create_item(
             item_name=item_name,
             item_price=item_price,
@@ -40,20 +40,18 @@ class ItemService:
             item_description=item_description,
             item_stock=item_stock,
         )
-        print(f"[ItemService] DAO returned after creation: {created_item}")
         return created_item
 
-    def update_item(self, item_id: int, update) -> None:
+    @log
+    def update_item(self, item_id: int, update) -> Optional[Item]:
         update_message_parts = []
         for field, value in update.items():
             update_message_parts.append(f"{field}={value}")
 
-        print(f"[ItemService] Updating item: {', '.join(update_message_parts)}")
-
         updated_item = self.item_dao.update_item(item_id=id, update=update)
-        print(f"[ItemService] DAO returned after creation: {updated_item}")
         return updated_item
 
+    @log
     def add_to_order(self, item_id: int, order, quantity: int = 1) -> None:
         """
         Adds an item to a given order if enough stock is available.
@@ -67,27 +65,21 @@ class ItemService:
         quantity : int, optional
             Number of units to add (default is 1).
         """
-        print(f"[ItemService] Adding item ID {item_id} (x{quantity}) to order {order.id_order}")
         item = self.item_dao.get_item_by_id(item_id)
-        # Check if Item exist
         if item is None:
             raise ValueError(f"[ItemService] Item with ID {item_id} not found.")
 
-        # Check the Stock
-        if item.stock < quantity:
+        if item.item_stock < quantity:
             raise ValueError(
                 f"[ItemService] Not enough stock for '{item.name}' (available: {item.stock})."
             )
 
-        order.items.append(item)
-        print(f"[ItemService] Item '{item.name}' added to order {order.id_order}.")
-        # Update Stocks
-        item.stock -= quantity
-        print(f"[ItemService] Updated stock for '{item.name}': {item.stock}")
+        update_data = {"item_stock": item.item_stock - quantity}
+        self.item_dao.update_item(item.item_id, update_data)
 
-        self.item_dao.update_item(item)  # A changer quand on aura écrit la méthode
-        print(f"[ItemService] Item '{item.name}' persisted after stock update.")
+        self.order_dao.add_orderable_to_order(item.orderable_id, quantity)
 
+    @log
     def delete_item(self, item_id: int) -> None:
         """
         Deletes an item from the database by its ID.
@@ -97,11 +89,8 @@ class ItemService:
         item_id : int
             The ID of the item to delete.
         """
-        print(f"[ItemService] Deleting item with ID: {item_id}")
-
         item = self.item_dao.get_item_by_id(item_id)
         if item is None:
             raise ValueError(f"[ItemService] Cannot delete: item with ID {item_id} not found.")
 
         self.item_dao.delete_item_by_id(item_id)
-        print(f"[ItemService] Item with ID {item_id} has been deleted.")

@@ -18,3 +18,8 @@ class Orderable(BaseModel, ABC):
     @abstractmethod
     def check_availability(self) -> bool:
         pass
+
+    @property
+    @abstractmethod
+    def price(self) -> float:
+        pass

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 from src.Model.Bundle import Bundle
 from src.Model.Item import Item
@@ -172,31 +172,31 @@ class OrderDAO(metaclass=Singleton):
         return None
 
     @log
-    def add_orderable_to_order(self, orderable_id: int, order_id: int) -> Order:
+    def add_orderable_to_order(self, orderable_id: int, order_id: int, quantity: int) -> Order:
         if self._get_quantity_of_orderables(orderable_id, order_id) >= 1:
             self.db_connector.sql_query(
                 """UPDATE Order_contents
-                   SET orderable_quantity=orderable_quantity+1
+                   SET orderable_quantity=orderable_quantity+%(quantity)s
                    WHERE order_id=%(order_id)s AND orderable_id=%(orderable_id)s;
                 """,
-                {"order_id": order_id, "orderable_id": orderable_id},
+                {"quantity": quantity, "order_id": order_id, "orderable_id": orderable_id},
                 "none",
             )
 
         else:
             self.db_connector.sql_query(
                 """INSERT INTO Order_contents
-                   VALUES (%(order_id)s, %(orderable_id)s, 1);
+                   VALUES (%(order_id)s, %(orderable_id)s, %(quantity)s);
                 """,
-                {"order_id": order_id, "orderable_id": orderable_id},
+                {"order_id": order_id, "orderable_id": orderable_id, "quantity": quantity},
                 "none",
             )
 
         return self.get_order_by_id(order_id)
 
     @log
-    def remove_orderable_from_order(self, order_id: int, orderable_id: int) -> Order:
-        if self._get_quantity_of_orderables(order_id, orderable_id) == 1:
+    def remove_orderable_from_order(self, order_id: int, orderable_id: int, quantity: int) -> Order:
+        if self._get_quantity_of_orderables(order_id, orderable_id) <= quantity:
             self.db_connector.sql_query(
                 """DELETE FROM Order_contents
                    WHERE order_id=%(order_id)s AND orderable_id=%(orderable_id)s;
@@ -207,10 +207,10 @@ class OrderDAO(metaclass=Singleton):
         else:
             self.db_connector.sql_query(
                 """UPDATE Order_contents
-                   SET orderable_quantity=orderable_quantity-1
+                   SET orderable_quantity=orderable_quantity-%(quantity)s
                    WHERE order_id=%(order_id)s AND orderable_id=%(orderable_id)s;
                 """,
-                {"order_id": order_id, "orderable_id": orderable_id},
+                {"quantity": quantity, "order_id": order_id, "orderable_id": orderable_id},
                 "none",
             )
 
@@ -230,7 +230,7 @@ class OrderDAO(metaclass=Singleton):
 
         return 0
 
-    def _get_orderables_in_order(self, order_id: int) -> Dict[Item | Bundle, int]:
+    def _get_orderables_in_order(self, order_id: int) -> Dict[Union[Item, Bundle], int]:
         raw_orderables = self.db_connector.sql_query(
             """
             SELECT oc.orderable_id, oc.orderable_quantity, o.orderable_type
