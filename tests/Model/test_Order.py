@@ -49,15 +49,5 @@ def test_order_constructor_throws_on_incorrect_input():
     )
 
 
-def test_order_calculate_price_with_bundle(sample_order):
-    pass
-
-def test_order_calculate_price_without_bundle(sample_order):
-    pass
-
-def test_order_calculate_price_with_all(sample_order):
-    # TODO Fix Bug (surement dans conftest dans la création des fixtures,
-    # order_items n'est pas parcouru pour le calcule du prix, je fais ça plus tard
-    # Néo)
-    assert sample_order.order_price == 20
-
+def test_order_calculate_price_with_all(sample_order_full):
+    assert sample_order_full.order_price == 0.85 * (0.5 + 4.5) + 2.0

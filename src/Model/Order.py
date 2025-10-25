@@ -43,9 +43,6 @@ class Order(BaseModel):
         """
         total_price = 0.0
         for orderable, qty in self.order_items.items():
-            if hasattr(orderable, 'bundle_price') and orderable.bundle_price is not None:
-                total_price += orderable.bundle_price * qty
-            else:
-                total_price += orderable.price * qty
+            total_price += orderable.price * qty
 
-        return round(total_price, 2)
+        return total_price

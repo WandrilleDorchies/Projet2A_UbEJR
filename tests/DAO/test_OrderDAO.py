@@ -230,11 +230,12 @@ class TestOrderDAO:
             item_description="Item de test",
             item_stock=10,
         )
-        order_dao.add_orderable_to_order(order.order_id, item.orderable_id)
-        order_dao.add_orderable_to_order(order.order_id, item.orderable_id)
+        order = order_dao.add_orderable_to_order(order.order_id, item.orderable_id)
+        order = order_dao.add_orderable_to_order(order.order_id, item.orderable_id)
 
         quantity = order_dao._get_quantity_of_orderables(order.order_id, item.orderable_id)
-        assert quantity >= 1
+        assert quantity == 2
+        assert list(order.order_items.keys())[0] == item
 
     def test_remove_orderable_from_order_decrement(
         self, order_dao, item_dao, sample_customer, clean_database, orderable_dao

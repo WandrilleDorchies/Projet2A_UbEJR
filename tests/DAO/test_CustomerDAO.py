@@ -119,7 +119,7 @@ class TestCustomerDAO:
         self, customer_dao, sample_customer, clean_database
     ):
         """Test invalid field raises error"""
-        with pytest.raises(ValueError, match="not a parameter of Order"):
+        with pytest.raises(ValueError, match="not a parameter of Customer"):
             customer_dao.update_customer(sample_customer.id, {"invalid_field": "value"})
 
     def test_delete_customer(self, customer_dao, sample_customer, clean_database):

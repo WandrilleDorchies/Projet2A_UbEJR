@@ -174,8 +174,8 @@ def multiple_items(item_dao, clean_database):
 
 @pytest.fixture
 def sample_bundle(multiple_items, bundle_dao, clean_database):
-    bundle_items = {item: 1 for item in multiple_items[:1]}
-    bundle = bundle_dao.create_dao(
+    bundle_items = {item: 1 for item in multiple_items[:2]}
+    bundle = bundle_dao.create_bundle(
         "Menu",
         15,
         "Plat + Boisson",
@@ -188,13 +188,9 @@ def sample_bundle(multiple_items, bundle_dao, clean_database):
 
 
 @pytest.fixture
-def sample_order_full(multiple_items, sample_bundle, order_dao, clean_database):
-    order = order_dao.create_order()
+def sample_order_full(multiple_items, sample_bundle, order_dao, clean_database, sample_customer):
+    order = order_dao.create_order(sample_customer.id)
 
-    order_dao.add_orderable_to_order(order.order_id, sample_bundle.orderable_id, 1)
-
-    order_with_items = order_dao.add_orderable_to_order(
-        order.order_id, multiple_items[2].orderable_id, 1
-    )
-
-    return order_with_items
+    order_dao.add_orderable_to_order(order.order_id, sample_bundle.orderable_id)
+    order = order_dao.add_orderable_to_order(order.order_id, multiple_items[2].orderable_id)
+    return order
