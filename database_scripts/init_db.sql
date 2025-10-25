@@ -114,12 +114,12 @@ CREATE TABLE project.Order_contents (
 
 -- Table: Deliveries
 CREATE TABLE project.Deliveries (
-    delivery_id_order INTEGER,
-    delivery_id_driver INTEGER,
-    delivery_state INTEGER,
-    PRIMARY KEY (delivery_id_order, delivery_id_driver),
-    FOREIGN KEY (delivery_id_order) REFERENCES project.Orders(order_id),
-    FOREIGN KEY (delivery_id_driver) REFERENCES project.Drivers(driver_id)
+    delivery_order_id INTEGER,
+    delivery_driver_id INTEGER,
+    delivery_state INTEGER DEFAULT 0,
+    PRIMARY KEY (delivery_order_id, delivery_driver_id),
+    FOREIGN KEY (delivery_order_id) REFERENCES project.Orders(order_id),
+    FOREIGN KEY (delivery_driver_id) REFERENCES project.Drivers(driver_id)
 );
 
 

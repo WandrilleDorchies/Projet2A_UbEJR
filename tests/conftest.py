@@ -5,6 +5,8 @@ from src.DAO.AddressDAO import AddressDAO
 from src.DAO.BundleDAO import BundleDAO
 from src.DAO.CustomerDAO import CustomerDAO
 from src.DAO.DBConnector import DBConnector
+from src.DAO.DeliveryDAO import DeliveryDAO
+from src.DAO.DriverDAO import DriverDAO
 from src.DAO.ItemDAO import ItemDAO
 from src.DAO.OrderableDAO import OrderableDAO
 from src.DAO.OrderDAO import OrderDAO
@@ -72,6 +74,16 @@ def customer_dao(db_connector_test, address_dao):
 
 
 @pytest.fixture
+def driver_dao(db_connector_test):
+    return DriverDAO(db_connector_test)
+
+
+@pytest.fixture
+def delivery_dao(db_connector_test):
+    return DeliveryDAO(db_connector_test)
+
+
+@pytest.fixture
 def sample_address(address_dao, clean_database):
     address = address_dao.create_address(
         number=7,
@@ -95,6 +107,17 @@ def sample_customer(customer_dao, sample_address, clean_database):
         address_id=sample_address.address_id,
     )
     return customer
+
+
+@pytest.fixture
+def sample_driver(driver_dao, clean_database):
+    driver = driver_dao.create_driver("Lewis", "Hamilton", "0707", "hash", "salt")
+    return driver
+
+
+@pytest.fixture
+def sample_order(order_dao, sample_customer, clean_database):
+    return order_dao.create_order(sample_customer.id)
 
 
 @pytest.fixture

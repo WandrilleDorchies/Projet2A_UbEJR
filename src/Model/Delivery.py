@@ -7,10 +7,11 @@ class Delivery(BaseModel):
 
     Attributes
     ----------
-        id_order (int): Unique identifier of the order to be delivered.
-        id_driver (int): Unique identifier of the driver assigned to the delivery.
-        state (int, optional): Delivery status (0 = pending). Default is 0.
+        delivery_order_id (int): Unique identifier of the order to be delivered.
+        delivery_driver_id (int): Unique identifier of the driver assigned to the delivery.
+        delivery_state (int, optional): Delivery status (0 = pending). Default is 0.
     """
-    delivery_id_order: int
-    delivery_id_driver: int
+
+    delivery_order_id: int
+    delivery_driver_id: int
     delivery_state: int = 0

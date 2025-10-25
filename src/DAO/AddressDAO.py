@@ -60,7 +60,7 @@ class AddressDAO(metaclass=Singleton):
             """SELECT a.*
                FROM Addresses AS a
                INNER JOIN Customers AS c ON a.address_id=c.customer_address_id
-               WHERE address_id = %s;
+               WHERE c.customer_id = %s;
             """,
             [customer_id],
             "one",
@@ -125,7 +125,6 @@ class AddressDAO(metaclass=Singleton):
             },
             "one",
         )
-        print(raw_created_address)
         return Address(**raw_created_address)
 
     @log

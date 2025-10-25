@@ -114,12 +114,12 @@ CREATE TABLE test.Order_contents (
 
 -- Table: Deliveries
 CREATE TABLE test.Deliveries (
-    delivery_id_order INTEGER,
-    delivery_id_driver INTEGER,
-    delivery_state INTEGER,
-    PRIMARY KEY (delivery_id_order, delivery_id_driver),
-    FOREIGN KEY (delivery_id_order) REFERENCES test.Orders(order_id),
-    FOREIGN KEY (delivery_id_driver) REFERENCES test.Drivers(driver_id)
+    delivery_order_id INTEGER,
+    delivery_driver_id INTEGER,
+    delivery_state INTEGER DEFAULT 0,
+    PRIMARY KEY (delivery_order_id, delivery_driver_id),
+    FOREIGN KEY (delivery_order_id) REFERENCES test.Orders(order_id),
+    FOREIGN KEY (delivery_driver_id) REFERENCES test.Drivers(driver_id)
 );
 
 
@@ -186,7 +186,7 @@ VALUES
 (1, 5, 1),
 (2, 4, 2);
 
-INSERT INTO Deliveries (delivery_id_order, delivery_id_driver, delivery_state)
+INSERT INTO Deliveries (delivery_order_id, delivery_driver_id, delivery_state)
 VALUES
 (1, 2, 1), 
 (2, 1, 0); 

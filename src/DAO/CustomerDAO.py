@@ -68,12 +68,13 @@ class CustomerDAO(metaclass=Singleton):
         return Customer(**mapped_args)
 
     @log
-    def get_customer_by_id(self, customer_id) -> Optional[Customer]:
+    def get_customer_by_id(self, customer_id: int) -> Optional[Customer]:
         raw_customer = self.db_connector.sql_query(
             "SELECT * from Customers WHERE customer_id=%s", [customer_id], "one"
         )
         if raw_customer is None:
             return None
+        raw_customer["customer_address"] = self.address_dao.get_address_by_customer_id(customer_id)
         mapped_args = self._map_db_to_model(raw_customer)
         return Customer(**mapped_args)
 
@@ -84,6 +85,8 @@ class CustomerDAO(metaclass=Singleton):
         )
         if raw_customer is None:
             return None
+        customer_id = raw_customer["customer_id"]
+        raw_customer["customer_address"] = self.address_dao.get_address_by_customer_id(customer_id)
         mapped_args = self._map_db_to_model(raw_customer)
         return Customer(**mapped_args)
 
@@ -98,9 +101,14 @@ class CustomerDAO(metaclass=Singleton):
     def get_all_customer(self) -> Optional[list[Customer]]:
         raw_customers = self.db_connector.sql_query("SELECT * from Customers ", return_type="all")
 
-        if raw_customers is None:
+        if not raw_customers:
             return None
 
+        for raw_customer in raw_customers:
+            raw_customer["customer_address"] = self.address_dao.get_address_by_customer_id(
+                raw_customer["customer_id"]
+            )
+            print(raw_customer["customer_address"])
         return [Customer(**self._map_db_to_model(customer)) for customer in raw_customers]
 
     @log
