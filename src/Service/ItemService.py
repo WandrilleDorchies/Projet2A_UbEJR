@@ -33,6 +33,7 @@ class ItemService:
         item_description: str,
         item_stock: int,
     ) -> Optional[Item]:
+
         created_item = self.item_dao.create_item(
             item_name=item_name,
             item_price=item_price,
@@ -48,7 +49,7 @@ class ItemService:
         for field, value in update.items():
             update_message_parts.append(f"{field}={value}")
 
-        updated_item = self.item_dao.update_item(item_id=id, update=update)
+        updated_item = self.item_dao.update_item(item_id=item_id, update=update)
         return updated_item
 
     @log
