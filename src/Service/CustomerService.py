@@ -87,6 +87,7 @@ class CustomerService:
         history = self.order_dao.get_all_order_by_customer(customer_id)
         return history
 
+    @log
     def make_order() -> Order:
         # TODO
         pass
