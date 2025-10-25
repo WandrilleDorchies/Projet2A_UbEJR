@@ -56,5 +56,8 @@ def test_order_calculate_price_without_bundle(sample_order):
     pass
 
 def test_order_calculate_price_with_all(sample_order):
+    # TODO Fix Bug (surement dans conftest dans la création des fixtures,
+    # order_items n'est pas parcouru pour le calcule du prix, je fais ça plus tard
+    # Néo)
     assert sample_order.order_price == 20
 
