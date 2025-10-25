@@ -21,6 +21,7 @@ class BundleDAO(metaclass=Singleton):
         self.orderable_dao = orderable_dao
         self.item_dao = item_dao
 
+    # CREATE
     @log
     def create_bundle(
         self,
@@ -69,6 +70,7 @@ class BundleDAO(metaclass=Singleton):
 
         return Bundle(**raw_bundle)
 
+    # READ
     @log
     def get_bundle_by_id(self, bundle_id: int) -> Optional[Bundle]:
         """
