@@ -172,7 +172,7 @@ class OrderDAO(metaclass=Singleton):
         return None
 
     @log
-    def add_orderable_to_order(self, orderable_id: int, order_id: int, quantity: int) -> Order:
+    def add_orderable_to_order(self, order_id: int, orderable_id: int, quantity: int = 1) -> Order:
         if self._get_quantity_of_orderables(orderable_id, order_id) >= 1:
             self.db_connector.sql_query(
                 """UPDATE Order_contents
@@ -195,7 +195,9 @@ class OrderDAO(metaclass=Singleton):
         return self.get_order_by_id(order_id)
 
     @log
-    def remove_orderable_from_order(self, order_id: int, orderable_id: int, quantity: int) -> Order:
+    def remove_orderable_from_order(
+        self, order_id: int, orderable_id: int, quantity: int = 1
+    ) -> Order:
         if self._get_quantity_of_orderables(order_id, orderable_id) <= quantity:
             self.db_connector.sql_query(
                 """DELETE FROM Order_contents

@@ -43,12 +43,8 @@ class ItemService:
         return created_item
 
     @log
-    def update_item(self, item_id: int, update) -> Optional[Item]:
-        update_message_parts = []
-        for field, value in update.items():
-            update_message_parts.append(f"{field}={value}")
-
-        updated_item = self.item_dao.update_item(item_id=id, update=update)
+    def update_item(self, item_id: int, update: dict) -> Optional[Item]:
+        updated_item = self.item_dao.update_item(item_id, update=update)
         return updated_item
 
     @log
