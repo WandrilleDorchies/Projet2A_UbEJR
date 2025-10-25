@@ -63,6 +63,13 @@ class ItemDAO(metaclass=Singleton):
         return Item(**raw_item) if raw_item else None
 
     @log
+    def get_all_items_on_menu(self) -> Optional[List[Item]]:
+        raw_items = self.db_connector.sql_query(
+            "SELECT * FROM Items WHERE item_in_menu=true", return_type="all"
+        )
+        return [Item(**raw_item) for raw_item in raw_items] if raw_items else None
+
+    @log
     def get_all_items(self) -> Optional[List[Item]]:
         raw_items = self.db_connector.sql_query("SELECT * from Items", return_type="all")
         return [Item(**raw_item) for raw_item in raw_items] if raw_items else None

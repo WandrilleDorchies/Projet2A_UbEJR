@@ -37,6 +37,23 @@ class TestItemDAO:
         assert retrieved_item.item_id == sample_item.item_id
         assert retrieved_item.orderable_id == sample_item.orderable_id
 
+    def test_get_all_items_on_menu(self, item_dao, multiple_items, clean_database):
+        update_data = {"item_in_menu": False}
+        item_dao.update_item(multiple_items[0].item_id, update_data)
+
+        items_in_menu = item_dao.get_all_items_on_menu()
+
+        assert len(items_in_menu) == 2
+        assert multiple_items[0] not in items_in_menu
+
+    def test_no_items_on_menu(self, item_dao, sample_item, clean_database):
+        update_data = {"item_in_menu": False}
+        item_dao.update_item(sample_item.item_id, update_data)
+
+        items_in_menu = item_dao.get_all_items_on_menu()
+
+        assert items_in_menu is None
+
     def test_get_all_items_empty(self, item_dao, clean_database):
         items = item_dao.get_all_items()
 
