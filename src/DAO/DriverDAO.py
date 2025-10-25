@@ -13,9 +13,15 @@ class DriverDAO(metaclass=Singleton):
     def __init__(self, db_connector: DBConnector):
         self.db_connector = db_connector
 
+    # CREATE
     @log
     def create_driver(
-        self, first_name: str, last_name: str, phone: str, password_hash: str, salt: str
+        self,
+        first_name: str,
+        last_name: str,
+        phone: str,
+        password_hash: str,
+        salt: str
     ) -> Driver:
         raw_driver = self.db_connector.sql_query(
             """
@@ -38,6 +44,7 @@ class DriverDAO(metaclass=Singleton):
         map_driver = self._map_db_to_model(raw_driver)
         return Driver(**map_driver)
 
+    # READ
     @log
     def get_driver_by_id(self, driver_id: int) -> Optional[Driver]:
         raw_driver = self.db_connector.sql_query(
@@ -57,6 +64,7 @@ class DriverDAO(metaclass=Singleton):
             return None
         return [Driver(**self._map_db_to_model(driver)) for driver in raw_drivers]
 
+    # UPDATE
     @log
     def update_driver(self, driver_id: int, update: dict):
         if not update:
@@ -89,6 +97,7 @@ class DriverDAO(metaclass=Singleton):
         )
         return self.get_driver_by_id(driver_id)
 
+    # DELETE
     @log
     def delete_driver(self, driver_id: int) -> None:
         self.db_connector.sql_query("DELETE FROM Drivers WHERE driver_id=%s", [driver_id], "none")

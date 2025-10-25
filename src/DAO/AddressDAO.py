@@ -13,6 +13,56 @@ class AddressDAO(metaclass=Singleton):
     def __init__(self, db_connector: DBConnector):
         self.db_connector = db_connector
 
+    # CREATE
+    @log
+    def create_address(
+        self,
+        number: int,
+        street: str,
+        city: str,
+        postal_code: int,
+        country: str
+    ) -> Address:
+        """
+        Create a new address entry in the database.
+
+        Args
+        ----
+        address_number (str or int):
+            Street number of the address.
+        address_street (str):
+            Name of the street.
+        address_city (str):
+            City where the address is located.
+        address_postal_code (str or int):
+            Postal code of the address.
+        address_country (str):
+            Country of the address.
+
+        Returns
+        -------
+        Address
+            The newly created Address object containing the inserted information.
+        """
+        raw_created_address = self.db_connector.sql_query(
+            """
+            INSERT INTO Addresses (address_id, address_number, address_street, address_city,
+            address_postal_code, address_country)
+            VALUES (DEFAULT, %(number)s, %(street)s, %(city)s, %(postal_code)s, %(country)s)
+            RETURNING *;
+            """,
+            {
+                "number": number,
+                "street": street,
+                "city": city,
+                "postal_code": postal_code,
+                "country": country,
+            },
+            "one",
+        )
+        return Address(**raw_created_address)
+
+    # READ
     @log
     def get_address_by_id(self, address_id: int) -> Optional[Address]:
         """
@@ -84,49 +134,7 @@ class AddressDAO(metaclass=Singleton):
 
         return [Address(**raw_address) for raw_address in raw_addresses] if raw_addresses else None
 
-    @log
-    def create_address(
-        self, number: int, street: str, city: str, postal_code: int, country: str
-    ) -> Address:
-        """
-        Create a new address entry in the database.
-
-        Args
-        ----
-        address_number (str or int):
-            Street number of the address.
-        address_street (str):
-            Name of the street.
-        address_city (str):
-            City where the address is located.
-        address_postal_code (str or int):
-            Postal code of the address.
-        address_country (str):
-            Country of the address.
-
-        Returns
-        -------
-        Address
-            The newly created Address object containing the inserted information.
-        """
-        raw_created_address = self.db_connector.sql_query(
-            """
-            INSERT INTO Addresses (address_id, address_number, address_street, address_city,
-            address_postal_code, address_country)
-            VALUES (DEFAULT, %(number)s, %(street)s, %(city)s, %(postal_code)s, %(country)s)
-            RETURNING *;
-            """,
-            {
-                "number": number,
-                "street": street,
-                "city": city,
-                "postal_code": postal_code,
-                "country": country,
-            },
-            "one",
-        )
-        return Address(**raw_created_address)
-
+    # UPDATE
     @log
     def update_address(self, address_id: int, update: dict):
         """
@@ -174,6 +182,7 @@ class AddressDAO(metaclass=Singleton):
 
         return self.get_address_by_id(address_id)
 
+    # DELETE
     @log
     def delete_address_by_id(self, address_id: int) -> None:
         self.db_connector.sql_query(

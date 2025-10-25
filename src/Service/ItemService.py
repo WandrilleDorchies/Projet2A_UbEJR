@@ -15,7 +15,7 @@ class ItemService:
         self.order_dao = order_dao
 
     @log
-    def get_item(self, item_id: int) -> Optional[Item]:
+    def get_item_by_id(self, item_id: int) -> Optional[Item]:
         item = self.item_dao.get_item_by_id(item_id)
         return item
 

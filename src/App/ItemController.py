@@ -14,7 +14,7 @@ item_router = APIRouter(prefix="/items", tags=["Items"])
 def get_item_by_id(item_id: int):
     try:
         print(f"DEBUG: Calling item_service.get_item({item_id})")
-        item = item_service.get_item(item_id)
+        item = item_service.get_item_by_id(item_id)
         print(f"DEBUG: item_service returned: {item}")
         if item is None:
             raise HTTPException(status_code=404, detail=f"Item with id [{item_id}] not found")
