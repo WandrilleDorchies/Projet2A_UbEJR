@@ -49,5 +49,12 @@ def test_order_constructor_throws_on_incorrect_input():
     )
 
 
-def test_order_calculate_price(sample_order):
+def test_order_calculate_price_with_bundle(sample_order):
+    pass
+
+def test_order_calculate_price_without_bundle(sample_order):
+    pass
+
+def test_order_calculate_price_with_all(sample_order):
     assert sample_order.order_price == 20
+
