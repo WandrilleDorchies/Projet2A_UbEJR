@@ -1,8 +1,7 @@
 import hashlib
 import secrets
-from typing import Literal, Optional
+from typing import Literal
 
-from src.DAO.UserRepo import UserRepo
 from src.Model.User import User
 
 
@@ -89,28 +88,24 @@ def check_password_strength(password: str) -> Literal[True]:  # noqa: C901
     return True
 
 
-def validate_password(user_id: int, password: str, user_repo: UserRepo) -> Optional[User]:
+def validate_password(user: User, password_to_test: str) -> bool:
     """
-    Validate username and password combination
+    Validate an input password compared to the password in the database
 
     Parameters
     ----------
-    user_id : int
-        Id of the user
-    password : str
+    user : User
+        User to test
+    password_to_test : str
         Password to check
 
     Returns
     -------
-    User
-        User authentificated
+    bool
+        If the two passwords are the same
     """
-    user: Optional[User] = user_repo.get_by_id(user_id)
 
-    if user is None:
-        raise ValueError(f"User {user_id} not found")
-
-    test_password: str = hash_password(password, user.salt)
+    test_password: str = hash_password(user.password, user.salt)
 
     if user.password != test_password:
         raise ValueError("Incorrect password")

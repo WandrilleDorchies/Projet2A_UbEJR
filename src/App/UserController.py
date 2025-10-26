@@ -41,13 +41,17 @@ def login(username: str, password: str) -> JWTResponse:
     try:
         user = validate_username_password(username=username, password=password, user_repo=user_repo)
     except Exception as error:
-        raise HTTPException(status_code=403, detail="Invalid username and password combination") from error
+        raise HTTPException(
+            status_code=403, detail="Invalid username and password combination"
+        ) from error
 
     return jwt_service.encode_jwt(user.id)
 
 
 @user_router.get("/me", dependencies=[Depends(JWTBearer())])
-def get_user_own_profile(credentials: Annotated[HTTPAuthorizationCredentials, Depends(JWTBearer())]) -> APIUser:
+def get_user_own_profile(
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(JWTBearer())],
+) -> APIUser:
     """
     Get the authenticated user profile
     """

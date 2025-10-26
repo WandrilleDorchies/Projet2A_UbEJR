@@ -38,7 +38,6 @@ class BundleService:
         bundle_availability_end_date: datetime,
         bundle_items: Dict[Item, int],
     ) -> Optional[Bundle]:
-
         create_bundle = self.bundle_dao.create_bundle(
             bundle_name=bundle_name,
             bundle_reduction=bundle_reduction,
@@ -51,10 +50,6 @@ class BundleService:
 
     @log
     def update_bundle(self, bundle_id: int, update: dict) -> Optional[Bundle]:
-        update_message_parts = []
-        for field, value in update.items():
-            update_message_parts.append(f"{field}={value}")
-
         updated_bundle = self.bundle_dao.update_bundle(bundle_id=bundle_id, update=update)
         return updated_bundle
 

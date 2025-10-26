@@ -62,7 +62,7 @@ class GoogleMapService:
         result = self.__gmaps.geocode(address)
 
         if not result:
-            return False
+            return None
 
         coord_address = result[0]["geometry"]["location"]
 
@@ -71,7 +71,7 @@ class GoogleMapService:
             or abs(coord_address["lng"] - self.coord_ensai["lng"]) > self.radius
         ):
             print("Location is too far away to get delivered.")
-            return False
+            return None
 
         number = street = city = postal_code = country = None
         for component in result[0]["address_components"]:

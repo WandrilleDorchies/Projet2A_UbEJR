@@ -67,7 +67,7 @@ class ResetDatabase(metaclass=Singleton):
 
 if __name__ == "__main__":
     if len(sys.argv[1:]) > 2:
-        print('Too many arguments, only project and test schemas can be reset.')
+        print("Too many arguments, only project and test schemas can be reset.")
         sys.exit(1)
     if len(sys.argv) == 1:
         ResetDatabase().startreset()

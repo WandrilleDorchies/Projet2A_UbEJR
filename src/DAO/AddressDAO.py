@@ -16,12 +16,7 @@ class AddressDAO(metaclass=Singleton):
     # CREATE
     @log
     def create_address(
-        self,
-        number: int,
-        street: str,
-        city: str,
-        postal_code: int,
-        country: str
+        self, number: int, street: str, city: str, postal_code: int, country: str
     ) -> Address:
         """
         Create a new address entry in the database.

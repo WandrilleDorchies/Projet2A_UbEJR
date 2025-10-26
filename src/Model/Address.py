@@ -21,3 +21,6 @@ class Address(BaseModel):
     address_city: str
     address_postal_code: int
     address_country: str
+
+    def get_attributes(self) -> dict:
+        return {attribute: value for attribute, value in self.__dict__.items()}

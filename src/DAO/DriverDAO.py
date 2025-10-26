@@ -16,12 +16,7 @@ class DriverDAO(metaclass=Singleton):
     # CREATE
     @log
     def create_driver(
-        self,
-        first_name: str,
-        last_name: str,
-        phone: str,
-        password_hash: str,
-        salt: str
+        self, first_name: str, last_name: str, phone: str, password_hash: str, salt: str
     ) -> Driver:
         raw_driver = self.db_connector.sql_query(
             """

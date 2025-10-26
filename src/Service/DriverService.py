@@ -57,7 +57,6 @@ class DriverService:
     def delivery_start(self, id_user: int, order: int) -> None:
         self.driver_dao.update_driver_delivery_status(id_user, True)
 
-
         # TODO
         return
 
