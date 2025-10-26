@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
 
@@ -12,6 +14,6 @@ class Delivery(BaseModel):
         delivery_state (int, optional): Delivery status (0 = pending). Default is 0.
     """
 
-    delivery_order_id: int
-    delivery_driver_id: int
-    delivery_state: int = 0
+    delivery_id_order: int
+    delivery_id_driver: int
+    delivery_state: Optional[int] = None
