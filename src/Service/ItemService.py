@@ -17,6 +17,8 @@ class ItemService:
     @log
     def get_item_by_id(self, item_id: int) -> Optional[Item]:
         item = self.item_dao.get_item_by_id(item_id)
+        if item is None:
+            raise ValueError(f"[ItemService] Cannot get: item with ID {item_id} not found.")
         return item
 
     @log
@@ -44,8 +46,10 @@ class ItemService:
 
     @log
     def update_item(self, item_id: int, update: dict) -> Optional[Item]:
-        updated_item = self.item_dao.update_item(item_id, update=update)
-        return updated_item
+        item = self.item_dao.update_item(item_id, update=update)
+        if item is None:
+            raise ValueError(f"[ItemService] Cannot update: item with ID {item_id} not found.")
+        return item
 
     @log
     def add_to_order(self, item_id: int, order, quantity: int = 1) -> None:

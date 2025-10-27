@@ -95,13 +95,13 @@ class OrderDAO(metaclass=Singleton):
         return Orders
 
     @log
-    def get_all_orders_by_customer(self, order_customer_id) -> Optional[List[Order]]:
+    def get_all_orders_by_customer(self, customer_id: int) -> Optional[List[Order]]:
         raw_orders = self.db_connector.sql_query(
-            "SELECT * from Orders where order_customer_id=%s", [order_customer_id], "all"
+            "SELECT * from Orders where order_customer_id=%s", [customer_id], "all"
         )
 
         if not raw_orders:
-            return None
+            return []
 
         Orders = []
         for raw_order in raw_orders:
@@ -117,7 +117,7 @@ class OrderDAO(metaclass=Singleton):
         )
 
         if not raw_orders:
-            return None
+            return []
 
         Orders = []
         for raw_order in raw_orders:

@@ -9,11 +9,13 @@ class OrderService:
     order_dao: OrderDAO
 
     def __init__(self, order_dao: OrderDAO):
-        self.item_dao = order_dao
+        self.order_dao = order_dao
 
     @log
     def get_order(self, order_id: int) -> Optional[Order]:
         order = self.order_dao.get_order_by_id(order_id)
+        if order is None:
+            raise ValueError(f"[Order Service] Cannot get: order with ID {order_id} not found.")
         return order
 
     @log
@@ -22,8 +24,8 @@ class OrderService:
         return orders
 
     @log
-    def get_all_order_by_customer(self, order_customer_id) -> Optional[List[Order]]:
-        orders = self.order_dao.get_all_order_by_customer()
+    def get_all_order_by_customer(self, customer_id: int) -> Optional[List[Order]]:
+        orders = self.order_dao.get_all_order_by_customer(customer_id)
         return orders
 
     @log
@@ -38,6 +40,9 @@ class OrderService:
 
     @log
     def update_order(self, order_id: int, update) -> Order:
+        order = self.order_dao.get_order_by_id(order_id)
+        if order is None:
+            raise ValueError(f"[OrderService] Cannot update: order with ID {order_id} not found.")
         updated_order = self.order_dao.update_order(order_id=order_id, update=update)
         return updated_order
 

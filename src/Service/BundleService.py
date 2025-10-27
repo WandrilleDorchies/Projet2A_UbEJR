@@ -16,11 +16,17 @@ class BundleService:
     @log
     def get_bundle_by_id(self, bundle_id: int) -> Optional[Bundle]:
         bundle = self.bundle_dao.get_bundle_by_id(bundle_id)
+        if bundle is None:
+            raise ValueError(f"[BundleService] Cannot get: bundle with ID {bundle_id} not found.")
         return bundle
 
     @log
     def get_bundle_by_orderable_id(self, orderable_id: int) -> Optional[Bundle]:
         bundle = self.bundle_dao.get_bundle_by_orderable_id(orderable_id)
+        if bundle is None:
+            raise ValueError(
+                f"[BundleService] Cannot get: bundle with ID {orderable_id} not found."
+            )
         return bundle
 
     @log
@@ -50,8 +56,12 @@ class BundleService:
 
     @log
     def update_bundle(self, bundle_id: int, update: dict) -> Optional[Bundle]:
-        updated_bundle = self.bundle_dao.update_bundle(bundle_id=bundle_id, update=update)
-        return updated_bundle
+        bundle = self.bundle_dao.update_bundle(bundle_id=bundle_id, update=update)
+        if bundle is None:
+            raise ValueError(
+                f"[BundleService] Cannot update: bundle with ID {bundle_id} not found."
+            )
+        return bundle
 
     @log
     def delete_bundle(self, bundle_id: int) -> None:
