@@ -50,12 +50,11 @@ CREATE TABLE project.Drivers (
 -- Table: Users
 CREATE TABLE project.Users(
     id SERIAL PRIMARY KEY,
-    first_name VARCHAR(128),
-    last_name VARCHAR(128),
+    username VARCHAR(128),
     --created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     password_hash VARCHAR(512),
     salt CHAR(256),
-    role role VARCHAR(10) NOT NULL);
+    role VARCHAR(10) NOT NULL);
 /*
 CREATE TABLE project.Users(
     id SERIAL PRIMARY KEY,
