@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Literal, Optional
 
 from pydantic import BaseModel
 
@@ -21,5 +22,14 @@ class User(BaseModel):
     first_name: str
     last_name: str
     created_at: datetime
-    password: str
+    password_hash: str
     salt: str
+    role: Literal["admin", "driver", "customer"]
+    # for everyone
+    email: str
+    # for customer and driver
+    phone: Optional[str]
+    # customer specific
+    address_id: Optional[int]
+    # driver specific
+    is_delivering: bool

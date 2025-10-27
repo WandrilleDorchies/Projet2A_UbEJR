@@ -10,7 +10,7 @@ CREATE TABLE test.Addresses (
     address_postal_code VARCHAR(8) NOT NULL,
     address_country VARCHAR(128) NOT NULL
 );
-
+/*
 -- Table: Customers
 CREATE TABLE test.Customers (
     customer_id SERIAL PRIMARY KEY,
@@ -46,7 +46,35 @@ CREATE TABLE test.Drivers (
     driver_is_delivering BOOLEAN,
     driver_phone VARCHAR(16)
 );
-
+*/
+CREATE TABLE test.Users(
+    id SERIAL PRIMARY KEY
+    first_name VARCHAR(128),
+    last_name VARCHAR(128)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    password_hash VARCHAR(512)
+    salt CHAR(256)
+    role ENUM('user', 'driver', 'customer') NOT NULL,
+    -- for customer
+    email VARCHAR(128),
+    -- for customer and driver
+    phone VARCHAR(16),
+    -- customer specific
+    address_id INT,
+    -- driver specific
+    is_delivering BOOLEAN,
+    FOREIGN KEY (address_id) REFERENCES test.Addresses(id), 
+    CHECK (
+        ((role = 'customer' AND address_id IS NOT NULL AND email IS NOT NULL) OR  -- customers must have an address
+        (role != 'customer' AND address_id IS NULL and email IS NULL)) --  admins and drivers cannot have an address
+        AND 
+        ((role = 'admin' AND phone IS NULL ) OR  
+        (role != 'admin' AND phone IS NOT NULL)) 
+        AND
+        ((role = 'driver' AND is_delivering IS NOT NULL ) OR  
+        (role != 'driver' AND is_delivering IS NULL)) 
+    )
+);
 -- Table: Orders
 CREATE TABLE test.Orders (
     order_id SERIAL PRIMARY KEY,
