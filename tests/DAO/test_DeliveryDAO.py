@@ -9,10 +9,9 @@ class TestDeliveryDAO:
         )
 
         assert delivery is not None
-        assert delivery.delivery_id_order == sample_order.order_id
-        assert delivery.delivery_id_driver == sample_driver.id
-        assert delivery.delivery_state is None
-
+        assert delivery.delivery_order_id == sample_order.order_id
+        assert delivery.delivery_driver_id == sample_driver.id
+        assert delivery.delivery_state == 0
 
     def test_get_delivery_by_driver_exists(
         self, delivery_dao, sample_order, sample_driver, clean_database
@@ -22,8 +21,8 @@ class TestDeliveryDAO:
         retrieved_delivery = delivery_dao.get_delivery_by_driver(sample_driver.id)
 
         assert retrieved_delivery is not None
-        assert retrieved_delivery.delivery_id_driver == sample_driver.id
-        assert retrieved_delivery.delivery_id_order == sample_order.order_id
+        assert retrieved_delivery.delivery_driver_id == sample_driver.id
+        assert retrieved_delivery.delivery_order_id == sample_order.order_id
 
     def test_get_delivery_by_driver_not_exists(self, delivery_dao, clean_database):
         """Test getting delivery by non-existant driver id"""
@@ -48,7 +47,7 @@ class TestDeliveryDAO:
         )
 
         updated_delivery = delivery_dao.update_delivery_state(
-            delivery_id=delivery.delivery_id_order, state=1
+            delivery_id=delivery.delivery_order_id, state=1
         )
 
         assert updated_delivery.delivery_state == 1
@@ -62,7 +61,7 @@ class TestDeliveryDAO:
         )
 
         with pytest.raises(ValueError, match="State can only take"):
-            delivery_dao.update_delivery_state(delivery_id=delivery.delivery_id_order, state=5)
+            delivery_dao.update_delivery_state(delivery_id=delivery.delivery_order_id, state=5)
 
     def test_change_driver(
         self, delivery_dao, driver_dao, sample_order, sample_driver, clean_database
@@ -75,11 +74,11 @@ class TestDeliveryDAO:
         new_driver = driver_dao.create_driver("New", "Driver", "0800", "hash", "salt")
 
         updated_delivery = delivery_dao.change_driver(
-            delivery_id=delivery.delivery_id_order, driver_id=new_driver.id
+            delivery_id=delivery.delivery_order_id, driver_id=new_driver.id
         )
 
-        assert updated_delivery.delivery_id_driver == new_driver.id
-        assert updated_delivery.delivery_id_order == sample_order.order_id
+        assert updated_delivery.delivery_driver_id == new_driver.id
+        assert updated_delivery.delivery_order_id == sample_order.order_id
 
     def test_delete_delivery(self, delivery_dao, sample_order, sample_driver, clean_database):
         """Test de suppression d'une livraison"""
@@ -88,11 +87,11 @@ class TestDeliveryDAO:
             order_id=sample_order.order_id, driver_id=sample_driver.id
         )
 
-        delivery_id = delivery.delivery_id_order
+        delivery_id = delivery.delivery_order_id
 
         delivery_dao.delete_delivery(delivery_id)
 
         retrieved_delivery = delivery_dao.get_delivery_by_driver(sample_driver.id)
 
         if retrieved_delivery is not None:
-            assert retrieved_delivery.delivery_id_order != delivery_id
+            assert retrieved_delivery.delivery_order_id != delivery_id

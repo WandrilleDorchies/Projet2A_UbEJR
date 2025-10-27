@@ -15,6 +15,6 @@ class Delivery(BaseModel):
             (0 = pending, 1 = being delivered, 2 = delivered)
     """
 
-    delivery_id_order: int
-    delivery_id_driver: int
+    delivery_order_id: int
+    delivery_driver_id: int
     delivery_state: Optional[int] = None
