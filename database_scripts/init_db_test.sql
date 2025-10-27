@@ -48,13 +48,13 @@ CREATE TABLE test.Drivers (
 );
 */
 CREATE TABLE test.Users(
-    id SERIAL PRIMARY KEY
+    id SERIAL PRIMARY KEY,
     first_name VARCHAR(128),
-    last_name VARCHAR(128)
+    last_name VARCHAR(128),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    password_hash VARCHAR(512)
-    salt CHAR(256)
-    role ENUM('user', 'driver', 'customer') NOT NULL,
+    password_hash VARCHAR(512),
+    salt CHAR(256),
+    role VARCHAR(10) NOT NULL,
     -- for customer
     email VARCHAR(128),
     -- for customer and driver
@@ -63,7 +63,7 @@ CREATE TABLE test.Users(
     address_id INT,
     -- driver specific
     is_delivering BOOLEAN,
-    FOREIGN KEY (address_id) REFERENCES test.Addresses(id), 
+    FOREIGN KEY (address_id) REFERENCES test.Addresses(address_id), 
     CHECK (
         ((role = 'customer' AND address_id IS NOT NULL AND email IS NOT NULL) OR  -- customers must have an address
         (role != 'customer' AND address_id IS NULL and email IS NULL)) --  admins and drivers cannot have an address
@@ -84,7 +84,7 @@ CREATE TABLE test.Orders (
     order_time TIME,
     order_is_paid BOOLEAN,
     order_is_prepared BOOLEAN,
-    FOREIGN KEY (order_customer_id) REFERENCES test.Customers(customer_id)
+    FOREIGN KEY (order_customer_id) REFERENCES test.Users(id)
 );
 
 -- Table: Items
@@ -147,10 +147,10 @@ CREATE TABLE test.Deliveries (
     delivery_state INTEGER DEFAULT 0,
     PRIMARY KEY (delivery_order_id, delivery_driver_id),
     FOREIGN KEY (delivery_order_id) REFERENCES test.Orders(order_id),
-    FOREIGN KEY (delivery_driver_id) REFERENCES test.Drivers(driver_id)
+    FOREIGN KEY (delivery_driver_id) REFERENCES test.Users(id)
 );
 
-
+/*
 INSERT INTO Addresses (address_number, address_street, address_city, address_postal_code, address_country)
 VALUES
 (7, 'Contour Antoine de Saint-Exupery', 'Bruz', '35170', 'France'),
@@ -218,3 +218,4 @@ INSERT INTO Deliveries (delivery_order_id, delivery_driver_id, delivery_state)
 VALUES
 (1, 2, 1), 
 (2, 1, 0); 
+*/

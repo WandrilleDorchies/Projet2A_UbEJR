@@ -49,13 +49,22 @@ CREATE TABLE project.Drivers (
 */
 -- Table: Users
 CREATE TABLE project.Users(
-    id SERIAL PRIMARY KEY
+    id SERIAL PRIMARY KEY,
     first_name VARCHAR(128),
-    last_name VARCHAR(128)
+    last_name VARCHAR(128),
+    --created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    password_hash VARCHAR(512),
+    salt CHAR(256),
+    role role VARCHAR(10) NOT NULL);
+/*
+CREATE TABLE project.Users(
+    id SERIAL PRIMARY KEY,
+    first_name VARCHAR(128),
+    last_name VARCHAR(128),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    password_hash VARCHAR(512)
-    salt CHAR(256)
-    role ENUM('user', 'driver', 'customer') NOT NULL,
+    password_hash VARCHAR(512),
+    salt CHAR(256),
+    role VARCHAR(10) NOT NULL,
     -- for customer
     email VARCHAR(128),
     -- for customer and driver
@@ -64,7 +73,7 @@ CREATE TABLE project.Users(
     address_id INT,
     -- driver specific
     is_delivering BOOLEAN,
-    FOREIGN KEY (address_id) REFERENCES project.Addresses(id), 
+    FOREIGN KEY (address_id) REFERENCES project.Addresses(address_id), 
     CHECK (
         ((role = 'customer' AND address_id IS NOT NULL AND email IS NOT NULL) OR  -- customers must have an address
         (role != 'customer' AND address_id IS NULL and email IS NULL)) --  admins and drivers cannot have an address
@@ -76,6 +85,7 @@ CREATE TABLE project.Users(
         (role != 'driver' AND is_delivering IS NULL)) 
     )
 );
+*/
 -- Table: Orders
 CREATE TABLE project.Orders (
     order_id SERIAL PRIMARY KEY,
@@ -85,7 +95,7 @@ CREATE TABLE project.Orders (
     order_time TIME,
     order_is_paid BOOLEAN,
     order_is_prepared BOOLEAN,
-    FOREIGN KEY (order_customer_id) REFERENCES project.Customers(customer_id)
+    FOREIGN KEY (order_customer_id) REFERENCES project.Users(id)
 );
 
 -- Table: Items
@@ -148,7 +158,7 @@ CREATE TABLE project.Deliveries (
     delivery_state INTEGER DEFAULT 0,
     PRIMARY KEY (delivery_order_id, delivery_driver_id),
     FOREIGN KEY (delivery_order_id) REFERENCES project.Orders(order_id),
-    FOREIGN KEY (delivery_driver_id) REFERENCES project.Drivers(driver_id)
+    FOREIGN KEY (delivery_driver_id) REFERENCES project.Users(id)
 );
 
 

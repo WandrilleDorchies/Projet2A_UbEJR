@@ -32,13 +32,14 @@ class ResetDatabase(metaclass=Singleton):
 
         init_db = open("database_scripts/init_db.sql", encoding="utf-8")
         init_db_as_string = init_db.read()
-        print("Project DB reset - Database structure created ")
+
         # print(init_db_as_string[:7])
         # pop_db = open("database_scripts/pop_db.sql", encoding="utf-8")
         # pop_db_as_string = pop_db.read()
 
         try:
             dbconnector.sql_query(query=init_db_as_string, return_type="none")
+            print("Project DB reset - Database structure created ")
         except Exception as e:
             print(e)
             raise
@@ -51,13 +52,14 @@ class ResetDatabase(metaclass=Singleton):
 
         init_db = open("database_scripts/init_db_test.sql", encoding="utf-8")
         init_db_as_string = init_db.read()
-        print("Tests DB reset - Database structure created ")
+
         # print(init_db_as_string[:7])
         # pop_db = open("database_scripts/pop_db.sql", encoding="utf-8")
         # pop_db_as_string = pop_db.read()
 
         try:
             dbconnector.sql_query(query=init_db_as_string, return_type="none")
+            print("Tests DB reset - Database structure created ")
         except Exception as e:
             print(e)
             raise

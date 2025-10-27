@@ -21,10 +21,13 @@ class User(BaseModel):
     id: int
     first_name: str
     last_name: str
+    """
     created_at: datetime
+    """
     password_hash: str
     salt: str
     role: Literal["admin", "driver", "customer"]
+    """
     # for everyone
     email: str
     # for customer and driver
@@ -33,3 +36,4 @@ class User(BaseModel):
     address_id: Optional[int]
     # driver specific
     is_delivering: bool
+    """

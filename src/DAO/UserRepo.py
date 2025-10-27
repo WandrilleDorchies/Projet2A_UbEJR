@@ -21,11 +21,17 @@ class UserRepo:
     def insert_into_db(self, user: User) -> User:
         raw_created_user = self.db_connector.sql_query(
             """
-        INSERT INTO users (id, first_name, last_name, password)
-        VALUES (DEFAULT, %(username)s, %(salt)s, %(password)s)
+        INSERT INTO users (id, first_name, last_name, password, role)
+        VALUES (DEFAULT, %(first_name)s,%(last_name)s, %(salt)s, %(password)s, %(role)s)
         RETURNING *;
         """,
-            {"username": username, "salt": salt, "password": hashed_password},
+            {
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "salt": user.salt,
+                "password": user.password_hash,
+                "role": user.role
+            },
             "one",
         )
         # pyrefly: ignore
