@@ -29,7 +29,7 @@ def get_item_by_id(item_id: int):
 def get_all_item():
     try:
         print("DEBUG: Calling item_service.get_all_item()")
-        items = item_service.get_all_item()
+        items = item_service.get_all_items()
         print(f"DEBUG: item_service returned: {items}")
         if items is None:
             raise HTTPException(status_code=404, detail="Nothing found")

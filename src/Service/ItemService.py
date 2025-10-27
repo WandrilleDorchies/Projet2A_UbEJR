@@ -20,8 +20,8 @@ class ItemService:
         return item
 
     @log
-    def get_all_item(self) -> Optional[List[Item]]:
-        items = self.item_dao.get_all_item()
+    def get_all_items(self) -> Optional[List[Item]]:
+        items = self.item_dao.get_all_items()
         return items
 
     @log

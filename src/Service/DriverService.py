@@ -1,23 +1,27 @@
 from typing import Optional
 
+from src.DAO.DeliveryDAO import DeliveryDAO
 from src.DAO.DriverDAO import DriverDAO
+from src.Model.Delivery import Delivery
 from src.Model.Driver import Driver
 from src.utils.log_decorator import log
-
-from .UserService import UserService
 
 
 class DriverService:
     driver_dao: DriverDAO
-    # ? user_service : UserService
+    delivery_dao: DeliveryDAO
 
-    def __init__(self, user_service: UserService, driver_dao: DriverDAO):
+    def __init__(self, delivery_dao: DeliveryDAO, driver_dao: DriverDAO):
         self.driver_dao = driver_dao
-        # ? self.user_service = user_service
+        self.delivery_dao = delivery_dao
 
     @log
     def get_driver_by_id(self, driver_id: int) -> Optional[Driver]:
         driver = self.driver_dao.get_driver_by_id(driver_id)
+        if driver is None:
+            raise ValueError(
+                f"[DriverService] Cannot update driver: driver with ID {driver_id} not found."
+            )
         return driver
 
     @log
@@ -40,31 +44,59 @@ class DriverService:
 
     @log
     def update_driver(self, driver_id: int, update) -> Optional[Driver]:
-        update_message_parts = []
-        for field, value in update.items():
-            update_message_parts.append(f"{field}={value}")
-
+        if self.driver_dao.get_driver_by_id(driver_id) is None:
+            raise ValueError(
+                f"[DriverService] Cannot update driver: driver with ID {driver_id} not found."
+            )
         updated_driver = self.driver_dao.update_driver(driver_id=driver_id, update=update)
         return updated_driver
 
     @log
-    def accept_order(self, id_user: int, order: int) -> None:
-        ## TODO
+    def accept_order(self, order_id: int, driver_id: int) -> Delivery:
+        if self.driver_dao.get_driver_by_id(driver_id) is None:
+            raise ValueError(
+                f"[DriverService] Cannot accept order: driver with ID {driver_id} not found."
+            )
 
-        return
+        if self.delivery_dao.get_delivery_by_id(order_id) is None:
+            raise ValueError(
+                f"[DriverService] Cannot accept order: order with ID {order_id} not found."
+            )
+
+        delivery = self.delivery_dao.create_delivery(order_id, driver_id)
+        return delivery
 
     @log
-    def delivery_start(self, id_user: int, order: int) -> None:
-        self.driver_dao.update_driver_delivery_status(id_user, True)
+    def delivery_start(self, order_id: int, driver_id: int) -> Delivery:
+        if self.driver_dao.get_driver_by_id(driver_id) is None:
+            raise ValueError(
+                f"[DriverService] Cannot start delivery: driver with ID {driver_id} not found."
+            )
 
-        # TODO
-        return
+        if self.delivery_dao.get_delivery_by_id(order_id) is None:
+            raise ValueError(
+                f"[DriverService] Cannot start delivery: order with ID {order_id} not found."
+            )
+
+        self.driver_dao.update_driver(driver_id, update={"driver_is_delivering": True})
+        delivery = self.delivery_dao.update_delivery_state(order_id, 1)
+        return delivery
 
     @log
-    def delivery_end(self, id_user: int, order: int) -> None:
-        self.driver_dao.update_driver_delivery_status(id_user, False)
-        # TODO
-        return
+    def delivery_end(self, order_id: int, driver_id: int) -> Delivery:
+        if self.driver_dao.get_driver_by_id(driver_id) is None:
+            raise ValueError(
+                f"[DriverService] Cannot end delivery: driver with ID {driver_id} not found."
+            )
+
+        if self.delivery_dao.get_delivery_by_id(order_id) is None:
+            raise ValueError(
+                f"[DriverService] Cannot end delivery: order with ID {order_id} not found."
+            )
+
+        self.driver_dao.update_driver(driver_id, update={"driver_is_delivering": False})
+        delivery = self.delivery_dao.update_delivery_state(order_id, 2)
+        return delivery
 
     @log
     def delete_driver(self, driver_id: int) -> None:

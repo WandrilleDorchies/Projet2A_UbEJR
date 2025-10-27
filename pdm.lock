@@ -5,7 +5,7 @@
 groups = ["default", "lint", "test", "typing"]
 strategy = []
 lock_version = "4.5.0"
-content_hash = "sha256:7faf59985a125dd91513f43ea3220b3b894945b27a32816993d3309df0214ef0"
+content_hash = "sha256:92ae50fa1d2f659b8afb52b4f5e69cbf6a5c84a922d2fdd40fde36fb86e03647"
 
 [[metadata.targets]]
 requires_python = "==3.12.*"
@@ -177,6 +177,15 @@ summary = ""
 files = [
     {file = "packaging-25.0-py3-none-any.whl", hash = "sha256:29572ef2b1f17581046b3a2227d5c611fb25ec70ca1ba8554b24b0e69331a484"},
     {file = "packaging-25.0.tar.gz", hash = "sha256:d443872c98d677bf60f6a1f2f8c1cb748e8fe762d2bf9d3148b5599295b0fc4f"},
+]
+
+[[package]]
+name = "phonenumbers"
+version = "9.0.17"
+summary = "Python version of Google's common library for parsing, formatting, storing and validating international phone numbers."
+files = [
+    {file = "phonenumbers-9.0.17-py2.py3-none-any.whl", hash = "sha256:180e4ec2e05f6d3150cbd63b1b6f26996f8738cd0657bcc8747fbd10184721ae"},
+    {file = "phonenumbers-9.0.17.tar.gz", hash = "sha256:4f7e06b2111640cd6b2a8e36d1c2dc3c1af0f5d6ab734a2bcf4c9aec2ad80b53"},
 ]
 
 [[package]]

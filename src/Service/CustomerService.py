@@ -1,5 +1,7 @@
 from typing import List, Optional
 
+import phonenumbers as pn
+
 from Service.PasswordService import check_password_strength, create_salt, hash_password
 from src.DAO.CustomerDAO import CustomerDAO
 from src.DAO.OrderDAO import OrderDAO
@@ -39,13 +41,12 @@ class CustomerService:
         return customer
 
     @log
-    def get_customer_by_email(self, customer_email: int) -> Optional[Customer]:
-        customer = self.customer_dao.get_customer_by_email(customer_email)
-        if customer is None:
-            raise ValueError(
-                f"[CustomerService] Cannot find: customer with email {customer_email} not found."
-            )
-        return customer
+    def get_customer_by_email(self, customer_email: str) -> Optional[Customer]:
+        return self.customer_dao.get_customer_by_email(customer_email)
+
+    @log
+    def get_customer_by_phone(self, customer_phone: int) -> Optional[Customer]:
+        return self.customer_dao.get_customer_by_phone(customer_phone)
 
     @log
     def get_all_customer(self) -> Optional[List[Customer]]:
@@ -73,7 +74,19 @@ class CustomerService:
                 f"[CustomerService] Cannot create: customer with ID {mail} already exists."
             )
 
+        existing_user = self.customer_dao.get_customer_by_phone(phone)
+        if existing_user is not None:
+            raise ValueError(
+                f"[CustomerService] Cannot create: customer with phone {phone} already exists."
+            )
+
         check_password_strength(password)
+
+        phone_number = pn.parse(phone, "FR")
+        if not pn.is_valid_number(phone_number) or not pn.is_possible_number(phone_number):
+            raise ValueError(f"The number {phone} is invalid.")
+
+        customer_phone = "0" + str(phone_number.national_number)
 
         address = self.gm_service.validate_address(address_string)
         if address is None:
@@ -86,14 +99,20 @@ class CustomerService:
         password_hash = hash_password(password, salt)
 
         customer = self.customer_dao.create_customer(
-            first_name, last_name, phone, mail, password_hash, salt, address.address_id
+            first_name, last_name, customer_phone, mail, password_hash, salt, address.address_id
         )
 
         return customer
 
     @log
-    def login_customer(self, email: str, password: str) -> Optional[Customer]:
-        customer = self.get_customer_by_email(email)
+    def login_customer(self, identifier: str, password: str) -> Optional[Customer]:
+        customer = self.get_customer_by_email(identifier)
+
+        if customer is None:
+            customer = self.get_customer_by_phone(identifier)
+            if customer is None:
+                raise ValueError("[CustomerService] Cannot login: unknown phone or email.")
+
         hashed_password = hash_password(password, customer.salt)
 
         if hashed_password != customer.password:
@@ -127,6 +146,19 @@ class CustomerService:
         check_password_strength(new_password)
         password_hash = hash_password(new_password, customer.salt)
         update = {"customer_password_hash": password_hash}
+        updated_customer = self.update_customer(customer_id, update)
+        return updated_customer
+
+    @log
+    def update_phone(self, customer_id: int, phone: str) -> Customer:
+        self.get_customer_by_id(customer_id)
+        phone_number = pn.parse(phone, "FR")
+        if not pn.is_valid_number(phone_number) or not pn.is_possible_number(phone_number):
+            raise ValueError(f"The number {phone} is invalid.")
+
+        customer_phone = "0" + str(phone_number.national_number)
+
+        update = {"customer_phone": customer_phone}
         updated_customer = self.update_customer(customer_id, update)
         return updated_customer
 
