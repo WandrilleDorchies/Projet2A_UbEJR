@@ -105,7 +105,10 @@ def validate_password(user: User, password_to_test: str) -> bool:
         If the two passwords are the same
     """
 
-    test_password: str = hash_password(user.password, user.salt)
+    if user is None:
+        raise ValueError("User not found")
+
+    test_password: str = hash_password(password_to_test, user.salt)
 
     if user.password != test_password:
         raise ValueError("Incorrect password")
