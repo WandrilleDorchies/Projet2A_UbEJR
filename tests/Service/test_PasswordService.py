@@ -79,6 +79,15 @@ class MockUserRepo:
                 password="56d25b0190eb6fcdab76f20550aa3e85a37ee48d520ac70385ae3615deb7d53a",
                 salt="jambon",
             )
+        elif user_id == 7:
+            return User(
+                id=7,
+                first_name="janjak",
+                last_name="jakjan",
+                created_at=datetime.now(),
+                password="56d25b0190eb6fcdab76f20550aa3e85a37ee48d520ac70385ae3615deb7d53a",
+                salt="jambon",
+            )
         else:
             return None
 
@@ -87,15 +96,15 @@ user_repo = MockUserRepo()
 
 
 def test_validate_password_ok():
-    janjak = validate_password(4, "soleil1234", user_repo)
+    janjak = validate_password(MockUserRepo.get_by_id(user_repo, 4), "soleil1234")
     assert janjak.id == 4
 
 
 def test_validate_password_incorrect():
     with pytest.raises(ValueError, match="Incorrect password"):
-        validate_password(4, "motdepassefaux", user_repo)
+        validate_password(MockUserRepo.get_by_id(user_repo, 4), "motdepassefaux")
 
 
 def test_validate_password_user_not_found():
-    with pytest.raises(ValueError, match="User 7 not found"):
-        validate_password(7, "soleil1234", user_repo)
+    with pytest.raises(ValueError, match="User not found"):
+        validate_password(None, "soleil1234")
