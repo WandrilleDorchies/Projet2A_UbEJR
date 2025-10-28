@@ -53,6 +53,18 @@ class DriverDAO(metaclass=Singleton):
         return Driver(**map_driver)
 
     @log
+    def get_driver_by_phone(self, phone_number: str) -> Optional[Driver]:
+        raw_driver = self.db_connector.sql_query(
+            "SELECT * FROM Drivers WHERE driver_phone=%s", [phone_number], "one"
+        )
+
+        if raw_driver is None:
+            return None
+
+        map_driver = self._map_db_to_model(raw_driver)
+        return Driver(**map_driver)
+
+    @log
     def get_all_drivers(self) -> Optional[list[Driver]]:
         raw_drivers = self.db_connector.sql_query("SELECT * FROM Drivers", return_type="all")
         if raw_drivers is None:

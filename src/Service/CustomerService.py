@@ -6,10 +6,11 @@ from Service.PasswordService import check_password_strength, create_salt, hash_p
 from src.DAO.CustomerDAO import CustomerDAO
 from src.DAO.OrderDAO import OrderDAO
 from src.Model.Address import Address
-from src.Model.AddressDAP import AddressDAO
+from src.Model.AddressDAO import AddressDAO
 from src.Model.Customer import Customer
 from src.Model.Order import Order
 from src.Service.GoogleMapService import GoogleMapService
+from src.Service.UserService import UserService
 from src.utils.log_decorateur import log
 
 
@@ -18,6 +19,7 @@ class CustomerService:
     order_dao: OrderDAO
     address_dao: AddressDAO
     gm_service: GoogleMapService
+    user_service: UserService
 
     def __init__(
         self,
@@ -25,11 +27,13 @@ class CustomerService:
         order_dao: OrderDAO,
         address_dao: AddressDAO,
         gm_service: GoogleMapService,
+        user_service: UserService,
     ):
         self.customer_dao = customer_dao
         self.order_dao = order_dao
         self.address_dao = address_dao
         self.gm_service = gm_service
+        self.user_service = user_service
 
     @log
     def get_customer_by_id(self, customer_id: int) -> Optional[Customer]:
@@ -106,19 +110,7 @@ class CustomerService:
 
     @log
     def login_customer(self, identifier: str, password: str) -> Optional[Customer]:
-        customer = self.get_customer_by_email(identifier)
-
-        if customer is None:
-            customer = self.get_customer_by_phone(identifier)
-            if customer is None:
-                raise ValueError("[CustomerService] Cannot login: unknown phone or email.")
-
-        hashed_password = hash_password(password, customer.salt)
-
-        if hashed_password != customer.password:
-            raise ValueError("[CustomerService] Cannot login: customer password is incorrect.")
-
-        return customer
+        return self.user_service.login(identifier, password, "customer")
 
     @log
     def update_customer(self, customer_id: int, update: dict) -> Customer:
@@ -127,7 +119,7 @@ class CustomerService:
 
     @log
     def update_address(self, customer_id: int, update: dict) -> Customer:
-        self.get_customer_by_id(customer_id)
+        customer = self.get_customer_by_id(customer_id)
         current_address = self.address_dao.get_address_by_customer_id(customer_id)
         current_attributes = current_address.get_attributes()
 
@@ -135,19 +127,17 @@ class CustomerService:
             if not update[key]:
                 update[key] = value
 
+        update["address_id"] = customer.address_id
         new_address = Address(**update)
         self.gm_service.validate_address(new_address)
 
         return self.get_customer_by_id(customer_id)
 
     @log
-    def update_password(self, customer_id: int, new_password: str) -> Customer:
-        customer = self.get_customer_by_id(customer_id)
-        check_password_strength(new_password)
-        password_hash = hash_password(new_password, customer.salt)
-        update = {"customer_password_hash": password_hash}
-        updated_customer = self.update_customer(customer_id, update)
-        return updated_customer
+    def update_password(self, customer_id: int, old_password: str, new_password: str) -> Customer:
+        return self.user_service.change_password(
+            customer_id, old_password, new_password, "customer"
+        )
 
     @log
     def update_phone(self, customer_id: int, phone: str) -> Customer:

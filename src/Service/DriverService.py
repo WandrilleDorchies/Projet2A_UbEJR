@@ -4,16 +4,19 @@ from src.DAO.DeliveryDAO import DeliveryDAO
 from src.DAO.DriverDAO import DriverDAO
 from src.Model.Delivery import Delivery
 from src.Model.Driver import Driver
+from src.Service.UserService import UserService
 from src.utils.log_decorator import log
 
 
 class DriverService:
     driver_dao: DriverDAO
     delivery_dao: DeliveryDAO
+    user_service: UserService
 
-    def __init__(self, delivery_dao: DeliveryDAO, driver_dao: DriverDAO):
+    def __init__(self, delivery_dao: DeliveryDAO, driver_dao: DriverDAO, user_service: UserService):
         self.driver_dao = driver_dao
         self.delivery_dao = delivery_dao
+        self.user_service = user_service
 
     @log
     def get_driver_by_id(self, driver_id: int) -> Optional[Driver]:
@@ -25,9 +28,22 @@ class DriverService:
         return driver
 
     @log
+    def get_driver_by_phone(self, phone_number: str) -> Optional[Driver]:
+        driver = self.driver_dao.get_driver_by_phone(phone_number)
+        if driver is None:
+            raise ValueError(
+                f"[DriverService] Cannot update driver: driver with phone {phone_number} not found."
+            )
+        return driver
+
+    @log
     def get_all_driver(self) -> Optional[Driver]:
         drivers = self.driver_dao.get_all_drivers()
         return drivers
+
+    @log
+    def login(self, identifier: str, password: str) -> Optional[Driver]:
+        return self.user_service.login(identifier, password)
 
     @log
     def create_driver(
@@ -62,6 +78,10 @@ class DriverService:
             raise ValueError(
                 f"[DriverService] Cannot accept order: order with ID {order_id} not found."
             )
+
+        existing_delivery = self.delivery_dao.get_delivery_by_driver(driver_id)
+        if existing_delivery and existing_delivery.delivery_state == 1:
+            raise ValueError(f"[DriverService] Driver {driver_id} is already on a delivery.")
 
         delivery = self.delivery_dao.create_delivery(order_id, driver_id)
         return delivery

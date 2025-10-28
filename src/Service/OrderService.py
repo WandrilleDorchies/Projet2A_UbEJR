@@ -19,18 +19,18 @@ class OrderService:
         return order
 
     @log
-    def get_all_order(self) -> Optional[List[Order]]:
-        orders = self.order_dao.get_all_order()
+    def get_all_orders(self) -> Optional[List[Order]]:
+        orders = self.order_dao.get_all_orders()
         return orders
 
     @log
-    def get_all_order_by_customer(self, customer_id: int) -> Optional[List[Order]]:
-        orders = self.order_dao.get_all_order_by_customer(customer_id)
+    def get_all_orders_by_customer(self, customer_id: int) -> Optional[List[Order]]:
+        orders = self.order_dao.get_all_orders_by_customer(customer_id)
         return orders
 
     @log
-    def get_all_order_prepared(self) -> Optional[List[Order]]:
-        orders = self.order_dao.get_all_order_prepared()
+    def get_all_orders_prepared(self) -> Optional[List[Order]]:
+        orders = self.order_dao.get_all_orders_prepareds()
         return orders
 
     @log

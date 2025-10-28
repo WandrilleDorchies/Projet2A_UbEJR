@@ -1,65 +1,78 @@
-from src.DAO.UserRepo import UserRepo
-from src.Model.User import User
-from src.Service.PasswordService import check_password_strength, create_salt, hash_password
+from typing import Literal, Union
+
+from src.DAO.AdminDAO import AdminDAO
+from src.DAO.CustomerDAO import CustomerDAO
+from src.DAO.DriverDAO import DriverDAO
+from src.Model.Admin import Admin
+from src.Model.Customer import Customer
+from src.Model.Driver import Driver
+from src.Service.PasswordService import (
+    check_password_strength,
+    hash_password,
+    validate_password,
+)
+from src.utils.log_decorator import log
 
 
 class UserService:
-    def __init__(self, user_repo: UserRepo):
-        self.user_repo = user_repo
+    def __init__(self, customer_dao: CustomerDAO, driver_dao: DriverDAO, admin_dao: AdminDAO):
+        self.customer_dao = customer_dao
+        self.driver_dao = driver_dao
+        self.admin_dao = admin_dao
 
-    def create_hashed_password(self, password: str) -> str:
-        """
-        Create a new user with a unique salt and hashed password.
+    @log
+    def login(
+        self, identifier: str, password: str, user_type: Literal["customer", "driver", "admin"]
+    ) -> Union[Customer, Driver, Admin]:
+        user = None
 
-        Parameters
-        ----------
-        password : str
-            Plain text password (before hash)
+        if user_type == "customer":
+            user = self.customer_dao.get_customer_by_email(identifier)
+            if not user:
+                user = self.customer_dao.get_customer_by_phone(identifier)
 
-        Returns
-        -------
-        str
-            The hashed password
-        """
-        check_password_strength(password)
+        elif user_type == "driver":
+            user = self.driver_dao.get_driver_by_id(identifier)
 
-        salt = create_salt()
+        elif user_type == "admin":
+            user = self.admin_dao.get_admin_by_username(identifier)
 
-        hashed_password = hash_password(password, salt)
+        if not user:
+            raise ValueError(f"[UserService] User not found with identifier: {identifier}")
 
-        return hashed_password
+        validate_password(user, password)
 
-    def get_user(self, user_id: int) -> User | None:
-        return self.user_repo.get_by_id(user_id)
+        return user
 
-    def delete_user(self, user_id: int) -> User | None:
-        print(f"[UserService] Deleting user with ID: {user_id}")
-        user = self.user_repo.get_by_id(user_id)
-        if user is None:
-            raise ValueError(f"[UserService] Cannot delete: user with ID {user_id} not found.")
-        user = self.user_repo.delete_user(user_id)
+    @log
+    def change_password(
+        self,
+        user_id: int,
+        old_password: str,
+        new_password: str,
+        user_type: Literal["customer", "driver", "admin"],
+    ) -> Union[Customer, Driver, Admin]:
+        user = self._get_user_by_type(user_id, user_type)
 
-        print(f"[UserService] User with ID {user_id} has been deleted.")
+        validate_password(user, old_password)
 
-    def update_user(self, user_id: int, update) -> User | None:
-        update_message_parts = []
-        for field, value in update.user():
-            update_message_parts.append(f"{field}={value}")
+        check_password_strength(new_password)
 
-        print(f"[UserService] Updating user: {', '.join(update_message_parts)}")
+        new_hashed = hash_password(new_password, user.salt)
 
-        updated_user = self.user_repo.update_user(user_id=id, update=update)
-        print(f"[UserService] Repo returned after creation: {updated_user}")
-        return updated_user
+        if user_type == "customer":
+            return self.customer_dao.update_customer(
+                user_id, {"customer_password_hash": new_hashed}
+            )
+        elif user_type == "driver":
+            return self.driver_dao.update_driver(user_id, {"driver_password_hash": new_hashed})
+        elif user_type == "admin":
+            return self.admin_dao.update_admin(user_id, {"admin_password_hash": new_hashed})
 
-    def change_password(self, id_user: int, password: str, new_password: str):
-        pass
-
-    def create_user(self, user_id: int, password: str):
-        pass
-
-    def login(self, username, password):
-        pass
-
-    def logout(self):
-        pass
+    def _get_user_by_type(self, user_id: int, user_type: Literal["customer", "driver", "admin"]):
+        if user_type == "customer":
+            return self.customer_dao.get_customer_by_id(user_id)
+        elif user_type == "driver":
+            return self.driver_dao.get_driver_by_id(user_id)
+        elif user_type == "admin":
+            return self.admin_dao.get_admin_by_id(user_id)

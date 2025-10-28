@@ -71,7 +71,8 @@ class ItemService:
 
         if item.item_stock < quantity:
             raise ValueError(
-                f"[ItemService] Not enough stock for '{item.name}' (available: {item.stock})."
+                f"[ItemService] Not enough stock for {item.item_name}"
+                f" (available: {item.item_stock})."
             )
 
         update_data = {"item_stock": item.item_stock - quantity}
