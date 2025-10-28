@@ -66,7 +66,7 @@ class TestOrderDAO:
         """Test fetching all orders of a non-existing customer"""
         orders = order_dao.get_all_orders_by_customer(9999)
 
-        assert orders is None
+        assert orders == []
 
     def test_get_all_orders_prepared(self, order_dao, sample_customer, clean_database):
         """Test fetching all prepared orders"""
@@ -94,7 +94,7 @@ class TestOrderDAO:
 
         prepared_orders = order_dao.get_all_orders_prepared()
 
-        assert prepared_orders is None
+        assert prepared_orders == []
 
     def test_update_order_payment_status(self, order_dao, sample_customer, clean_database):
         """Test updating payment status"""
