@@ -27,11 +27,3 @@ class Orderable(BaseModel, ABC):
     @abstractmethod
     def price(self) -> float:
         pass
-
-    @abstractmethod
-    def get_name(self) -> str:
-        pass
-
-    @abstractmethod
-    def get_stock(self) -> int:
-        pass
