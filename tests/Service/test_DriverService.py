@@ -1,3 +1,5 @@
+import re
+
 import pytest
 
 
@@ -9,6 +11,25 @@ class TestDriverService:
         assert retrieved_driver is not None
         assert retrieved_driver.id == sample_driver.id
         assert retrieved_driver.first_name == sample_driver.first_name
+
+    def test_get_driver_by_phone(self, driver_service, sample_driver, clean_database):
+        """Test getting a driver by phone"""
+        retrieved_driver = driver_service.get_driver_by_phone(sample_driver.driver_phone)
+
+        assert retrieved_driver is not None
+        assert retrieved_driver.id == sample_driver.id
+        assert retrieved_driver.first_name == sample_driver.first_name
+
+    def test_get_driver_by_phone_not_exists(self, driver_service, sample_driver, clean_database):
+        """Test getting a driver by non-existing phone"""
+        with pytest.raises(
+            ValueError,
+            match=re.escape(
+                "[DriverService] Cannot update driver: "
+                "driver with phone mental breakdown not found."
+            ),
+        ):
+            driver_service.get_driver_by_phone("mental breakdown")
 
     def test_get_driver_by_id_not_exists(self, driver_service, clean_database):
         """Test getting driver by non-existing id raises error"""

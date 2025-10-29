@@ -45,7 +45,7 @@ class OrderService:
 
     @log
     def get_all_orders_prepared(self) -> Optional[List[Order]]:
-        orders = self.order_dao.get_all_orders_prepareds()
+        orders = self.order_dao.get_all_orders_prepared()
         return orders
 
     @log
@@ -67,7 +67,7 @@ class OrderService:
         if order is None:
             raise ValueError(f"[OrderService] Cannot delete: order with ID {order_id} not found.")
 
-        self.order_dao.delete_order_by_id(order_id)
+        self.order_dao.delete_order(order_id)
 
     @log
     def calculate_price(self, order_id: int) -> float:
@@ -108,11 +108,11 @@ class OrderService:
         """
         orderable_type = self.orderable_dao.get_type_by_id(orderable_id)
 
+        if orderable_type is None:
+            raise ValueError(f"[OrderService] Orderable with ID {orderable_id} not found.")
+
         if orderable_type == "item":
             orderable = self.item_dao.get_item_by_orderable_id(orderable_id)
-            if orderable is None:
-                raise ValueError(f"[OrderService] Item with ID {orderable.item_id} not found.")
-
             if not orderable.check_stock(quantity):
                 raise ValueError(
                     f"[OrderService] Not enough stock for {orderable.item_name}"
@@ -123,10 +123,6 @@ class OrderService:
 
         if orderable_type == "bundle":
             orderable = self.bundle_dao.get_bundle_by_orderable_id(orderable_id)
-
-            if orderable is None:
-                raise ValueError(f"[OrderService] Bundle with ID {orderable.bundle_id} not found.")
-
             if not orderable.check_stock(quantity):
                 raise ValueError(
                     f"[OrderService] Not enough stock for {orderable.bundle_name}"
@@ -156,11 +152,11 @@ class OrderService:
             Number of units to remove (default is 1).
         """
         orderable_type = self.orderable_dao.get_type_by_id(orderable_id)
+        if orderable_type is None:
+            raise ValueError(f"[OrderService] Orderable with ID {orderable_id} not found.")
 
         if orderable_type == "item":
             orderable = self.item_dao.get_item_by_orderable_id(orderable_id)
-            if orderable is None:
-                raise ValueError(f"[OrderService] Item with ID {orderable.item_id} not found.")
 
             update_data = {"item_stock": orderable.item_stock + quantity}
             self.item_dao.update_item(orderable.item_id, update_data)
@@ -168,11 +164,10 @@ class OrderService:
         if orderable_type == "bundle":
             orderable = self.bundle_dao.get_bundle_by_orderable_id(orderable_id)
 
-            if orderable is None:
-                raise ValueError(f"[OrderService] Bundle with ID {orderable.bundle_id} not found.")
-
             for item, nb in orderable.bundle_items.items():
                 update_data = {"item_stock": item.item_stock + nb * quantity}
                 self.item_dao.update_item(item.item_id, update_data)
 
-        return self.order_dao.remove_orderable_to_order(order_id, orderable.orderable_id, quantity)
+        return self.order_dao.remove_orderable_from_order(
+            order_id, orderable.orderable_id, quantity
+        )

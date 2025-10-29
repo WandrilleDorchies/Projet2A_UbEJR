@@ -1,11 +1,11 @@
-from typing import TYPE_CHECKING, Annotated
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
 
 from src.Model.Customer import Customer
 
-from .init_app import customer_service, jwt_service, user_service
+from .init_app import customer_service, jwt_service
 from .JWTBearer import JWTBearer
 
 customer_router = APIRouter(prefix="/customer", tags=["Customers"])

@@ -37,4 +37,4 @@ class OrderableDAO(metaclass=Singleton):
         raw_orderable = self.db_connector.sql_query(
             "SELECT * FROM Orderables WHERE orderable_id=%s;", [orderable_id], "one"
         )
-        return raw_orderable["orderable_type"]
+        return raw_orderable["orderable_type"] if raw_orderable else None

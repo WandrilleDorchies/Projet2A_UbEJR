@@ -70,5 +70,5 @@ class Bundle(Orderable):
         return available and sufficient_stock
 
     def get_stock(self) -> int:
-        bottleneck = min(item.stock / nb for item, nb in self.bundle_items.items())
+        bottleneck = min(item.item_stock / nb for item, nb in self.bundle_items.items())
         return int(bottleneck)

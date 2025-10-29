@@ -4,8 +4,8 @@ import pytest
 from dotenv import load_dotenv
 
 from src.DAO.AddressDAO import AddressDAO
-from src.DAO.BundleDAO import BundleDAO
 from src.DAO.AdminDAO import AdminDAO
+from src.DAO.BundleDAO import BundleDAO
 from src.DAO.CustomerDAO import CustomerDAO
 from src.DAO.DBConnector import DBConnector
 from src.DAO.DeliveryDAO import DeliveryDAO
@@ -13,13 +13,13 @@ from src.DAO.DriverDAO import DriverDAO
 from src.DAO.ItemDAO import ItemDAO
 from src.DAO.OrderableDAO import OrderableDAO
 from src.DAO.OrderDAO import OrderDAO
-from src.Service.UserService import UserService
 from src.Service.AddressService import AddressService
 from src.Service.BundleService import BundleService
 from src.Service.DriverService import DriverService
 from src.Service.GoogleMapService import GoogleMapService
 from src.Service.ItemService import ItemService
 from src.Service.OrderService import OrderService
+from src.Service.UserService import UserService
 
 load_dotenv()
 
@@ -114,8 +114,8 @@ def bundle_service(bundle_dao):
 
 
 @pytest.fixture
-def order_service(order_dao):
-    return OrderService(order_dao)
+def order_service(order_dao, orderable_dao, item_dao, bundle_dao):
+    return OrderService(order_dao, orderable_dao, item_dao, bundle_dao)
 
 
 @pytest.fixture

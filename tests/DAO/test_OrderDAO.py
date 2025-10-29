@@ -37,7 +37,7 @@ class TestOrderDAO:
         """Tests that get_all_orders returns None"""
         orders = order_dao.get_all_orders()
 
-        assert orders is None
+        assert orders == []
 
     def test_get_all_orders_multiple(self, order_dao, sample_customer, clean_database):
         """Tests that get_all_orders returns all the orders"""
