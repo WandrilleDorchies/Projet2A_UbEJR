@@ -74,7 +74,7 @@ def register(
                 "last_name": customer.last_name,
                 "phone": customer.customer_phone,
                 "email": customer.customer_mail,
-                "hash_pw": customer.customer_hashed_password,
+                "hash_pw": customer.password,
                 "type": "customer",
             },
             "access_token": jwt_token.access_token,
@@ -127,7 +127,6 @@ def login(
         user = user_service.login(identifier=identifier, password=password, user_type=user_type)
 
         token = jwt_service.encode_jwt(user.id)
-
         return token
 
     except ValueError as e:
