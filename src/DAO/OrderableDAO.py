@@ -31,3 +31,10 @@ class OrderableDAO(metaclass=Singleton):
             "one",
         )
         return result["orderable_id"]
+
+    @log
+    def get_type_by_id(self, orderable_id: int) -> str:
+        raw_orderable = self.db_connector.sql_query(
+            "SELECT * FROM Orderables WHERE orderable_id=%s;", [orderable_id], "one"
+        )
+        return raw_orderable["orderable_type"]

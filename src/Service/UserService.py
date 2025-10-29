@@ -32,7 +32,7 @@ class UserService:
                 user = self.customer_dao.get_customer_by_phone(identifier)
 
         elif user_type == "driver":
-            user = self.driver_dao.get_driver_by_id(identifier)
+            user = self.driver_dao.get_driver_by_phone(identifier)
 
         elif user_type == "admin":
             user = self.admin_dao.get_admin_by_username(identifier)

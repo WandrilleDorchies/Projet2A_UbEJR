@@ -12,6 +12,12 @@ from src.DAO.DriverDAO import DriverDAO
 from src.DAO.ItemDAO import ItemDAO
 from src.DAO.OrderableDAO import OrderableDAO
 from src.DAO.OrderDAO import OrderDAO
+from src.Service.AddressService import AddressService
+from src.Service.BundleService import BundleService
+from src.Service.DriverService import DriverService
+from src.Service.GoogleMapService import GoogleMapService
+from src.Service.ItemService import ItemService
+from src.Service.OrderService import OrderService
 
 load_dotenv()
 
@@ -83,6 +89,36 @@ def driver_dao(db_connector_test):
 @pytest.fixture
 def delivery_dao(db_connector_test):
     return DeliveryDAO(db_connector_test)
+
+
+@pytest.fixture
+def item_service(item_dao, order_dao):
+    return ItemService(item_dao, order_dao)
+
+
+@pytest.fixture
+def bundle_service(bundle_dao):
+    return BundleService(bundle_dao)
+
+
+@pytest.fixture
+def order_service(order_dao):
+    return OrderService(order_dao)
+
+
+@pytest.fixture
+def driver_service(delivery_dao, driver_dao):
+    return DriverService(delivery_dao, driver_dao)
+
+
+@pytest.fixture
+def google_map_service(address_dao):
+    return GoogleMapService(address_dao)
+
+
+@pytest.fixture
+def address_service(address_dao):
+    return AddressService(address_dao)
 
 
 @pytest.fixture
@@ -185,6 +221,11 @@ def sample_bundle(multiple_items, bundle_dao, clean_database):
     )
 
     return bundle
+
+
+@pytest.fixture
+def sample_empty_order(order_dao, clean_database, sample_customer):
+    return order_dao.create_order(sample_customer.id)
 
 
 @pytest.fixture
