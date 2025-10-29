@@ -18,10 +18,10 @@ class DeliveryDAO(metaclass=Singleton):
     def create_delivery(self, order_id: int, driver_id: int) -> Delivery:
         raw_created_delivery = self.db_connector.sql_query(
             """
-        INSERT INTO Deliveries (delivery_order_id, delivery_driver_id, delivery_state)
-        VALUES (%(order_id)s, %(driver_id)s, DEFAULT)
-        RETURNING *;
-        """,
+            INSERT INTO Deliveries (delivery_order_id, delivery_driver_id, delivery_state)
+            VALUES (%(order_id)s, %(driver_id)s, DEFAULT)
+            RETURNING *;
+            """,
             {"order_id": order_id, "driver_id": driver_id},
             "one",
         )
@@ -40,12 +40,25 @@ class DeliveryDAO(metaclass=Singleton):
     @log
     def get_delivery_by_user(self, customer_id: int) -> Optional[Order]:
         raw_delivery = self.db_connector.sql_query(
-            """SELECT *
+            """SELECT d.*
             FROM Deliveries AS d
             INNER JOIN Orders AS o ON d.delivery_order_id = o.order_id
             WHERE order_customer_id=%s
             """,
             [customer_id],
+            "one",
+        )
+
+        return Delivery(**raw_delivery) if raw_delivery else None
+
+    @log
+    def get_delivery_by_order_id(self, order_id: int) -> Optional[Order]:
+        raw_delivery = self.db_connector.sql_query(
+            """SELECT *
+            FROM Deliveries AS d
+            WHERE delivery_order_id=%s
+            """,
+            [order_id],
             "one",
         )
         if raw_delivery is None:

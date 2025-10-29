@@ -119,8 +119,12 @@ class BundleDAO(metaclass=Singleton):
             [orderable_id],
             "one",
         )
+
+        if raw_bundle is None:
+            return None
+
         raw_bundle["bundle_items"] = self._get_items_from_bundle(raw_bundle["bundle_id"])
-        return Bundle(**raw_bundle) if raw_bundle else None
+        return Bundle(**raw_bundle)
 
     @log
     def get_all_bundle(self) -> Optional[List[Bundle]]:
@@ -138,6 +142,9 @@ class BundleDAO(metaclass=Singleton):
 
     @log
     def update_bundle(self, bundle_id: int, update: dict):
+        if self.get_bundle_by_id(bundle_id) is None:
+            return None
+
         parameters_update = [
             "bundle_name",
             "bundle_reduction",

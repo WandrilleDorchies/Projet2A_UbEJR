@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 
 from src.DAO.AddressDAO import AddressDAO
 from src.DAO.BundleDAO import BundleDAO
+from src.DAO.AdminDAO import AdminDAO
 from src.DAO.CustomerDAO import CustomerDAO
 from src.DAO.DBConnector import DBConnector
 from src.DAO.DeliveryDAO import DeliveryDAO
@@ -12,6 +13,7 @@ from src.DAO.DriverDAO import DriverDAO
 from src.DAO.ItemDAO import ItemDAO
 from src.DAO.OrderableDAO import OrderableDAO
 from src.DAO.OrderDAO import OrderDAO
+from src.Service.UserService import UserService
 from src.Service.AddressService import AddressService
 from src.Service.BundleService import BundleService
 from src.Service.DriverService import DriverService
@@ -77,6 +79,11 @@ def address_dao(db_connector_test):
 
 
 @pytest.fixture
+def admin_dao(db_connector_test):
+    return AdminDAO(db_connector_test)
+
+
+@pytest.fixture
 def customer_dao(db_connector_test, address_dao):
     return CustomerDAO(db_connector_test, address_dao)
 
@@ -89,6 +96,11 @@ def driver_dao(db_connector_test):
 @pytest.fixture
 def delivery_dao(db_connector_test):
     return DeliveryDAO(db_connector_test)
+
+
+@pytest.fixture
+def user_service():
+    UserService(customer_dao, driver_dao, admin_dao)
 
 
 @pytest.fixture
@@ -107,8 +119,8 @@ def order_service(order_dao):
 
 
 @pytest.fixture
-def driver_service(delivery_dao, driver_dao):
-    return DriverService(delivery_dao, driver_dao)
+def driver_service(delivery_dao, driver_dao, user_service, order_dao):
+    return DriverService(delivery_dao, driver_dao, order_dao, user_service)
 
 
 @pytest.fixture
