@@ -17,3 +17,7 @@ class Customer(User):
     customer_address: Address
     customer_phone: str
     customer_mail: str
+
+    def __init__(self, **args):
+        args["user_role"] = "customer"
+        super().__init__(**args)

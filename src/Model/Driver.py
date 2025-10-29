@@ -14,3 +14,7 @@ class Driver(User):
 
     driver_phone: str
     driver_is_delivering: bool = False
+
+    def __init__(self, **args):
+        args["user_role"] = "driver"
+        super().__init__(**args)
