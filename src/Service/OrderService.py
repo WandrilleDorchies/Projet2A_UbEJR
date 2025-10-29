@@ -116,7 +116,7 @@ class OrderService:
             if not orderable.check_stock(quantity):
                 raise ValueError(
                     f"[OrderService] Not enough stock for {orderable.item_name}"
-                    f" (available: {orderable.stock})."
+                    f" (available: {orderable.item_stock})."
                 )
             update_data = {"item_stock": orderable.item_stock - quantity}
             self.item_dao.update_item(orderable.item_id, update_data)
@@ -130,7 +130,7 @@ class OrderService:
             if not orderable.check_stock(quantity):
                 raise ValueError(
                     f"[OrderService] Not enough stock for {orderable.bundle_name}"
-                    f" (available: {orderable.check_stock()})."
+                    f" (available: {orderable.get_stock()})."
                 )
 
             for item, nb in orderable.bundle_items.items():
