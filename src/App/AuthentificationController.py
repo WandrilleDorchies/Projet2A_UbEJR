@@ -127,7 +127,6 @@ def login(
         user = user_service.login(identifier=identifier, password=password, user_type=user_type)
 
         token = jwt_service.encode_jwt(user.id)
-
         return token
 
     except ValueError as e:
