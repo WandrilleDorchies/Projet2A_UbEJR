@@ -1,11 +1,13 @@
 from abc import ABC, abstractmethod
+from typing import Literal
 
 from pydantic import BaseModel
 
 
 class Orderable(BaseModel, ABC):
     orderable_id: int
-    orderable_type: str
+    orderable_type: Literal["item", "bundle"]
+    is_in_menu: bool = False
 
     @abstractmethod
     def __eq__(self, other):

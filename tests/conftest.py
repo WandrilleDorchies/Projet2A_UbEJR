@@ -178,6 +178,7 @@ def sample_item_data():
         "item_type": "Plat",
         "item_description": "La fameuse galette-saucisse de l'EJR",
         "item_stock": 50,
+        "is_in_menu": True,
     }
 
 
@@ -196,6 +197,7 @@ def multiple_items(item_dao, clean_database):
         item_type="Plat",
         item_description="La fameuse galette-saucisse de l'EJR",
         item_stock=50,
+        is_in_menu=True,
     )
     items.append(item1)
 
@@ -205,6 +207,7 @@ def multiple_items(item_dao, clean_database):
         item_type="Boisson",
         item_description="Canette de Coca-Cola",
         item_stock=100,
+        is_in_menu=True,
     )
     items.append(item2)
 
@@ -214,6 +217,7 @@ def multiple_items(item_dao, clean_database):
         item_type="Dessert",
         item_description="Tiramisu-holic",
         item_stock=30,
+        is_in_menu=True,
     )
     items.append(item3)
 
@@ -230,6 +234,7 @@ def sample_bundle(multiple_items, bundle_dao, clean_database):
         datetime(2025, 10, 9, 12, 30, 0),
         datetime(2026, 10, 9, 12, 30, 0),
         bundle_items,
+        True
     )
 
     return bundle

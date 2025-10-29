@@ -67,8 +67,7 @@ CREATE TABLE test.Items (
     item_price FLOAT(24) CHECK (item_price >= 0),
     item_type VARCHAR(32),
     item_description VARCHAR(256),
-    item_stock INTEGER CHECK (item_stock >= 0),
-    item_in_menu BOOLEAN DEFAULT true
+    item_stock INTEGER CHECK (item_stock >= 0)
 );
 
 
@@ -98,7 +97,8 @@ CREATE TABLE test.Bundle_Items (
 -- Table: Orderable
 CREATE TABLE test.Orderables (
     orderable_id SERIAL PRIMARY KEY,
-    orderable_type VARCHAR(8) NOT NULL CHECK (orderable_type IN ('item', 'bundle'))
+    orderable_type VARCHAR(8) NOT NULL CHECK (orderable_type IN ('item', 'bundle')),
+    is_in_menu BOOLEAN DEFAULT false
 );
 -- linking items and bundle to orderable
 -- Table: Order_contents
@@ -144,12 +144,12 @@ VALUES
 ('Lewis', 'HAMILTON', 'hash_driver1', 'salt_driver1', false, '0707070707'),
 ('Max', 'VERSTAPPEN', 'hash_driver2', 'salt_driver2', true, '0606060606');
 
-INSERT INTO Items (orderable_id, item_name, item_price, item_type, item_description, item_stock, item_in_menu)
+INSERT INTO Items (orderable_id, item_name, item_price, item_type, item_description, item_stock)
 VALUES
-(1, 'Galette-Saucisse', 4.5, 'Plat', 'La fameuse galette-saucisse de l''EJR', 50, true),
-(2, 'Coca-Cola 33cl', 0.5, 'Boisson', 'Canette de Coca-Cola', 100, true),
-(3, 'Tiramisu', 2.0, 'Dessert', 'Tiramisu-holic', 30, true),
-(4, 'Banh-Mi', 4.5, 'Plat', 'Sandwich vietnamien', 40, false);
+(1, 'Galette-Saucisse', 4.5, 'Plat', 'La fameuse galette-saucisse de l''EJR', 50),
+(2, 'Coca-Cola 33cl', 0.5, 'Boisson', 'Canette de Coca-Cola', 100),
+(3, 'Tiramisu', 2.0, 'Dessert', 'Tiramisu-holic', 30),
+(4, 'Banh-Mi', 4.5, 'Plat', 'Sandwich vietnamien', 40);
 
 INSERT INTO Bundles (orderable_id, bundle_name, bundle_reduction, bundle_description, bundle_availability_start_date, bundle_availability_end_date)
 VALUES
@@ -170,14 +170,14 @@ VALUES
 (1, 1, '2025-10-21', '12:30:00', true, true),
 (2, 0, '2025-10-21', '13:00:00', false, false);
 
-INSERT INTO Orderables (orderable_type)
+INSERT INTO Orderables (orderable_type, is_in_menu)
 VALUES
-('item'),
-('item'),
-('item'),
-('item'),
-('bundle'),
-('bundle');
+('item', true),
+('item', true),
+('item', false),
+('item', true),
+('bundle', false),
+('bundle', true);
 
 INSERT INTO Order_contents (order_id, orderable_id, orderable_quantity)
 VALUES

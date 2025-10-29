@@ -88,6 +88,7 @@ def test_bundle_check_availability_true(params, response, sample_item):
         bundle_availability_start_date=params[0],
         bundle_availability_end_date=params[1],
         bundle_items={sample_item: 1},
+        is_in_menu=True,
     )
 
     assert bundle.check_availability() is response

@@ -106,12 +106,12 @@ class OrderService:
         quantity : int, optional
             Number of units to add (default is 1).
         """
-        orderable_type = self.orderable_dao.get_type_by_id(orderable_id)
+        raw_orderable = self.orderable_dao.get_orderable_by_id(orderable_id)
 
-        if orderable_type is None:
+        if raw_orderable is None:
             raise ValueError(f"[OrderService] Orderable with ID {orderable_id} not found.")
 
-        if orderable_type == "item":
+        if raw_orderable["orderable_type"] == "item":
             orderable = self.item_dao.get_item_by_orderable_id(orderable_id)
             if not orderable.check_stock(quantity):
                 raise ValueError(
@@ -121,7 +121,7 @@ class OrderService:
             update_data = {"item_stock": orderable.item_stock - quantity}
             self.item_dao.update_item(orderable.item_id, update_data)
 
-        if orderable_type == "bundle":
+        if raw_orderable["orderable_type"] == "bundle":
             orderable = self.bundle_dao.get_bundle_by_orderable_id(orderable_id)
             if not orderable.check_stock(quantity):
                 raise ValueError(
@@ -151,17 +151,17 @@ class OrderService:
         quantity : int, optional
             Number of units to remove (default is 1).
         """
-        orderable_type = self.orderable_dao.get_type_by_id(orderable_id)
-        if orderable_type is None:
+        raw_orderable = self.orderable_dao.get_orderable_by_id(orderable_id)
+        if raw_orderable is None:
             raise ValueError(f"[OrderService] Orderable with ID {orderable_id} not found.")
 
-        if orderable_type == "item":
+        if raw_orderable["orderable_type"] == "item":
             orderable = self.item_dao.get_item_by_orderable_id(orderable_id)
 
             update_data = {"item_stock": orderable.item_stock + quantity}
             self.item_dao.update_item(orderable.item_id, update_data)
 
-        if orderable_type == "bundle":
+        if raw_orderable["orderable_type"] == "bundle":
             orderable = self.bundle_dao.get_bundle_by_orderable_id(orderable_id)
 
             for item, nb in orderable.bundle_items.items():

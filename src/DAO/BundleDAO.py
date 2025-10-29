@@ -31,8 +31,9 @@ class BundleDAO(metaclass=Singleton):
         bundle_availability_start_date: datetime,
         bundle_availability_end_date: datetime,
         bundle_items: Dict[Item, int],
+        is_in_menu: bool = False
     ):
-        orderable_id = self.orderable_dao.create_orderable("bundle")
+        orderable_id = self.orderable_dao.create_orderable("bundle", is_in_menu)
         raw_bundle = self.db_connector.sql_query(
             """
             INSERT INTO Bundles (bundle_id, orderable_id, bundle_name,
@@ -97,6 +98,7 @@ class BundleDAO(metaclass=Singleton):
             return None
 
         raw_bundle["bundle_items"] = self._get_items_from_bundle(bundle_id)
+        raw_bundle["is_in_menu"] = self.orderable_dao._is_in_menu(raw_bundle["orderable_id"])
         return Bundle(**raw_bundle)
 
     @log
@@ -124,6 +126,7 @@ class BundleDAO(metaclass=Singleton):
             return None
 
         raw_bundle["bundle_items"] = self._get_items_from_bundle(raw_bundle["bundle_id"])
+        raw_bundle["is_in_menu"] = self.orderable_dao._is_in_menu(raw_bundle["orderable_id"])
         return Bundle(**raw_bundle)
 
     @log
@@ -136,6 +139,7 @@ class BundleDAO(metaclass=Singleton):
         Bundles = []
         for raw_bundle in raw_bundles:
             raw_bundle["bundle_items"] = self._get_items_from_bundle(raw_bundle["bundle_id"])
+            raw_bundle["is_in_menu"] = self.orderable_dao._is_in_menu(raw_bundle["orderable_id"])
             Bundles.append(Bundle(**raw_bundle))
 
         return Bundles
