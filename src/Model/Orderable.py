@@ -19,7 +19,19 @@ class Orderable(BaseModel, ABC):
     def check_availability(self) -> bool:
         pass
 
+    @abstractmethod
+    def check_stock(self, quantity) -> bool:
+        pass
+
     @property
     @abstractmethod
     def price(self) -> float:
+        pass
+
+    @abstractmethod
+    def get_name(self) -> str:
+        pass
+
+    @abstractmethod
+    def get_stock(self) -> int:
         pass

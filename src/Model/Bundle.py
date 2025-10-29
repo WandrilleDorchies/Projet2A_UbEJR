@@ -55,8 +55,23 @@ class Bundle(Orderable):
         )
 
         all_items_available = all(
-            item.check_availability() and item.item_stock >= qty
-            for item, qty in self.bundle_items.items()
+            item.check_availability() and item.item_stock >= nb
+            for item, nb in self.bundle_items.items()
         )
 
         return is_in_period and all_items_available
+
+    def check_stock(self, quantity) -> bool:
+        available = self.check_availability()
+        sufficient_stock = all(
+            item.check_stock(quantity * nb) for item, nb in self.bundle_items.items()
+        )
+
+        return available and sufficient_stock
+
+    def get_name(self) -> str:
+        return self.bundle_name
+
+    def get_stock(self) -> int:
+        bottleneck = min(item.stock / nb for item, nb in self.bundle_items.items())
+        return int(bottleneck)

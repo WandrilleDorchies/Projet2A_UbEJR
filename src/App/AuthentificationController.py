@@ -74,7 +74,7 @@ def register(
                 "last_name": customer.last_name,
                 "phone": customer.customer_phone,
                 "email": customer.customer_mail,
-                "hash_pw": customer.customer_hashed_password,
+                "hash_pw": customer.password,
                 "type": "customer",
             },
             "access_token": jwt_token.access_token,
