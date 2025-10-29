@@ -61,7 +61,7 @@ class CustomerBearer(JWTBearer):
         credentials = await super().__call__(request)
         user_id = jwt_service.validate_user_jwt(credentials.credentials)
 
-        user = self.customer_dao.get_driver_by_id(user_id)
+        user = self.customer_dao.get_customer_by_id(user_id)
         if user.user_role != "customer":
             raise HTTPException(403, "You need to be a customer to access this page.")
 
