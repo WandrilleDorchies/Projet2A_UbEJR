@@ -4,7 +4,8 @@ from fastapi.responses import RedirectResponse
 
 from src.utils.log_init import initialiser_logs
 
-from .ItemController import item_router
+# from .ItemController import item_router
+from .AuthentificationController import auth_router
 
 # from .UserController import user_router
 
@@ -16,7 +17,8 @@ def run_app():
 
     # app.include_router(user_router)
 
-    app.include_router(item_router)
+    # app.include_router(item_router)
+    app.include_router(auth_router)
 
     @app.get("/", include_in_schema=False)
     async def redirect_to_docs():

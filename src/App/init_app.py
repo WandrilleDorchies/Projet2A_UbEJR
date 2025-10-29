@@ -1,23 +1,43 @@
 from dotenv import load_dotenv
 
-from src.DAO.BundleDAO import BundleDAO
 from src.DAO.DBConnector import DBConnector
-from src.DAO.ItemDAO import ItemDAO
+
+from src.DAO.AddressDAO import AddressDAO
 from src.DAO.OrderableDAO import OrderableDAO
+from src.DAO.ItemDAO import ItemDAO
+from src.DAO.BundleDAO import BundleDAO
+from src.DAO.CustomerDAO import CustomerDAO
+from src.DAO.DriverDAO import DriverDAO
+from src.DAO.AdminDAO import AdminDAO
 from src.DAO.OrderDAO import OrderDAO
+from src.DAO.DeliveryDAO import DeliveryDAO
+
 from src.Service.ItemService import ItemService
 from src.Service.JWTService import JwtService
+from src.Service.CustomerService import CustomerService
+from src.Service.GoogleMapService import GoogleMapService
+from src.Service.BundleService import BundleService
+from src.Service.UserService import UserService
 
 load_dotenv()
 db_connector = DBConnector()
 
-# Items and Bundles
+# DAOs
+address_dao = AddressDAO(db_connector)
+customer_dao = CustomerDAO(db_connector, address_dao)
+driver_dao = DriverDAO(db_connector)
+admin_dao = AdminDAO(db_connector)
 orderable_dao = OrderableDAO(db_connector)
 item_dao = ItemDAO(db_connector, orderable_dao)
 bundle_dao = BundleDAO(db_connector, orderable_dao, item_dao)
+delivery_dao = DeliveryDAO(db_connector)
+
+# Services
 order_dao = OrderDAO(db_connector, orderable_dao, item_dao, bundle_dao)
+gm_service = GoogleMapService(address_dao)
+user_service = UserService(customer_dao, driver_dao, admin_dao)
+customer_service = CustomerService(customer_dao, order_dao, address_dao, gm_service, user_service)
 item_service = ItemService(item_dao, order_dao)
-# bundle_service = BundleService(bundle_dao)
-# Order and deliveries
+bundle_service = BundleService(bundle_dao)
 
 jwt_service = JwtService()

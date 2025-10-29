@@ -8,12 +8,13 @@ from src.Model.JWTResponse import JWTResponse
 from src.Service.PasswordService import check_password_strength, validate_username_password
 
 from .init_app import jwt_service, user_repo, user_service
-from .JWTBearer import JWTBearer
+from .JWTBearer import CustomerBearer
 
 if TYPE_CHECKING:
     from src.Model.User import User
 
-user_router = APIRouter(prefix="/users", tags=["Users"])
+customer_bearer = CustomerBearer()
+user_router = APIRouter(prefix="/users", tags=["Users"], dependencies=[Depends(customer_bearer)])
 
 
 @user_router.post("/", status_code=status.HTTP_201_CREATED)
