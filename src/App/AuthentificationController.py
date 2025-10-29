@@ -1,9 +1,9 @@
+from typing import Literal
+
 from fastapi import APIRouter, HTTPException, status
 
 from src.App.init_app import customer_service, jwt_service, user_service
 from src.Model.JWTResponse import JWTResponse
-
-from typing import Literal
 
 auth_router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -15,9 +15,12 @@ def register(
     phone: str,
     mail: str,
     password: str,
+    confirm_password: str,
     address_string: str,
 ):
     try:
+        if confirm_password != password:
+            raise HTTPException(status_code=400, detail="The two password don't match.")
         customer = customer_service.create_customer(
             first_name, last_name, phone, mail, password, address_string
         )

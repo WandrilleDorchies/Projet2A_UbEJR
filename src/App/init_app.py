@@ -1,22 +1,20 @@
 from dotenv import load_dotenv
 
-from src.DAO.DBConnector import DBConnector
-
 from src.DAO.AddressDAO import AddressDAO
-from src.DAO.OrderableDAO import OrderableDAO
-from src.DAO.ItemDAO import ItemDAO
+from src.DAO.AdminDAO import AdminDAO
 from src.DAO.BundleDAO import BundleDAO
 from src.DAO.CustomerDAO import CustomerDAO
-from src.DAO.DriverDAO import DriverDAO
-from src.DAO.AdminDAO import AdminDAO
-from src.DAO.OrderDAO import OrderDAO
+from src.DAO.DBConnector import DBConnector
 from src.DAO.DeliveryDAO import DeliveryDAO
-
-from src.Service.ItemService import ItemService
-from src.Service.JWTService import JwtService
+from src.DAO.DriverDAO import DriverDAO
+from src.DAO.ItemDAO import ItemDAO
+from src.DAO.OrderableDAO import OrderableDAO
+from src.DAO.OrderDAO import OrderDAO
+from src.Service.BundleService import BundleService
 from src.Service.CustomerService import CustomerService
 from src.Service.GoogleMapService import GoogleMapService
-from src.Service.BundleService import BundleService
+from src.Service.ItemService import ItemService
+from src.Service.JWTService import JwtService
 from src.Service.UserService import UserService
 
 load_dotenv()

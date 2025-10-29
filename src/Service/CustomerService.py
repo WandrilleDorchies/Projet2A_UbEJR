@@ -2,14 +2,14 @@ from typing import List, Optional
 
 import phonenumbers as pn
 
-from src.Service.PasswordService import check_password_strength, create_salt, hash_password
+from src.DAO.AddressDAO import AddressDAO
 from src.DAO.CustomerDAO import CustomerDAO
 from src.DAO.OrderDAO import OrderDAO
 from src.Model.Address import Address
-from src.DAO.AddressDAO import AddressDAO
 from src.Model.Customer import Customer
 from src.Model.Order import Order
 from src.Service.GoogleMapService import GoogleMapService
+from src.Service.PasswordService import check_password_strength, create_salt, hash_password
 from src.Service.UserService import UserService
 from src.utils.log_decorator import log
 
