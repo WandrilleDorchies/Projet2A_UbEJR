@@ -71,4 +71,4 @@ class BundleService:
                 f"[BundleService] Cannot delete: bundle with ID {bundle_id} not found."
             )
 
-        self.bundle_dao.delete_bundle_by_id(bundle_id)
+        self.bundle_dao.delete_bundle(bundle_id)

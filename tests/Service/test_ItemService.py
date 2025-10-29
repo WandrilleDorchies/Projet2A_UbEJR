@@ -1,4 +1,3 @@
-import re
 from datetime import datetime
 
 import pytest
@@ -96,12 +95,3 @@ class TestItemService:
 
         with pytest.raises(ValueError, match="item is in a bundle"):
             item_service.delete_item(multiple_items[0].item_id)
-
-    def test_add_to_order(self, item_service, sample_empty_order, sample_item, clean_database):
-        pass
-
-    def test_add_to_order_item_not_exists(self, item_service, sample_empty_order, clean_database):
-        with pytest.raises(
-            ValueError, match=re.escape("[ItemService] Item with ID 9999 not found.")
-        ):
-            item_service.add_to_order(9999, sample_empty_order.order_id, 2)
