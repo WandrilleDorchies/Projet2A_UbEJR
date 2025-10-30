@@ -1,6 +1,6 @@
 from typing import Literal, Optional
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Response, status
 
 from src.App.init_app import customer_service, jwt_service, user_service
 from src.Model.JWTResponse import JWTResponse
@@ -87,7 +87,10 @@ def register(
 
 @auth_router.post("/login", status_code=status.HTTP_200_OK)
 def login(
-    identifier: Optional[str], password: str, user_type: Literal["admin", "customer", "driver"]
+    identifier: Optional[str],
+    password: str,
+    user_type: Literal["admin", "customer", "driver"],
+    response: Response,
 ) -> JWTResponse:
     """
     Login request for users regardless of type
@@ -126,6 +129,15 @@ def login(
         user = user_service.login(identifier=identifier, password=password, user_type=user_type)
 
         token = jwt_service.encode_jwt(user.id)
+
+        response.set_cookie(
+            key="access_token",
+            value=token.access_token,
+            httponly=True,
+            max_age=600,
+            samesite="lax",
+        )
+
         return token
 
     except ValueError as e:

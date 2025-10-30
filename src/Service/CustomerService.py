@@ -114,6 +114,7 @@ class CustomerService:
 
     @log
     def update_customer(self, customer_id: int, update: dict) -> Customer:
+        self.get_customer_by_id(customer_id)
         updated_customer = self.customer_dao.update_customer(customer_id=customer_id, update=update)
         return updated_customer
 
@@ -139,18 +140,18 @@ class CustomerService:
             customer_id, old_password, new_password, "customer"
         )
 
-    @log
-    def update_phone(self, customer_id: int, phone: str) -> Customer:
-        self.get_customer_by_id(customer_id)
-        phone_number = pn.parse(phone, "FR")
-        if not pn.is_valid_number(phone_number) or not pn.is_possible_number(phone_number):
-            raise ValueError(f"The number {phone} is invalid.")
+    # @log
+    # def update_phone(self, customer_id: int, phone: str) -> Customer:
 
-        customer_phone = "0" + str(phone_number.national_number)
+    #     phone_number = pn.parse(phone, "FR")
+    #     if not pn.is_valid_number(phone_number) or not pn.is_possible_number(phone_number):
+    #         raise ValueError(f"The number {phone} is invalid.")
 
-        update = {"customer_phone": customer_phone}
-        updated_customer = self.update_customer(customer_id, update)
-        return updated_customer
+    #     customer_phone = "0" + str(phone_number.national_number)
+
+    #     update = {"customer_phone": customer_phone}
+    #     updated_customer = self.update_customer(customer_id, update)
+    #     return updated_customer
 
     @log
     def order_history(self, customer_id: int) -> Optional[List[Order]]:
