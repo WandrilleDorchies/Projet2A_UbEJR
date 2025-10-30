@@ -28,6 +28,7 @@ CREATE TABLE test.Customers (
 -- Table: Admins
 CREATE TABLE test.Admins (
     admin_id SERIAL PRIMARY KEY,
+    username VARCHAR(32) NOT NULL,
     admin_first_name VARCHAR(128),
     admin_last_name VARCHAR(128),
     admin_created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -135,9 +136,9 @@ VALUES
 ('Mental', 'CRASHOUT', '0699988777', 'aled.prozaczopixan@email.com', 'hash2', 'salt2', 2),
 ('Plus', 'DIDIER', '0699988777', 'pas.dinspi@email.com', 'hash3', 'salt3', 3);
 
-INSERT INTO Admins (admin_first_name, admin_last_name, admin_password_hash, admin_salt)
+INSERT INTO Admins (username, admin_first_name, admin_last_name, admin_password_hash, admin_salt)
 VALUES
-('Admin', 'INSEE', 'hash_admin1', 'salt_admin1');
+('adminsee', 'Admin', 'INSEE', 'hash_admin1', 'salt_admin1');
 
 INSERT INTO Drivers (driver_first_name, driver_last_name, driver_password_hash, driver_salt, driver_is_delivering, driver_phone)
 VALUES

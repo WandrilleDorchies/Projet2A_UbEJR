@@ -23,6 +23,7 @@ def test_user_constructor_ok():
     assert user.created_at == datetime(2023, 1, 15, 10, 30, 0)
     assert user.password == "hashed_password_123"
     assert user.salt == "unique_salt_abc"
+    assert user.user_role == "customer"
 
 
 def test_user_constructor_throws_on_incorrect_id():

@@ -50,10 +50,10 @@ class MenuService:
         orderable = self.orderable_dao.update_orderable_state(orderable_id, False)
 
         if orderable["orderable_type"] == "item":
-            return self.item_dao.get_item_by_orderable_id(orderable.orderable_id)
+            return self.item_dao.get_item_by_orderable_id(orderable["orderable_id"])
 
         if orderable["orderable_type"] == "bundle":
-            return self.bundle_dao.get_bundle_by_orderable_id(orderable.orderable_id)
+            return self.bundle_dao.get_bundle_by_orderable_id(orderable["orderable_id"])
 
     @log
     def add_orderable_to_menu(self, orderable_id: int) -> Union[Item, Bundle]:
@@ -72,7 +72,7 @@ class MenuService:
         orderable = self.orderable_dao.update_orderable_state(orderable_id, True)
 
         if orderable["orderable_type"] == "item":
-            return self.item_dao.get_item_by_orderable_id(orderable.orderable_id)
+            return self.item_dao.get_item_by_orderable_id(orderable["orderable_id"])
 
         if orderable["orderable_type"] == "bundle":
-            return self.bundle_dao.get_bundle_by_orderable_id(orderable.orderable_id)
+            return self.bundle_dao.get_bundle_by_orderable_id(orderable["orderable_id"])

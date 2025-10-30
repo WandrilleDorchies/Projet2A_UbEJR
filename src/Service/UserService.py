@@ -67,7 +67,7 @@ class UserService:
         elif user_type == "driver":
             return self.driver_dao.update_driver(user_id, {"driver_password_hash": new_hashed})
         elif user_type == "admin":
-            return self.admin_dao.update_admin(user_id, {"admin_password_hash": new_hashed})
+            return self.admin_dao.update_admin_password(new_hashed)
 
     def _get_user_by_type(self, user_id: int, user_type: Literal["customer", "driver", "admin"]):
         if user_type == "customer":
@@ -75,4 +75,4 @@ class UserService:
         elif user_type == "driver":
             return self.driver_dao.get_driver_by_id(user_id)
         elif user_type == "admin":
-            return self.admin_dao.get_admin_by_id(user_id)
+            return self.admin_dao.get_admin()

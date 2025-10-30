@@ -31,7 +31,7 @@ class BundleDAO(metaclass=Singleton):
         bundle_availability_start_date: datetime,
         bundle_availability_end_date: datetime,
         bundle_items: Dict[Item, int],
-        is_in_menu: bool = False
+        is_in_menu: bool = False,
     ):
         orderable_id = self.orderable_dao.create_orderable("bundle", is_in_menu)
         raw_bundle = self.db_connector.sql_query(
@@ -248,9 +248,9 @@ class BundleDAO(metaclass=Singleton):
         for raw_item in raw_items:
             quantity = raw_item["item_quantity"]
 
-            item_data = {k: v for k, v in raw_item.items() if k != "item_quantity"}
-            item = Item(**item_data)
+            item = self.item_dao.get_item_by_id(raw_item["item_id"])
 
-            items_dict[item] = quantity
+            if item:
+                items_dict[item] = quantity
 
         return items_dict

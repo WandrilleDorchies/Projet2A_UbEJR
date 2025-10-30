@@ -28,6 +28,7 @@ CREATE TABLE project.Customers (
 -- Table: Admins
 CREATE TABLE project.Admins (
     admin_id SERIAL PRIMARY KEY,
+    username VARCHAR(32) NOT NULL,
     admin_first_name VARCHAR(128),
     admin_last_name VARCHAR(128),
     admin_created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

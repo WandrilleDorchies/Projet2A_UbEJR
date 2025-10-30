@@ -15,9 +15,11 @@ from src.DAO.OrderableDAO import OrderableDAO
 from src.DAO.OrderDAO import OrderDAO
 from src.Service.AddressService import AddressService
 from src.Service.BundleService import BundleService
+from src.Service.CustomerService import CustomerService
 from src.Service.DriverService import DriverService
 from src.Service.GoogleMapService import GoogleMapService
 from src.Service.ItemService import ItemService
+from src.Service.MenuService import MenuService
 from src.Service.OrderService import OrderService
 from src.Service.UserService import UserService
 
@@ -99,8 +101,8 @@ def delivery_dao(db_connector_test):
 
 
 @pytest.fixture
-def user_service():
-    UserService(customer_dao, driver_dao, admin_dao)
+def user_service(customer_dao, driver_dao, admin_dao):
+    return UserService(customer_dao, driver_dao, admin_dao)
 
 
 @pytest.fixture
@@ -131,6 +133,16 @@ def google_map_service(address_dao):
 @pytest.fixture
 def address_service(address_dao):
     return AddressService(address_dao)
+
+
+@pytest.fixture
+def menu_service(orderable_dao, item_dao, bundle_dao):
+    return MenuService(orderable_dao, item_dao, bundle_dao)
+
+
+@pytest.fixture
+def customer_service(customer_dao, order_dao, address_dao, google_map_service, user_service):
+    return CustomerService(customer_dao, order_dao, address_dao, google_map_service, user_service)
 
 
 @pytest.fixture
@@ -234,7 +246,7 @@ def sample_bundle(multiple_items, bundle_dao, clean_database):
         datetime(2025, 10, 9, 12, 30, 0),
         datetime(2026, 10, 9, 12, 30, 0),
         bundle_items,
-        True
+        True,
     )
 
     return bundle
@@ -252,3 +264,8 @@ def sample_order_full(multiple_items, sample_bundle, order_dao, clean_database, 
     order_dao.add_orderable_to_order(order.order_id, sample_bundle.orderable_id)
     order = order_dao.add_orderable_to_order(order.order_id, multiple_items[2].orderable_id)
     return order
+
+
+@pytest.fixture
+def sample_admin(admin_dao, clean_database):
+    return admin_dao.create_admin("admin", "Aucune", "Idee", "V@lidPassw0rd", "salt")

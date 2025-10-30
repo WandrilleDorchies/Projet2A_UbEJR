@@ -154,7 +154,7 @@ class CustomerService:
 
     @log
     def order_history(self, customer_id: int) -> Optional[List[Order]]:
-        history = self.order_dao.get_all_order_by_customer(customer_id)
+        history = self.order_dao.get_all_orders_by_customer(customer_id)
         return history
 
     @log
@@ -177,4 +177,4 @@ class CustomerService:
                 f"[CustomerService] Cannot delete: customer with ID {customer_id} not found."
             )
 
-        self.customer_dao.delete_customer_by_id(customer_id)
+        self.customer_dao.delete_customer(customer_id)

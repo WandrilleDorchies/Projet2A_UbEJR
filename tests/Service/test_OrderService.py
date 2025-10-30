@@ -173,9 +173,6 @@ class TestOrderService:
         """Test adding a bundle to an order successfully"""
         orderable_id = sample_bundle.orderable_id
 
-        for item in sample_bundle.bundle_items.keys():
-            print(f"Item dans menu: {item.is_in_menu}")
-
         initial_stocks = {item.item_id: item.item_stock for item in multiple_items[:2]}
 
         updated_order = order_service.add_orderable_to_order(orderable_id, sample_order.order_id, 1)

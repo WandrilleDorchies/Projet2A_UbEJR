@@ -21,7 +21,7 @@ class TestItemService:
         """Test getting all items when there are none"""
         items = item_service.get_all_items()
 
-        assert items is None
+        assert items == []
 
     def test_get_all_items_multiple(self, item_service, multiple_items, clean_database):
         """Test getting all items"""

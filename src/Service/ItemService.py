@@ -34,6 +34,7 @@ class ItemService:
         item_type: str,
         item_description: str,
         item_stock: int,
+        is_in_menu: bool = False,
     ) -> Optional[Item]:
         created_item = self.item_dao.create_item(
             item_name=item_name,
@@ -41,6 +42,7 @@ class ItemService:
             item_type=item_type,
             item_description=item_description,
             item_stock=item_stock,
+            is_in_menu=is_in_menu,
         )
         return created_item
 

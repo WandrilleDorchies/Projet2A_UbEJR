@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel
 
@@ -23,3 +24,4 @@ class User(BaseModel):
     created_at: datetime
     password: str
     salt: str
+    user_role: Literal["admin", "customer", "driver"] = "customer"

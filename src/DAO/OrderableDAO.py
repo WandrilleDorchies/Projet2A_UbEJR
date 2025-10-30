@@ -1,4 +1,4 @@
-from typing import List, Optional, Dict
+from typing import Dict, List, Optional
 
 from src.utils.log_decorator import log
 from src.utils.singleton import Singleton
