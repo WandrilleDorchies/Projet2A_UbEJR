@@ -75,9 +75,9 @@ class TestCustomerDAO:
 
     def test_get_all_customers_empty(self, customer_dao, clean_database):
         """Test get_all_customer when there are no customers"""
-        customers = customer_dao.get_all_customer()
+        customers = customer_dao.get_all_customers()
 
-        assert customers is None
+        assert customers == []
 
     def test_get_all_customers_multiple(self, customer_dao, address_dao, clean_database):
         """Test getting all customers"""
@@ -93,7 +93,7 @@ class TestCustomerDAO:
             "C", "C", "0603", "c@test.com", "hash", "salt", address.address_id
         )
 
-        customers = customer_dao.get_all_customer()
+        customers = customer_dao.get_all_customers()
 
         assert customers is not None
         assert len(customers) == 3
