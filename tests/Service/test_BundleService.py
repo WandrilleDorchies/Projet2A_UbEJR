@@ -33,7 +33,7 @@ class TestBundleService:
         """Test getting all bundles when there are none"""
         bundles = bundle_service.get_all_bundles()
 
-        assert bundles is None
+        assert bundles == []
 
     def test_get_all_bundles_multiple(self, bundle_service, multiple_items, clean_database):
         """Test getting all bundles"""
@@ -59,7 +59,7 @@ class TestBundleService:
 
         bundles = bundle_service.get_all_bundles()
 
-        assert bundles is not None
+        assert bundles != []
         assert len(bundles) == 2
 
     def test_create_bundle(self, bundle_service, multiple_items, clean_database):
@@ -95,6 +95,7 @@ class TestBundleService:
 
         assert updated_bundle.bundle_name == "Menu Modifié"
         assert updated_bundle.bundle_reduction == 25
+        assert list(updated_bundle.bundle_items.keys())[0] == multiple_items[2]
 
     def test_update_bundle_not_exists(self, bundle_service, clean_database):
         """Test updating non-existing bundle raises error"""

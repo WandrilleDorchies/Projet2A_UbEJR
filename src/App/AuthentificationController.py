@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, Optional
 
 from fastapi import APIRouter, HTTPException, status
 
@@ -87,9 +87,8 @@ def register(
 
 @auth_router.post("/login", status_code=status.HTTP_200_OK)
 def login(
-    identifier: str, password: str, user_type: Literal["admin", "customer", "driver"]
+    identifier: Optional[str], password: str, user_type: Literal["admin", "customer", "driver"]
 ) -> JWTResponse:
-    # Suggestion: identifier of type Optional[str] as admin only logs in with pw
     """
     Login request for users regardless of type
 

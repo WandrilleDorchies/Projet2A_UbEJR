@@ -25,11 +25,9 @@ class TestMenuService:
     ):
         """Test getting all orderables in menu with only bundles"""
 
-        # Remove items from menu
         for item in multiple_items:
             menu_service.remove_orderable_from_menu(item.orderable_id)
 
-        # Create bundles in menu
         bundle_items = {multiple_items[0]: 1, multiple_items[1]: 1}
         bundle_dao.create_bundle(
             bundle_name="Menu 1",
@@ -54,7 +52,7 @@ class TestMenuService:
         orderables = menu_service.get_all_orderable_in_menu()
 
         assert orderables is not None
-        assert len(orderables) == 4  # 3 items + 1 bundle
+        assert len(orderables) == 4
         types = [o.orderable_type for o in orderables]
         assert "item" in types
         assert "bundle" in types
@@ -158,12 +156,10 @@ class TestMenuService:
             is_in_menu=False,
         )
 
-        # Add to menu
         menu_service.add_orderable_to_menu(item.orderable_id)
         orderables = menu_service.get_all_orderable_in_menu()
         assert any(o.orderable_id == item.orderable_id for o in orderables)
 
-        # Remove from menu
         menu_service.remove_orderable_from_menu(item.orderable_id)
         orderables = menu_service.get_all_orderable_in_menu()
         assert not any(o.orderable_id == item.orderable_id for o in orderables)

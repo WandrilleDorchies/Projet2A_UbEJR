@@ -53,8 +53,8 @@ class CustomerService:
         return self.customer_dao.get_customer_by_phone(customer_phone)
 
     @log
-    def get_all_customer(self) -> Optional[List[Customer]]:
-        customers = self.customer_dao.get_all_customer()
+    def get_all_customers(self) -> Optional[List[Customer]]:
+        customers = self.customer_dao.get_all_customers()
         return customers
 
     @log

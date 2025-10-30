@@ -134,7 +134,7 @@ class BundleDAO(metaclass=Singleton):
         raw_bundles = self.db_connector.sql_query("SELECT * FROM Bundles", return_type="all")
 
         if not raw_bundles:
-            return None
+            return []
 
         Bundles = []
         for raw_bundle in raw_bundles:

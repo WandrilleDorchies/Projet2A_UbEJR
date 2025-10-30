@@ -35,7 +35,7 @@ class UserService:
             user = self.driver_dao.get_driver_by_phone(identifier)
 
         elif user_type == "admin":
-            user = self.admin_dao.get_admin_by_username(identifier)
+            user = self.admin_dao.get_admin()
 
         if not user:
             raise ValueError(f"[UserService] User not found with identifier: {identifier}")

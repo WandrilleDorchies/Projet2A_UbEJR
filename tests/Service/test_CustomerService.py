@@ -44,11 +44,11 @@ class TestCustomerService:
 
         assert retrieved_customer is None
 
-    def test_get_all_customer_empty(self, customer_service, clean_database):
+    def test_get_all_customers_empty(self, customer_service, clean_database):
         """Test getting all customers when there are none"""
-        customers = customer_service.get_all_customer()
+        customers = customer_service.get_all_customers()
 
-        assert customers is None
+        assert customers == []
 
     def test_get_all_customer_multiple(
         self, customer_service, address_dao, customer_dao, clean_database
@@ -66,9 +66,9 @@ class TestCustomerService:
             "C", "C", "0603", "c@test.com", "hash", "salt", address.address_id
         )
 
-        customers = customer_service.get_all_customer()
+        customers = customer_service.get_all_customers()
 
-        assert customers is not None
+        assert customers != []
         assert len(customers) == 3
 
     def test_get_all_customer_email(self, customer_service, sample_customer, clean_database):

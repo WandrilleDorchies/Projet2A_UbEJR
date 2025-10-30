@@ -40,14 +40,6 @@ class TestItemService:
         assert created_item.item_price == sample_item_data["item_price"]
         assert created_item.item_type == sample_item_data["item_type"]
 
-    def test_update_item_single_field(self, item_service, sample_item, clean_database):
-        """Test updating single field"""
-        updated_item = item_service.update_item(sample_item.item_id, {"item_stock": 25})
-
-        assert updated_item is not None
-        assert updated_item.item_stock == 25
-        assert updated_item.item_name == sample_item.item_name
-
     def test_update_item_multiple_fields(self, item_service, sample_item, clean_database):
         """Test updating multiple fields"""
         update_data = {

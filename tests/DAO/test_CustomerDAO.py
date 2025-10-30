@@ -43,6 +43,12 @@ class TestCustomerDAO:
 
         assert retrieved_customer is None
 
+    def test_get_all_customer_empty(self, customer_dao, clean_database):
+        """Test getting all customers when there are none"""
+        customers = customer_dao.get_all_customers()
+
+        assert customers == []
+
     def test_get_customer_loads_address(self, customer_dao, sample_customer, clean_database):
         """Tests that fetching a customer gets his address"""
         retrieved_customer = customer_dao.get_customer_by_id(sample_customer.id)

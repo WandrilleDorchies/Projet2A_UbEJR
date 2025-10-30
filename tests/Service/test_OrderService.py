@@ -32,7 +32,7 @@ class TestOrderService:
 
         orders = order_service.get_all_orders()
 
-        assert orders is not None
+        assert orders != []
         assert len(orders) == 3
 
     def test_get_all_orders_by_customer(self, order_service, sample_customer, clean_database):
@@ -42,7 +42,7 @@ class TestOrderService:
 
         orders = order_service.get_all_orders_by_customer(sample_customer.id)
 
-        assert orders is not None
+        assert orders != []
         assert len(orders) == 2
         assert all(o.order_customer_id == sample_customer.id for o in orders)
 
@@ -58,7 +58,7 @@ class TestOrderService:
 
         prepared_orders = order_service.get_all_orders_prepared()
 
-        assert prepared_orders is not None
+        assert prepared_orders != []
         assert len(prepared_orders) == 2
         assert all(o.order_is_prepared is True for o in prepared_orders)
 
@@ -132,7 +132,12 @@ class TestOrderService:
         """Test adding an item with insufficient stock raises error"""
         orderable_id = sample_item.orderable_id
 
-        with pytest.raises(ValueError, match="Not enough stock"):
+        with pytest.raises(
+            ValueError,
+            match=re.escape(
+                "[OrderService] Not enough stock for Galette-Saucisse (available: 50)."
+            ),
+        ):
             order_service.add_orderable_to_order(orderable_id, sample_order.order_id, 100)
 
     def test_add_orderable_to_order_item_not_found(
@@ -200,7 +205,10 @@ class TestOrderService:
             bundle_items=bundle_items,
         )
 
-        with pytest.raises(ValueError, match="Not enough stock"):
+        with pytest.raises(
+            ValueError,
+            match=re.escape("[OrderService] Not enough stock for Bundle Test (available: 0)."),
+        ):
             order_service.add_orderable_to_order(bundle.orderable_id, sample_order.order_id, 1)
 
     def test_add_bundle_to_order_multiple_times(
@@ -299,7 +307,6 @@ class TestOrderService:
 
         for item, quantity_in_bundle in sample_bundle.bundle_items.items():
             updated_item = item_service.get_item_by_id(item.item_id)
-            # -2 bundles +1 bundle = -1 bundle au final
             expected_stock = initial_stocks[item.item_id] - quantity_in_bundle
             assert updated_item.item_stock == expected_stock
 
