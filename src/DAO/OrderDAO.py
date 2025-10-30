@@ -85,7 +85,7 @@ class OrderDAO(metaclass=Singleton):
         raw_orders = self.db_connector.sql_query("SELECT * from Orders", return_type="all")
 
         if not raw_orders:
-            return None
+            return []
 
         Orders = []
         for raw_order in raw_orders:
@@ -173,7 +173,7 @@ class OrderDAO(metaclass=Singleton):
 
     @log
     def add_orderable_to_order(self, order_id: int, orderable_id: int, quantity: int = 1) -> Order:
-        if self._get_quantity_of_orderables(orderable_id, order_id) >= 1:
+        if self._get_quantity_of_orderables(order_id, orderable_id) >= 1:
             self.db_connector.sql_query(
                 """UPDATE Order_contents
                    SET orderable_quantity=orderable_quantity+%(quantity)s
@@ -227,10 +227,10 @@ class OrderDAO(metaclass=Singleton):
             {"order_id": order_id, "orderable_id": orderable_id},
             "one",
         )
-        if result is not None:
-            return result["orderable_quantity"]
+        if result is None:
+            return 0
 
-        return 0
+        return result["orderable_quantity"]
 
     def _get_orderables_in_order(self, order_id: int) -> Dict[Union[Item, Bundle], int]:
         raw_orderables = self.db_connector.sql_query(

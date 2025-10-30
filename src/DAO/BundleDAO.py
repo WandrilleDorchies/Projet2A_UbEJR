@@ -31,8 +31,9 @@ class BundleDAO(metaclass=Singleton):
         bundle_availability_start_date: datetime,
         bundle_availability_end_date: datetime,
         bundle_items: Dict[Item, int],
+        is_in_menu: bool = False,
     ):
-        orderable_id = self.orderable_dao.create_orderable("bundle")
+        orderable_id = self.orderable_dao.create_orderable("bundle", is_in_menu)
         raw_bundle = self.db_connector.sql_query(
             """
             INSERT INTO Bundles (bundle_id, orderable_id, bundle_name,
@@ -97,6 +98,7 @@ class BundleDAO(metaclass=Singleton):
             return None
 
         raw_bundle["bundle_items"] = self._get_items_from_bundle(bundle_id)
+        raw_bundle["is_in_menu"] = self.orderable_dao._is_in_menu(raw_bundle["orderable_id"])
         return Bundle(**raw_bundle)
 
     @log
@@ -119,25 +121,34 @@ class BundleDAO(metaclass=Singleton):
             [orderable_id],
             "one",
         )
+
+        if raw_bundle is None:
+            return None
+
         raw_bundle["bundle_items"] = self._get_items_from_bundle(raw_bundle["bundle_id"])
-        return Bundle(**raw_bundle) if raw_bundle else None
+        raw_bundle["is_in_menu"] = self.orderable_dao._is_in_menu(raw_bundle["orderable_id"])
+        return Bundle(**raw_bundle)
 
     @log
     def get_all_bundle(self) -> Optional[List[Bundle]]:
         raw_bundles = self.db_connector.sql_query("SELECT * FROM Bundles", return_type="all")
 
         if not raw_bundles:
-            return None
+            return []
 
         Bundles = []
         for raw_bundle in raw_bundles:
             raw_bundle["bundle_items"] = self._get_items_from_bundle(raw_bundle["bundle_id"])
+            raw_bundle["is_in_menu"] = self.orderable_dao._is_in_menu(raw_bundle["orderable_id"])
             Bundles.append(Bundle(**raw_bundle))
 
         return Bundles
 
     @log
     def update_bundle(self, bundle_id: int, update: dict):
+        if self.get_bundle_by_id(bundle_id) is None:
+            return None
+
         parameters_update = [
             "bundle_name",
             "bundle_reduction",
@@ -237,9 +248,9 @@ class BundleDAO(metaclass=Singleton):
         for raw_item in raw_items:
             quantity = raw_item["item_quantity"]
 
-            item_data = {k: v for k, v in raw_item.items() if k != "item_quantity"}
-            item = Item(**item_data)
+            item = self.item_dao.get_item_by_id(raw_item["item_id"])
 
-            items_dict[item] = quantity
+            if item:
+                items_dict[item] = quantity
 
         return items_dict

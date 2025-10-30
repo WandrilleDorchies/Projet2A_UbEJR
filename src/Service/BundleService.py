@@ -43,6 +43,7 @@ class BundleService:
         bundle_availability_start_date: datetime,
         bundle_availability_end_date: datetime,
         bundle_items: Dict[Item, int],
+        is_in_menu: bool = False,
     ) -> Optional[Bundle]:
         create_bundle = self.bundle_dao.create_bundle(
             bundle_name=bundle_name,
@@ -51,6 +52,7 @@ class BundleService:
             bundle_availability_start_date=bundle_availability_start_date,
             bundle_availability_end_date=bundle_availability_end_date,
             bundle_items=bundle_items,
+            is_in_menu=is_in_menu,
         )
         return create_bundle
 
@@ -71,4 +73,4 @@ class BundleService:
                 f"[BundleService] Cannot delete: bundle with ID {bundle_id} not found."
             )
 
-        self.bundle_dao.delete_bundle_by_id(bundle_id)
+        self.bundle_dao.delete_bundle(bundle_id)

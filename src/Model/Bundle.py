@@ -53,10 +53,23 @@ class Bundle(Orderable):
         is_in_period = (
             self.bundle_availability_start_date <= now <= self.bundle_availability_end_date
         )
-
         all_items_available = all(
-            item.check_availability() and item.item_stock >= qty
-            for item, qty in self.bundle_items.items()
+            item.check_availability() and item.item_stock >= nb
+            for item, nb in self.bundle_items.items()
         )
+        print(all_items_available)
+        return is_in_period and all_items_available and self.is_in_menu
 
-        return is_in_period and all_items_available
+    def check_stock(self, quantity) -> bool:
+        available = self.check_availability()
+        print(available)
+        sufficient_stock = all(
+            item.check_stock(quantity * nb) for item, nb in self.bundle_items.items()
+        )
+        print(sufficient_stock)
+
+        return available and sufficient_stock
+
+    def get_stock(self) -> int:
+        bottleneck = min(item.item_stock / nb for item, nb in self.bundle_items.items())
+        return int(bottleneck)

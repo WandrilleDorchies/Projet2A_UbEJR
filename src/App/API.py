@@ -4,7 +4,9 @@ from fastapi.responses import RedirectResponse
 
 from src.utils.log_init import initialiser_logs
 
-from .ItemController import item_router
+# from .ItemController import item_router
+from .AuthentificationController import auth_router
+from .CustomerController import customer_router
 
 # from .UserController import user_router
 
@@ -16,11 +18,13 @@ def run_app():
 
     # app.include_router(user_router)
 
-    app.include_router(item_router)
+    # app.include_router(item_router)
 
     @app.get("/", include_in_schema=False)
     async def redirect_to_docs():
         """Redirect to the API documentation"""
         return RedirectResponse(url="/docs")
 
+    app.include_router(auth_router)
+    app.include_router(customer_router)
     uvicorn.run(app, port=8000, host="0.0.0.0")

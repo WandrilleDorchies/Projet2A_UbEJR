@@ -25,14 +25,15 @@ class ItemDAO(metaclass=Singleton):
         item_type: str,
         item_description: str,
         item_stock: int,
+        is_in_menu: bool = False,
     ) -> Item:
-        orderable_id = self.orderable_dao.create_orderable("item")
+        orderable_id = self.orderable_dao.create_orderable("item", is_in_menu)
         raw_item = self.db_connector.sql_query(
             """
             INSERT INTO Items (orderable_id, item_name, item_price, item_type,
-            item_description, item_stock, item_in_menu)
+            item_description, item_stock)
             VALUES (%(orderable_id)s, %(item_name)s, %(item_price)s, %(item_type)s,
-            %(item_description)s, %(item_stock)s, DEFAULT)
+            %(item_description)s, %(item_stock)s)
             RETURNING *;
             """,
             {
@@ -45,6 +46,7 @@ class ItemDAO(metaclass=Singleton):
             },
             "one",
         )
+        raw_item["is_in_menu"] = is_in_menu
         return Item(**raw_item)
 
     # READ
@@ -53,26 +55,36 @@ class ItemDAO(metaclass=Singleton):
         raw_item = self.db_connector.sql_query(
             "SELECT * from Items WHERE item_id=%s", [item_id], "one"
         )
-        return Item(**raw_item) if raw_item else None
+        if raw_item is None:
+            return None
+
+        raw_item["is_in_menu"] = self.orderable_dao._is_in_menu(raw_item["orderable_id"])
+        return Item(**raw_item)
 
     @log
     def get_item_by_orderable_id(self, orderable_id: int) -> Optional[Item]:
         raw_item = self.db_connector.sql_query(
             "SELECT * FROM Items WHERE orderable_id=%s", [orderable_id], "one"
         )
-        return Item(**raw_item) if raw_item else None
+        if raw_item is None:
+            return None
+
+        raw_item["is_in_menu"] = self.orderable_dao._is_in_menu(raw_item["orderable_id"])
+        return Item(**raw_item)
 
     @log
-    def get_all_items_on_menu(self) -> Optional[List[Item]]:
-        raw_items = self.db_connector.sql_query(
-            "SELECT * FROM Items WHERE item_in_menu=true", return_type="all"
-        )
-        return [Item(**raw_item) for raw_item in raw_items] if raw_items else None
-
-    @log
-    def get_all_items(self) -> Optional[List[Item]]:
+    def get_all_items(self) -> List[Item]:
         raw_items = self.db_connector.sql_query("SELECT * from Items", return_type="all")
-        return [Item(**raw_item) for raw_item in raw_items] if raw_items else None
+
+        if not raw_items:
+            return []
+
+        Items = []
+        for raw_item in raw_items:
+            raw_item["is_in_menu"] = self.orderable_dao._is_in_menu(raw_item["orderable_id"])
+            Items.append(Item(**raw_item))
+
+        return Items
 
     # UPDATE
     @log
@@ -86,7 +98,6 @@ class ItemDAO(metaclass=Singleton):
             "item_type",
             "item_description",
             "item_stock",
-            "item_in_menu",
         ]
         for key in update.keys():
             if key not in parameters_update:

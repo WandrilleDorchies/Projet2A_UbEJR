@@ -112,11 +112,11 @@ class CustomerDAO(metaclass=Singleton):
         return [raw_mail["customer_mail"] for raw_mail in raw_mails] if raw_mails else None
 
     @log
-    def get_all_customer(self) -> Optional[list[Customer]]:
+    def get_all_customers(self) -> Optional[list[Customer]]:
         raw_customers = self.db_connector.sql_query("SELECT * from Customers ", return_type="all")
 
         if not raw_customers:
-            return None
+            return []
 
         for raw_customer in raw_customers:
             raw_customer["customer_address"] = self.address_dao.get_address_by_customer_id(

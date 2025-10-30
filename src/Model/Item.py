@@ -23,7 +23,6 @@ class Item(Orderable):
     item_type: str
     item_description: str
     item_stock: int
-    item_in_menu: bool = True
 
     def __init__(self, **args):
         args["orderable_type"] = "item"
@@ -46,7 +45,10 @@ class Item(Orderable):
         bool:
             True if all the conditions are met
         """
-        return self.item_stock > 0 and self.item_in_menu
+        return self.item_stock > 0 and self.is_in_menu
+
+    def check_stock(self, quantity) -> bool:
+        return self.check_availability() and self.item_stock - quantity > 0
 
     @property
     def price(self) -> float:

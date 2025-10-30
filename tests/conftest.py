@@ -4,6 +4,7 @@ import pytest
 from dotenv import load_dotenv
 
 from src.DAO.AddressDAO import AddressDAO
+from src.DAO.AdminDAO import AdminDAO
 from src.DAO.BundleDAO import BundleDAO
 from src.DAO.CustomerDAO import CustomerDAO
 from src.DAO.DBConnector import DBConnector
@@ -12,6 +13,15 @@ from src.DAO.DriverDAO import DriverDAO
 from src.DAO.ItemDAO import ItemDAO
 from src.DAO.OrderableDAO import OrderableDAO
 from src.DAO.OrderDAO import OrderDAO
+from src.Service.AddressService import AddressService
+from src.Service.BundleService import BundleService
+from src.Service.CustomerService import CustomerService
+from src.Service.DriverService import DriverService
+from src.Service.GoogleMapService import GoogleMapService
+from src.Service.ItemService import ItemService
+from src.Service.MenuService import MenuService
+from src.Service.OrderService import OrderService
+from src.Service.UserService import UserService
 
 load_dotenv()
 
@@ -71,6 +81,11 @@ def address_dao(db_connector_test):
 
 
 @pytest.fixture
+def admin_dao(db_connector_test):
+    return AdminDAO(db_connector_test)
+
+
+@pytest.fixture
 def customer_dao(db_connector_test, address_dao):
     return CustomerDAO(db_connector_test, address_dao)
 
@@ -83,6 +98,51 @@ def driver_dao(db_connector_test):
 @pytest.fixture
 def delivery_dao(db_connector_test):
     return DeliveryDAO(db_connector_test)
+
+
+@pytest.fixture
+def user_service(customer_dao, driver_dao, admin_dao):
+    return UserService(customer_dao, driver_dao, admin_dao)
+
+
+@pytest.fixture
+def item_service(item_dao, order_dao):
+    return ItemService(item_dao, order_dao)
+
+
+@pytest.fixture
+def bundle_service(bundle_dao):
+    return BundleService(bundle_dao)
+
+
+@pytest.fixture
+def order_service(order_dao, orderable_dao, item_dao, bundle_dao):
+    return OrderService(order_dao, orderable_dao, item_dao, bundle_dao)
+
+
+@pytest.fixture
+def driver_service(delivery_dao, driver_dao, user_service, order_dao):
+    return DriverService(delivery_dao, driver_dao, order_dao, user_service)
+
+
+@pytest.fixture
+def google_map_service(address_dao):
+    return GoogleMapService(address_dao)
+
+
+@pytest.fixture
+def address_service(address_dao):
+    return AddressService(address_dao)
+
+
+@pytest.fixture
+def menu_service(orderable_dao, item_dao, bundle_dao):
+    return MenuService(orderable_dao, item_dao, bundle_dao)
+
+
+@pytest.fixture
+def customer_service(customer_dao, order_dao, address_dao, google_map_service, user_service):
+    return CustomerService(customer_dao, order_dao, address_dao, google_map_service, user_service)
 
 
 @pytest.fixture
@@ -130,6 +190,7 @@ def sample_item_data():
         "item_type": "Plat",
         "item_description": "La fameuse galette-saucisse de l'EJR",
         "item_stock": 50,
+        "is_in_menu": True,
     }
 
 
@@ -148,6 +209,7 @@ def multiple_items(item_dao, clean_database):
         item_type="Plat",
         item_description="La fameuse galette-saucisse de l'EJR",
         item_stock=50,
+        is_in_menu=True,
     )
     items.append(item1)
 
@@ -157,6 +219,7 @@ def multiple_items(item_dao, clean_database):
         item_type="Boisson",
         item_description="Canette de Coca-Cola",
         item_stock=100,
+        is_in_menu=True,
     )
     items.append(item2)
 
@@ -166,6 +229,7 @@ def multiple_items(item_dao, clean_database):
         item_type="Dessert",
         item_description="Tiramisu-holic",
         item_stock=30,
+        is_in_menu=True,
     )
     items.append(item3)
 
@@ -182,9 +246,15 @@ def sample_bundle(multiple_items, bundle_dao, clean_database):
         datetime(2025, 10, 9, 12, 30, 0),
         datetime(2026, 10, 9, 12, 30, 0),
         bundle_items,
+        True,
     )
 
     return bundle
+
+
+@pytest.fixture
+def sample_empty_order(order_dao, clean_database, sample_customer):
+    return order_dao.create_order(sample_customer.id)
 
 
 @pytest.fixture
@@ -194,3 +264,8 @@ def sample_order_full(multiple_items, sample_bundle, order_dao, clean_database, 
     order_dao.add_orderable_to_order(order.order_id, sample_bundle.orderable_id)
     order = order_dao.add_orderable_to_order(order.order_id, multiple_items[2].orderable_id)
     return order
+
+
+@pytest.fixture
+def sample_admin(admin_dao, clean_database):
+    return admin_dao.create_admin("admin", "Aucune", "Idee", "V@lidPassw0rd", "salt")

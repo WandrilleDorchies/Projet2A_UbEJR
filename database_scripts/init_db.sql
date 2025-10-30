@@ -28,6 +28,7 @@ CREATE TABLE project.Customers (
 -- Table: Admins
 CREATE TABLE project.Admins (
     admin_id SERIAL PRIMARY KEY,
+    username VARCHAR(32) NOT NULL,
     admin_first_name VARCHAR(128),
     admin_last_name VARCHAR(128),
     admin_created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -67,8 +68,7 @@ CREATE TABLE project.Items (
     item_price FLOAT(24) CHECK (item_price >= 0),
     item_type VARCHAR(32),
     item_description VARCHAR(256),
-    item_stock INTEGER CHECK (item_stock >= 0),
-    item_in_menu BOOLEAN DEFAULT false
+    item_stock INTEGER CHECK (item_stock >= 0)
 );
 
 
@@ -98,7 +98,8 @@ CREATE TABLE project.Bundle_Items (
 -- Table: Orderable
 CREATE TABLE project.Orderables (
     orderable_id SERIAL PRIMARY KEY,
-    orderable_type VARCHAR(8) NOT NULL CHECK (orderable_type IN ('item', 'bundle'))
+    orderable_type VARCHAR(8) NOT NULL CHECK (orderable_type IN ('item', 'bundle')),
+    is_in_menu BOOLEAN DEFAULT false
 );
 -- linking items and bundle to orderable
 -- Table: Order_contents

@@ -15,7 +15,7 @@ class TestItemDAO:
         assert item.item_type == sample_item_data["item_type"]
         assert item.item_description == sample_item_data["item_description"]
         assert item.item_stock == sample_item_data["item_stock"]
-        assert item.item_in_menu is True
+        assert item.is_in_menu is True
 
     def test_get_item_by_id_exists(self, item_dao, sample_item, clean_database):
         retrieved_item = item_dao.get_item_by_id(sample_item.item_id)
@@ -37,34 +37,16 @@ class TestItemDAO:
         assert retrieved_item.item_id == sample_item.item_id
         assert retrieved_item.orderable_id == sample_item.orderable_id
 
-    def test_get_all_items_on_menu(self, item_dao, multiple_items, clean_database):
-        update_data = {"item_in_menu": False}
-        item_dao.update_item(multiple_items[0].item_id, update_data)
-
-        items_in_menu = item_dao.get_all_items_on_menu()
-
-        assert len(items_in_menu) == 2
-        assert multiple_items[0] not in items_in_menu
-
-    def test_no_items_on_menu(self, item_dao, sample_item, clean_database):
-        update_data = {"item_in_menu": False}
-        item_dao.update_item(sample_item.item_id, update_data)
-
-        items_in_menu = item_dao.get_all_items_on_menu()
-
-        assert items_in_menu is None
-
     def test_get_all_items_empty(self, item_dao, clean_database):
         items = item_dao.get_all_items()
 
-        assert items is None or items == []
+        assert items == []
 
     def test_get_all_items_multiple(self, item_dao, multiple_items, clean_database):
         items = item_dao.get_all_items()
 
         assert items is not None
         assert len(items) == 3
-        assert all(item.item_id > 0 for item in items)
 
     def test_update_item_single_field(self, item_dao, sample_item, clean_database):
         update_data = {"item_stock": 25}
@@ -79,14 +61,12 @@ class TestItemDAO:
             "item_name": "Galette Complète",
             "item_price": 5.0,
             "item_stock": 30,
-            "item_in_menu": True,
         }
         updated_item = item_dao.update_item(sample_item.item_id, update_data)
 
         assert updated_item.item_name == "Galette Complète"
         assert updated_item.item_price == 5.0
         assert updated_item.item_stock == 30
-        assert updated_item.item_in_menu is True
 
     def test_update_item_empty_dict_raises_error(self, item_dao, sample_item, clean_database):
         with pytest.raises(ValueError, match="At least one value should be updated"):

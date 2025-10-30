@@ -93,7 +93,7 @@ class TestBundleDAO:
     def test_get_all_bundles_empty(self, bundle_dao, clean_database):
         bundles = bundle_dao.get_all_bundle()
 
-        assert bundles is None or bundles == []
+        assert bundles == []
 
     def test_get_all_bundles_multiple(self, bundle_dao, multiple_items, clean_database):
         bundle_items1 = {multiple_items[0]: 1, multiple_items[1]: 1}
