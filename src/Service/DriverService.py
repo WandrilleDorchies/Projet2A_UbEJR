@@ -50,7 +50,7 @@ class DriverService:
         return driver
 
     @log
-    def get_all_driver(self) -> Optional[Driver]:
+    def get_all_drivers(self) -> Optional[Driver]:
         drivers = self.driver_dao.get_all_drivers()
         return drivers
 
@@ -122,6 +122,7 @@ class DriverService:
             )
 
         self.driver_dao.update_driver(driver_id, update={"driver_is_delivering": True})
+        self.order_dao.update_order(order_id, update={"order_state": 1})
         delivery = self.delivery_dao.update_delivery_state(order_id, 1)
         return delivery
 
@@ -138,6 +139,7 @@ class DriverService:
             )
 
         self.driver_dao.update_driver(driver_id, update={"driver_is_delivering": False})
+        self.order_dao.update_order(order_id, update={"order_state": 2})
         delivery = self.delivery_dao.update_delivery_state(order_id, 2)
         return delivery
 

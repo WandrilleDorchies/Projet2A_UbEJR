@@ -12,10 +12,12 @@ from src.DAO.OrderableDAO import OrderableDAO
 from src.DAO.OrderDAO import OrderDAO
 from src.Service.BundleService import BundleService
 from src.Service.CustomerService import CustomerService
+from src.Service.DriverService import DriverService
 from src.Service.GoogleMapService import GoogleMapService
 from src.Service.ItemService import ItemService
 from src.Service.JWTService import JwtService
 from src.Service.MenuService import MenuService
+from src.Service.OrderService import OrderService
 from src.Service.UserService import UserService
 
 load_dotenv()
@@ -36,6 +38,8 @@ order_dao = OrderDAO(db_connector, orderable_dao, item_dao, bundle_dao)
 gm_service = GoogleMapService(address_dao)
 user_service = UserService(customer_dao, driver_dao, admin_dao)
 customer_service = CustomerService(customer_dao, order_dao, address_dao, gm_service, user_service)
+driver_service = DriverService(delivery_dao, driver_dao, order_dao, user_service)
+order_service = OrderService(order_dao, orderable_dao, item_dao, bundle_dao)
 item_service = ItemService(item_dao, order_dao)
 bundle_service = BundleService(bundle_dao)
 menu_service = MenuService(orderable_dao, item_dao, bundle_dao)

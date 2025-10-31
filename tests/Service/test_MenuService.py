@@ -6,7 +6,7 @@ import pytest
 class TestMenuService:
     def test_get_all_orderable_in_menu_empty(self, menu_service, clean_database):
         """Test getting all orderables in menu when menu is empty"""
-        orderables = menu_service.get_all_orderable()
+        orderables = menu_service.get_all_orderables()
 
         assert orderables == []
 
@@ -14,7 +14,7 @@ class TestMenuService:
         self, menu_service, multiple_items, clean_database
     ):
         """Test getting all orderables in menu with only items"""
-        orderables = menu_service.get_all_orderable()
+        orderables = menu_service.get_all_orderables()
 
         assert orderables is not None
         assert len(orderables) == 3
@@ -24,7 +24,7 @@ class TestMenuService:
         self, menu_service, sample_bundle, multiple_items, clean_database
     ):
         """Test getting all orderables in menu with items and bundles"""
-        orderables = menu_service.get_all_orderable()
+        orderables = menu_service.get_all_orderables()
 
         assert orderables is not None
         assert len(orderables) == 4
@@ -132,9 +132,9 @@ class TestMenuService:
         )
 
         menu_service.add_orderable_to_menu(item.orderable_id)
-        orderables = menu_service.get_all_orderable()
+        orderables = menu_service.get_all_orderables()
         assert any(o.orderable_id == item.orderable_id for o in orderables)
 
         menu_service.remove_orderable_from_menu(item.orderable_id)
-        orderables = menu_service.get_all_orderable()
+        orderables = menu_service.get_all_orderables()
         assert not any(o.orderable_id == item.orderable_id for o in orderables)

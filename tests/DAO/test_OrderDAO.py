@@ -134,12 +134,12 @@ class TestOrderDAO:
 
         updated_order = order_dao.update_order(
             order_id=created_order.order_id,
-            update={"order_is_paid": True, "order_is_prepared": True, "order_state": 3},
+            update={"order_is_paid": True, "order_is_prepared": True, "order_state": 2},
         )
 
         assert updated_order.order_is_paid is True
         assert updated_order.order_is_prepared is True
-        assert updated_order.order_state == 3
+        assert updated_order.order_state == 2
 
     def test_update_order_empty_dict_raises_error(self, order_dao, sample_customer, clean_database):
         """Test updating with empty dictionnary"""

@@ -96,7 +96,7 @@ def update_profile(
 )
 def get_menu():
     try:
-        return menu_service.get_all_orderable_in_menu()
+        return menu_service.get_all_orderables()
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:

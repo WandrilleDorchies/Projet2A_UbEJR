@@ -19,7 +19,7 @@ class MenuService:
         self.bundle_dao = bundle_dao
 
     @log
-    def get_all_orderable(self, in_menu=True) -> List[Union[Item, Bundle]]:
+    def get_all_orderables(self, in_menu=True) -> List[Union[Item, Bundle]]:
         orderables = self.orderable_dao.get_all_orderables()
 
         Orderables_in_menu = []

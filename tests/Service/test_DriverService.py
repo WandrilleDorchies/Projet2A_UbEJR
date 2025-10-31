@@ -36,19 +36,19 @@ class TestDriverService:
         with pytest.raises(ValueError, match="Cannot update driver: driver with ID 9999 not found"):
             driver_service.get_driver_by_id(9999)
 
-    def test_get_all_driver_empty(self, driver_service, clean_database):
+    def test_get_all_drivers_empty(self, driver_service, clean_database):
         """Test getting all drivers when there are none"""
-        drivers = driver_service.get_all_driver()
+        drivers = driver_service.get_all_drivers()
 
         assert drivers == []
 
-    def test_get_all_driver_multiple(self, driver_service, driver_dao, clean_database):
+    def test_get_all_drivers_multiple(self, driver_service, driver_dao, clean_database):
         """Test getting all drivers"""
         driver_dao.create_driver("A", "A", "0701", "hash", "salt")
         driver_dao.create_driver("B", "B", "0702", "hash", "salt")
         driver_dao.create_driver("C", "C", "0703", "hash", "salt")
 
-        drivers = driver_service.get_all_driver()
+        drivers = driver_service.get_all_drivers()
 
         assert drivers is not None
         assert len(drivers) == 3

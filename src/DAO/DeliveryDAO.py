@@ -67,7 +67,7 @@ class DeliveryDAO(metaclass=Singleton):
 
     @log
     def update_delivery_state(self, delivery_id: int, state: int) -> Delivery:
-        if state not in [0, 1, 2]:
+        if state not in (0, 1, 2):
             raise ValueError("State can only take 1, 2 or 3 as value.")
         raw_update_delivery = self.db_connector.sql_query(
             """

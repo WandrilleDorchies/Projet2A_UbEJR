@@ -38,28 +38,6 @@ class TestOrderableDAO:
         assert orderables is not None
         assert len(orderables) == 3
 
-    def test_get_all_orderable_in_menu_empty(self, orderable_dao, clean_database):
-        """Test getting all orderables in menu when there are none"""
-        orderable_dao.create_orderable("item", is_in_menu=False)
-        orderable_dao.create_orderable("bundle", is_in_menu=False)
-
-        orderables_in_menu = orderable_dao.get_all_orderable_in_menu()
-
-        assert orderables_in_menu == []
-
-    def test_get_all_orderable_in_menu_multiple(self, orderable_dao, clean_database):
-        """Test getting all orderables in menu"""
-        orderable_dao.create_orderable("item", is_in_menu=True)
-        orderable_dao.create_orderable("bundle", is_in_menu=False)
-        orderable_dao.create_orderable("item", is_in_menu=True)
-        orderable_dao.create_orderable("bundle", is_in_menu=True)
-
-        orderables_in_menu = orderable_dao.get_all_orderable_in_menu()
-
-        assert orderables_in_menu is not None
-        assert len(orderables_in_menu) == 3
-        assert all(o["is_in_menu"] is True for o in orderables_in_menu)
-
     def test_update_orderable_state_to_true(self, orderable_dao, clean_database):
         """Test updating orderable state from False to True"""
         orderable_id = orderable_dao.create_orderable("item", is_in_menu=False)

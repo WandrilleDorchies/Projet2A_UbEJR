@@ -44,6 +44,14 @@ class OrderService:
         return orders
 
     @log
+    def get_current_orders(self):
+        return self.order_dao.get_current_orders()
+
+    @log
+    def get_past_orders(self):
+        return self.order_dao.get_past_orders()
+
+    @log
     def get_all_orders_prepared(self) -> Optional[List[Order]]:
         orders = self.order_dao.get_all_orders_prepared()
         return orders

@@ -113,7 +113,7 @@ class OrderDAO(metaclass=Singleton):
     @log
     def get_all_orders_prepared(self) -> Optional[List[Order]]:
         raw_orders = self.db_connector.sql_query(
-            "SELECT * from Orders where order_is_prepared is True", return_type="all"
+            "SELECT * from Orders WHERE order_is_prepared is True", return_type="all"
         )
 
         if not raw_orders:
@@ -126,6 +126,34 @@ class OrderDAO(metaclass=Singleton):
 
         return Orders
 
+    @log
+    def get_current_orders(self):
+        raw_orders = self.db_connector.sql_query(
+            "SELECT * from Orders WHERE order_state IN (0, 1)", return_type="all"
+        )
+
+        if not raw_orders:
+            return []
+
+        Orders = []
+        for raw_order in raw_orders:
+            raw_order["order_items"] = self._get_orderables_in_order(raw_order["order_id"])
+            Orders.append(Order(**raw_order))
+
+    @log
+    def get_past_orders(self):
+        raw_orders = self.db_connector.sql_query(
+            "SELECT * from Orders WHERE order_state = 2", return_type="all"
+        )
+
+        if not raw_orders:
+            return []
+
+        Orders = []
+        for raw_order in raw_orders:
+            raw_order["order_items"] = self._get_orderables_in_order(raw_order["order_id"])
+            Orders.append(Order(**raw_order))
+
     # UPDATE
     @log
     def update_order(self, order_id: int, update: dict) -> Order:
@@ -135,6 +163,8 @@ class OrderDAO(metaclass=Singleton):
         for key in update.keys():
             if key not in ["order_is_paid", "order_is_prepared", "order_state"]:
                 raise ValueError(f"{key} is not a parameter of Order.")
+        if update.get("order_state") and update["order_state"] not in (0, 1, 2):
+            raise ValueError("State can only take 1, 2 or 3 as value.")
 
         updated_fields = [f"{field} = %({field})s" for field in update.keys()]
         set_field = ", ".join(updated_fields)

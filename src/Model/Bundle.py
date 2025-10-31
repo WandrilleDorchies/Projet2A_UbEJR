@@ -18,6 +18,7 @@ class Bundle(Orderable):
     def __init__(self, **args):
         args["orderable_type"] = "bundle"
         super().__init__(**args)
+        self.is_in_menu = self.check_availability()
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, Bundle):
