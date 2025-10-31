@@ -108,7 +108,7 @@ def get_menu():
 )
 def get_orderable_detail(orderable_id: int):
     try:
-        orderable = menu_service.get_orderable_from_menu(orderable_id)
+        return menu_service.get_orderable_from_menu(orderable_id)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:
