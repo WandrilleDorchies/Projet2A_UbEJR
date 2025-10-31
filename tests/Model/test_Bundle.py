@@ -9,7 +9,6 @@ from src.Model.Item import Item
 
 
 def test_order_constructor_ok(sample_item):
-
     bundle_test = Bundle(
         bundle_id=1,
         orderable_id=1,

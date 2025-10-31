@@ -111,7 +111,23 @@ class OrderDAO(metaclass=Singleton):
         return Orders
 
     @log
-    def get_all_orders_prepared(self) -> Optional[List[Order]]:
+    def get_paid_orders(self) -> Optional[List[Order]]:
+        raw_orders = self.db_connector.sql_query(
+            "SELECT * from Orders WHERE order_is_paid is True", return_type="all"
+        )
+
+        if not raw_orders:
+            return []
+
+        Orders = []
+        for raw_order in raw_orders:
+            raw_order["order_items"] = self._get_orderables_in_order(raw_order["order_id"])
+            Orders.append(Order(**raw_order))
+
+        return Orders
+
+    @log
+    def get_prepared_orders(self) -> Optional[List[Order]]:
         raw_orders = self.db_connector.sql_query(
             "SELECT * from Orders WHERE order_is_prepared is True", return_type="all"
         )

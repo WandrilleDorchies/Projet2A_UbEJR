@@ -79,7 +79,7 @@ class TestOrderDAO:
         order_dao.update_order(order2.order_id, {"order_is_prepared": False})
         order_dao.update_order(order3.order_id, {"order_is_prepared": True})
 
-        prepared_orders = order_dao.get_all_orders_prepared()
+        prepared_orders = order_dao.get_prepared_orders()
 
         assert prepared_orders is not None
         assert len(prepared_orders) == 2
@@ -92,7 +92,7 @@ class TestOrderDAO:
         order_dao.create_order(sample_customer.id)
         order_dao.create_order(sample_customer.id)
 
-        prepared_orders = order_dao.get_all_orders_prepared()
+        prepared_orders = order_dao.get_prepared_orders()
 
         assert prepared_orders == []
 

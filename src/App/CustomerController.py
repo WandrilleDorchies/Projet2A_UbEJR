@@ -129,8 +129,8 @@ def get_order(order_id: int, customer_id: int = Depends(get_customer_id_from_tok
     pass
 
 
-@customer_router.post(
-    "/orders/{order_id}/{orderable_id}",
+@customer_router.put(
+    "/orders/{order_id}/{orderable_id}/add",
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(CustomerBearer())],
 )
@@ -142,15 +142,24 @@ def add_orderable_to_order(
     pass
 
 
-# @customer_router.get(
-#     "/me/order_history",
-#     status_code=status.HTTP_200_OK,
-# )
-# def view_order_history(
-#     credentials: Annotated[HTTPAuthorizationCredentials, Depends(CustomerBearer)],
-# ):
-#     current_customer: Customer = get_customer_from_credentials(credentials)
-#     try:
-#         customer_service.order_history(current_customer.id)
-#     except Exception:
-#         print("[CustomerController] could not get order history")
+@customer_router.put(
+    "/orders/{order_id}/{orderable_id}/remove",
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(CustomerBearer())],
+)
+def remove_orderable_to_order(
+    orderable_id: int,
+    order_id: int,
+    customer_id: int = Depends(get_customer_id_from_token),
+):
+    pass
+
+
+@customer_router.get(
+    "/me/order_history", status_code=status.HTTP_200_OK, dependencies=[Depends(CustomerBearer())]
+)
+def view_order_history(customer_id: int = Depends(get_customer_id_from_token)):
+    try:
+        return customer_service.order_history(customer_id)
+    except Exception:
+        print("[CustomerController] could not get order history")

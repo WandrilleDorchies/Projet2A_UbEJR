@@ -56,7 +56,7 @@ class TestOrderService:
         order_service.update_order(order2.order_id, {"order_is_prepared": False})
         order_service.update_order(order3.order_id, {"order_is_prepared": True})
 
-        prepared_orders = order_service.get_all_orders_prepared()
+        prepared_orders = order_service.get_prepared_orders()
 
         assert prepared_orders != []
         assert len(prepared_orders) == 2

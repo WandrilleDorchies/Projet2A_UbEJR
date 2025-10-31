@@ -15,7 +15,8 @@ class Order(BaseModel):
     ----------
         id_order (int): Unique identifier of the order.
         client_id (int): ID of the client.
-        state (int, optional): Order status (0 = pending). Default is 0.
+        state (int, optional): Order status (0 = pending, 1 = delivering, 2 = delivered).
+                               Default is 0.
         items (Dict[Bundle | Item, int]): List of items and bundles in the order.
         date (date): Date of the order.
         time (time): Time of the order.

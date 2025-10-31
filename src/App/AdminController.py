@@ -67,7 +67,7 @@ def remove_orderable_from_menu(orderable_id: int):
 
 # ITEMS
 @admin_router.get(
-    "items/{item_id}", status_code=status.HTTP_200_OK, dependencies=[Depends(AdminBearer())]
+    "/items/{item_id}", status_code=status.HTTP_200_OK, dependencies=[Depends(AdminBearer())]
 )
 def get_item_by_id(item_id: int):
     try:
