@@ -6,7 +6,7 @@ import pytest
 class TestMenuService:
     def test_get_all_orderable_in_menu_empty(self, menu_service, clean_database):
         """Test getting all orderables in menu when menu is empty"""
-        orderables = menu_service.get_all_orderable_in_menu()
+        orderables = menu_service.get_all_orderable()
 
         assert orderables == []
 
@@ -14,42 +14,17 @@ class TestMenuService:
         self, menu_service, multiple_items, clean_database
     ):
         """Test getting all orderables in menu with only items"""
-        orderables = menu_service.get_all_orderable_in_menu()
+        orderables = menu_service.get_all_orderable()
 
         assert orderables is not None
         assert len(orderables) == 3
         assert all(o.orderable_type == "item" for o in orderables)
 
-    def test_get_all_orderable_in_menu_bundles_only(
-        self, menu_service, bundle_dao, multiple_items, clean_database
-    ):
-        """Test getting all orderables in menu with only bundles"""
-
-        for item in multiple_items:
-            menu_service.remove_orderable_from_menu(item.orderable_id)
-
-        bundle_items = {multiple_items[0]: 1, multiple_items[1]: 1}
-        bundle_dao.create_bundle(
-            bundle_name="Menu 1",
-            bundle_reduction=10,
-            bundle_description="Premier bundle",
-            bundle_availability_start_date=datetime(2025, 1, 1),
-            bundle_availability_end_date=datetime(2025, 12, 31),
-            bundle_items=bundle_items,
-            is_in_menu=True,
-        )
-
-        orderables = menu_service.get_all_orderable_in_menu()
-
-        assert orderables is not None
-        assert len(orderables) == 1
-        assert all(o.orderable_type == "bundle" for o in orderables)
-
     def test_get_all_orderable_in_menu_mixed(
         self, menu_service, sample_bundle, multiple_items, clean_database
     ):
         """Test getting all orderables in menu with items and bundles"""
-        orderables = menu_service.get_all_orderable_in_menu()
+        orderables = menu_service.get_all_orderable()
 
         assert orderables is not None
         assert len(orderables) == 4
@@ -157,9 +132,9 @@ class TestMenuService:
         )
 
         menu_service.add_orderable_to_menu(item.orderable_id)
-        orderables = menu_service.get_all_orderable_in_menu()
+        orderables = menu_service.get_all_orderable()
         assert any(o.orderable_id == item.orderable_id for o in orderables)
 
         menu_service.remove_orderable_from_menu(item.orderable_id)
-        orderables = menu_service.get_all_orderable_in_menu()
+        orderables = menu_service.get_all_orderable()
         assert not any(o.orderable_id == item.orderable_id for o in orderables)

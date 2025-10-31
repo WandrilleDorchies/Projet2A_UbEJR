@@ -130,7 +130,7 @@ def get_order(order_id: int, customer_id: int = Depends(get_customer_id_from_tok
 
 
 @customer_router.post(
-    "orders/{order_id}/{orderable_id}",
+    "/orders/{order_id}/{orderable_id}",
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(CustomerBearer())],
 )

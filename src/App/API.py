@@ -4,6 +4,8 @@ from fastapi.responses import RedirectResponse
 
 from src.utils.log_init import initialiser_logs
 
+from .AdminController import admin_router
+
 # from .ItemController import item_router
 from .AuthentificationController import auth_router
 from .CustomerController import customer_router
@@ -27,4 +29,5 @@ def run_app():
 
     app.include_router(auth_router)
     app.include_router(customer_router)
+    app.include_router(admin_router)
     uvicorn.run(app, port=8000, host="0.0.0.0")

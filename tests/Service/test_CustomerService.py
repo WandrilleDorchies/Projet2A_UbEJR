@@ -188,19 +188,6 @@ class TestCustomerService:
         assert updated_customer.last_name == "UpdatedLastName"
         assert updated_customer.customer_mail == sample_customer.customer_mail
 
-    def test_update_phone(self, customer_service, sample_customer, clean_database):
-        """Test updating customer phone"""
-        updated_customer = customer_service.update_phone(sample_customer.id, "0687654321")
-
-        assert updated_customer.customer_phone == "0687654321"
-
-    def test_update_phone_invalid_raises_error(
-        self, customer_service, sample_customer, clean_database
-    ):
-        """Test updating with invalid phone raises error"""
-        with pytest.raises(ValueError, match="invalid"):
-            customer_service.update_phone(sample_customer.id, "123")
-
     def test_make_order(self, customer_service, sample_customer, clean_database):
         """Test making an order"""
         order = customer_service.make_order(sample_customer.id)

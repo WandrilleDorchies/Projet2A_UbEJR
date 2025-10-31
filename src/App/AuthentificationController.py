@@ -128,7 +128,7 @@ def login(
 
         user = user_service.login(identifier=identifier, password=password, user_type=user_type)
 
-        token = jwt_service.encode_jwt(user.id)
+        token = jwt_service.encode_jwt(user.id, user.user_role)
 
         response.set_cookie(
             key="access_token",

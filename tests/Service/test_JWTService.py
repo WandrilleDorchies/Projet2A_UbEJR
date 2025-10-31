@@ -10,11 +10,12 @@ jwt_service = JwtService()
 @freeze_time("2024-08-26 12:00:00")
 def test_encode_jwt():
     user_id = "myUser"
-    jwtResponse = jwt_service.encode_jwt(user_id=user_id)
+    user_role = "customer"
+    jwtResponse = jwt_service.encode_jwt(user_id=user_id, user_role=user_role)
     print(jwtResponse.access_token)
     assert (
         jwtResponse.access_token
-        == "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoibXlVc2VyIiwiZXhwaXJ5X3RpbWVzdGFtcCI6MTcyNDY3NDIwMC4wfQ.6BlZzHEW-KWlL1JYtmJol4aArumjZOxWSe0kBumSSMs"  # noqa: E501
+        == "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoibXlVc2VyIiwidXNlcl9yb2xlIjoiY3VzdG9tZXIiLCJleHBpcnlfdGltZXN0YW1wIjoxNzI0Njc0MjAwLjB9.arE3LvBst4NygMUWdXD1sMIaeW9yrWDIo5KswSM6des"  # noqa: E501
     )
 
 

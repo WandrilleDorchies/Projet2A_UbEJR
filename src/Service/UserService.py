@@ -34,7 +34,7 @@ class UserService:
         elif user_type == "driver":
             user = self.driver_dao.get_driver_by_phone(identifier)
 
-        elif user_type == "admin":
+        elif user_type == "admin" and identifier == "adminsee":
             user = self.admin_dao.get_admin()
 
         if not user:

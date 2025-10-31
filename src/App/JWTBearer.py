@@ -2,7 +2,7 @@ from fastapi import HTTPException, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jwt import DecodeError, ExpiredSignatureError
 
-from .init_app import admin_dao, customer_dao, driver_dao, jwt_service
+from .init_app import jwt_service
 
 
 class JWTBearer(HTTPBearer):
@@ -38,10 +38,9 @@ class JWTBearer(HTTPBearer):
 class AdminBearer(JWTBearer):
     async def __call__(self, request: Request):
         credentials = await super().__call__(request)
-        user_id = jwt_service.validate_user_jwt(credentials.credentials)
+        payload = jwt_service.validate_user_jwt(credentials.credentials)
 
-        user = admin_dao.get_admin(user_id)
-        if user.user_role != "admin":
+        if payload["user_role"] != "admin":
             raise HTTPException(403, "You need to be an admin to access this page.")
 
         return credentials
@@ -50,10 +49,9 @@ class AdminBearer(JWTBearer):
 class CustomerBearer(JWTBearer):
     async def __call__(self, request: Request):
         credentials = await super().__call__(request)
-        user_id = jwt_service.validate_user_jwt(credentials.credentials)
+        payload = jwt_service.validate_user_jwt(credentials.credentials)
 
-        user = customer_dao.get_customer_by_id(user_id)
-        if user.user_role != "customer":
+        if payload["user_role"] != "customer":
             raise HTTPException(403, "You need to be a customer to access this page.")
 
         return credentials
@@ -62,10 +60,9 @@ class CustomerBearer(JWTBearer):
 class DriverBearer(JWTBearer):
     async def __call__(self, request: Request):
         credentials = await super().__call__(request)
-        user_id = jwt_service.validate_user_jwt(credentials.credentials)
+        payload = jwt_service.validate_user_jwt(credentials.credentials)
 
-        user = driver_dao.get_driver_by_id(user_id)
-        if user.user_role != "driver":
+        if payload["user_role"] != "driver":
             raise HTTPException(403, "You need to be a driver to access this page.")
 
         return credentials

@@ -19,18 +19,18 @@ class MenuService:
         self.bundle_dao = bundle_dao
 
     @log
-    def get_all_orderable_in_menu(self) -> List[Union[Item, Bundle]]:
+    def get_all_orderable(self, in_menu=True) -> List[Union[Item, Bundle]]:
         orderables = self.orderable_dao.get_all_orderable_in_menu()
 
         Orderables_in_menu = []
         for orderable in orderables:
             if orderable["orderable_type"] == "item":
                 item = self.item_dao.get_item_by_orderable_id(orderable["orderable_id"])
-                if item.check_availability():
+                if (in_menu and item.check_availability()) or not in_menu:
                     Orderables_in_menu.append(item)
             if orderable["orderable_type"] == "bundle":
                 bundle = self.bundle_dao.get_bundle_by_orderable_id(orderable["orderable_id"])
-                if bundle.check_availability():
+                if (in_menu and bundle.check_availability()) or not in_menu:
                     Orderables_in_menu.append(bundle)
 
         return Orderables_in_menu

@@ -164,7 +164,7 @@ VALUES
 
 INSERT INTO Admins (username, admin_first_name, admin_last_name, admin_password_hash, admin_salt)
 VALUES
-('adminsee', 'Admin', 'INSEE', 'hash_admin1', 'salt_admin1');
+('adminsee', 'Admin', 'INSEE', 'f594552eb86dfd8d151ccdd0e44e122e5099d02fbec2319a9e678d500fd388dd', '50ae456cf5f459d39080e9fff9e53f83bc67b5aad17c1a3b2ba06bea11cab6be521a61dd4eeb1a2b64d1beab943b803c885217a521fbcfcb82dfc2fe5e0b58895d051e84eee2c2af4a75206fbc005a1b4e465d2563bf5b9b3c09d8387fb2a13797058298cc51b7a2e8f369fe652e9f74eeeb7ae0de2dabf5308b65144550cd78');
 
 INSERT INTO Drivers (driver_first_name, driver_last_name, driver_password_hash, driver_salt, driver_is_delivering, driver_phone)
 VALUES
