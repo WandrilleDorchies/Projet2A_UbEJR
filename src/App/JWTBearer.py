@@ -21,6 +21,8 @@ class JWTBearer(HTTPBearer):
             if token:
                 credentials = HTTPAuthorizationCredentials(scheme="Bearer", credentials=token)
 
+        if not credentials:
+            raise HTTPException(status_code=400, detail="Please login")
         if not credentials.scheme == "Bearer":
             raise HTTPException(status_code=403, detail="Invalid authentication scheme.")
         try:

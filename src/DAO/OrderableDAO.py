@@ -50,16 +50,6 @@ class OrderableDAO(metaclass=Singleton):
         return raw_orderables
 
     @log
-    def get_all_orderable_in_menu(self) -> List[Dict]:
-        raw_orderables = self.db_connector.sql_query(
-            "SELECT * FROM Orderables WHERE is_in_menu=true;", return_type="all"
-        )
-        if not raw_orderables:
-            return []
-
-        return raw_orderables
-
-    @log
     def update_orderable_state(self, orderable_id: int, is_in_menu: bool) -> Dict:
         raw_orderable = self.db_connector.sql_query(
             """UPDATE Orderables

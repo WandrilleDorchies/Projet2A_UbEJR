@@ -57,17 +57,13 @@ class Bundle(Orderable):
             item.check_availability() and item.item_stock >= nb
             for item, nb in self.bundle_items.items()
         )
-        print(all_items_available)
         return is_in_period and all_items_available and self.is_in_menu
 
     def check_stock(self, quantity) -> bool:
         available = self.check_availability()
-        print(available)
         sufficient_stock = all(
             item.check_stock(quantity * nb) for item, nb in self.bundle_items.items()
         )
-        print(sufficient_stock)
-
         return available and sufficient_stock
 
     def get_stock(self) -> int:
