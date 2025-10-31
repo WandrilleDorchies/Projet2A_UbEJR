@@ -148,3 +148,72 @@ CREATE TABLE project.Order_Bundles (
     FOREIGN KEY (bundle_id) REFERENCES project.Bundles(bundle_id)
 );
 */
+
+
+INSERT INTO Addresses (address_number, address_street, address_city, address_postal_code, address_country)
+VALUES
+(7, 'Contour Antoine de Saint-Exupery', 'Bruz', '35170', 'France'),
+(95, 'Rue Papu', 'Rennes', '35000', 'France'),
+(8, 'Avenue de la Brocéliande', 'Chartres-de-Bretagne', '35131', 'France');
+
+INSERT INTO Customers (customer_first_name, customer_last_name, customer_phone, customer_mail, customer_password_hash, customer_salt, customer_address_id)
+VALUES
+('Ronan', 'LE SAOUT', '0612345678', 'ronan.le-saout@email.com', 'hash1', 'salt1', 1),
+('Mental', 'CRASHOUT', '0699988777', 'aled.prozaczopixan@email.com', 'hash2', 'salt2', 2),
+('Plus', 'DIDIER', '0699988777', 'pas.dinspi@email.com', 'hash3', 'salt3', 3);
+
+INSERT INTO Admins (username, admin_first_name, admin_last_name, admin_password_hash, admin_salt)
+VALUES
+('adminsee', 'Admin', 'INSEE', 'hash_admin1', 'salt_admin1');
+
+INSERT INTO Drivers (driver_first_name, driver_last_name, driver_password_hash, driver_salt, driver_is_delivering, driver_phone)
+VALUES
+('Lewis', 'HAMILTON', 'hash_driver1', 'salt_driver1', false, '0707070707'),
+('Max', 'VERSTAPPEN', 'hash_driver2', 'salt_driver2', true, '0606060606');
+
+INSERT INTO Items (orderable_id, item_name, item_price, item_type, item_description, item_stock)
+VALUES
+(1, 'Galette-Saucisse', 4.5, 'Plat', 'La fameuse galette-saucisse de l''EJR', 50),
+(2, 'Coca-Cola 33cl', 0.5, 'Boisson', 'Canette de Coca-Cola', 100),
+(3, 'Tiramisu', 2.0, 'Dessert', 'Tiramisu-holic', 30),
+(4, 'Banh-Mi', 4.5, 'Plat', 'Sandwich vietnamien', 40);
+
+INSERT INTO Bundles (orderable_id, bundle_name, bundle_reduction, bundle_description, bundle_availability_start_date, bundle_availability_end_date)
+VALUES
+(5, 'Menu Galette-Saucisse', 30, 'Galette-Saucisse + Boisson + Dessert', '2025-01-01', '2025-12-31'),
+(6, 'Menu Accompagnement', 10, 'Boisson + Dessert', '2025-01-01', '2025-12-31');
+
+INSERT INTO Bundle_Items (bundle_id, item_id, item_quantity)
+VALUES
+(1, 1, 1),
+(1, 2, 1),
+(1, 3, 1),
+(2, 3, 1),
+(2, 2, 1);
+
+
+INSERT INTO Orders (order_customer_id, order_state, order_date, order_time, order_is_paid, order_is_prepared)
+VALUES
+(1, 1, '2025-10-21', '12:30:00', true, true),
+(2, 0, '2025-10-21', '13:00:00', false, false);
+
+INSERT INTO Orderables (orderable_type, is_in_menu)
+VALUES
+('item', true),
+('item', true),
+('item', true),
+('item', false),
+('bundle', false),
+('bundle', true);
+
+INSERT INTO Order_contents (order_id, orderable_id, orderable_quantity)
+VALUES
+(1, 1, 1),  
+(1, 2, 1), 
+(1, 5, 1),
+(2, 4, 2);
+
+INSERT INTO Deliveries (delivery_order_id, delivery_driver_id, delivery_state)
+VALUES
+(1, 2, 1), 
+(2, 1, 0); 

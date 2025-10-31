@@ -15,6 +15,7 @@ from src.Service.CustomerService import CustomerService
 from src.Service.GoogleMapService import GoogleMapService
 from src.Service.ItemService import ItemService
 from src.Service.JWTService import JwtService
+from src.Service.MenuService import MenuService
 from src.Service.UserService import UserService
 
 load_dotenv()
@@ -37,5 +38,6 @@ user_service = UserService(customer_dao, driver_dao, admin_dao)
 customer_service = CustomerService(customer_dao, order_dao, address_dao, gm_service, user_service)
 item_service = ItemService(item_dao, order_dao)
 bundle_service = BundleService(bundle_dao)
+menu_service = MenuService(orderable_dao, item_dao, bundle_dao)
 
 jwt_service = JwtService()

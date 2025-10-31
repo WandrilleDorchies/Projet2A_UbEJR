@@ -4,7 +4,7 @@ import phonenumbers as pn
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
 
-from .init_app import customer_service, jwt_service
+from .init_app import customer_service, jwt_service, menu_service
 from .JWTBearer import CustomerBearer
 
 customer_router = APIRouter(
@@ -45,7 +45,7 @@ def get_customer_id_from_token(
 @customer_router.get(
     "/me", status_code=status.HTTP_200_OK, dependencies=[Depends(CustomerBearer())]
 )
-def get_my_profile(customer_id: int = Depends(get_customer_id_from_token)):
+def get_profile(customer_id: int = Depends(get_customer_id_from_token)):
     try:
         customer = customer_service.get_customer_by_id(customer_id)
         return customer
@@ -58,7 +58,7 @@ def get_my_profile(customer_id: int = Depends(get_customer_id_from_token)):
 @customer_router.put(
     "/me", status_code=status.HTTP_200_OK, dependencies=[Depends(CustomerBearer())]
 )
-def update_my_profile(
+def update_profile(
     first_name: str = None,
     last_name: str = None,
     mail: str = None,
@@ -89,6 +89,57 @@ def update_my_profile(
         raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error updating profile: {e}") from e
+
+
+@customer_router.get(
+    "/menu", status_code=status.HTTP_200_OK, dependencies=[Depends(CustomerBearer())]
+)
+def get_menu():
+    try:
+        return menu_service.get_all_orderable_in_menu()
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error updating profile: {e}") from e
+
+
+@customer_router.get(
+    "/menu/{orderable_id}", status_code=status.HTTP_200_OK, dependencies=[Depends(CustomerBearer())]
+)
+def get_orderable_detail(orderable_id: int):
+    try:
+        orderable = menu_service.get_orderable_from_menu(orderable_id)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error updating profile: {e}") from e
+
+
+@customer_router.get(
+    "/orders", status_code=status.HTTP_200_OK, dependencies=[Depends(CustomerBearer())]
+)
+def get_all_orders(customer_id: int = Depends(get_customer_id_from_token)):
+    pass
+
+
+@customer_router.get(
+    "/orders/{order_id}", status_code=status.HTTP_200_OK, dependencies=[Depends(CustomerBearer())]
+)
+def get_order(order_id: int, customer_id: int = Depends(get_customer_id_from_token)):
+    pass
+
+
+@customer_router.post(
+    "orders/{order_id}/{orderable_id}",
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(CustomerBearer())],
+)
+def add_orderable_to_order(
+    orderable_id: int,
+    order_id: int,
+    customer_id: int = Depends(get_customer_id_from_token),
+):
+    pass
 
 
 # @customer_router.get(

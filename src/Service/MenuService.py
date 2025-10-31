@@ -26,12 +26,29 @@ class MenuService:
         for orderable in orderables:
             if orderable["orderable_type"] == "item":
                 item = self.item_dao.get_item_by_orderable_id(orderable["orderable_id"])
-                Orderables_in_menu.append(item)
+                if item.check_availability():
+                    Orderables_in_menu.append(item)
             if orderable["orderable_type"] == "bundle":
                 bundle = self.bundle_dao.get_bundle_by_orderable_id(orderable["orderable_id"])
-                Orderables_in_menu.append(bundle)
+                if bundle.check_availability():
+                    Orderables_in_menu.append(bundle)
 
         return Orderables_in_menu
+
+    @log
+    def get_orderable_from_menu(self, orderable_id: int) -> Union[Item, Bundle]:
+        orderable = self.orderable_dao.get_orderable_by_id(orderable_id)
+        if orderable is None:
+            raise ValueError(
+                f"[MenuService] Cannot get orderable: Orderable with ID {orderable_id} not found."
+            )
+        if orderable["orderable_type"] == "item":
+            item = self.item_dao.get_item_by_orderable_id(orderable["orderable_id"])
+            return item if item.check_availability() else None
+
+        if orderable["orderable_type"] == "bundle":
+            bundle = self.bundle_dao.get_bundle_by_orderable_id(orderable["orderable_id"])
+            return bundle if bundle.check_availability() else None
 
     @log
     def remove_orderable_from_menu(self, orderable_id: int) -> Union[Item, Bundle]:
