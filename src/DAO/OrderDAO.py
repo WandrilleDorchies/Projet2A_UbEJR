@@ -169,6 +169,8 @@ class OrderDAO(metaclass=Singleton):
             raw_order["order_items"] = self._get_orderables_in_order(raw_order["order_id"])
             Orders.append(Order(**raw_order))
 
+        return Orders
+
     @log
     def get_past_orders(self):
         raw_orders = self.db_connector.sql_query(
@@ -182,6 +184,8 @@ class OrderDAO(metaclass=Singleton):
         for raw_order in raw_orders:
             raw_order["order_items"] = self._get_orderables_in_order(raw_order["order_id"])
             Orders.append(Order(**raw_order))
+
+        return Orders
 
     # UPDATE
     @log

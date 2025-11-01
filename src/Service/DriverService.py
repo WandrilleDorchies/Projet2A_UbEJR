@@ -110,7 +110,7 @@ class DriverService:
         return delivery
 
     @log
-    def delivery_start(self, order_id: int, driver_id: int) -> Delivery:
+    def start_delivery(self, order_id: int, driver_id: int) -> Delivery:
         if self.driver_dao.get_driver_by_id(driver_id) is None:
             raise ValueError(
                 f"[DriverService] Cannot start delivery: driver with ID {driver_id} not found."
@@ -127,7 +127,7 @@ class DriverService:
         return delivery
 
     @log
-    def delivery_end(self, order_id: int, driver_id: int) -> Delivery:
+    def end_delivery(self, order_id: int, driver_id: int) -> Delivery:
         if self.driver_dao.get_driver_by_id(driver_id) is None:
             raise ValueError(
                 f"[DriverService] Cannot end delivery: driver with ID {driver_id} not found."

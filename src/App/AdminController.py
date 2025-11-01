@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Annotated, Dict
+from typing import Annotated, Dict, Optional
 
 import phonenumbers as pn
 from fastapi import APIRouter, Depends, HTTPException, Response, UploadFile, status
@@ -88,7 +88,7 @@ async def create_item(
     item_type: str,
     item_description: str,
     item_stock: int,
-    item_image: UploadFile,
+    item_image: Optional[UploadFile],
 ):
     try:
         image_data = await item_image.read() if item_image else None
@@ -110,10 +110,9 @@ async def update_item(
     item_type: str = None,
     item_description: str = None,
     item_stock: int = None,
-    item_image: UploadFile = None,
+    item_image: Optional[UploadFile] = None,
 ):
     try:
-        update = {}
         update = {
             key: value
             for key, value in [
@@ -135,7 +134,7 @@ async def update_item(
         raise HTTPException(status_code=400, detail=f"Invalid request: {e}") from e
 
 
-@admin_router.post(
+@admin_router.delete(
     "/items/{item_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     dependencies=[Depends(AdminBearer())],
@@ -177,7 +176,7 @@ async def create_bundle(
     bundle_availability_start_date: str,
     bundle_availability_end_date: str,
     bundle_items: Dict,
-    bundle_image: UploadFile = None,
+    bundle_image: Optional[UploadFile] = None,
 ):
     try:
         image_data = await bundle_image.read() if bundle_image else None
@@ -213,10 +212,9 @@ async def update_bundle(
     bundle_availability_start_date: datetime = None,
     bundle_availability_end_date: datetime = None,
     bundle_items: Dict[int, int] = None,
-    bundle_image: UploadFile = None,
+    bundle_image: Optional[UploadFile] = None,
 ):
     try:
-        update = {}
         update = {
             key: value
             for key, value in [
@@ -254,7 +252,7 @@ async def update_bundle(
         raise HTTPException(status_code=400, detail=f"Invalid request: {e}") from e
 
 
-@admin_router.post(
+@admin_router.delete(
     "/bundles/{bundle_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     dependencies=[Depends(AdminBearer())],
@@ -441,15 +439,15 @@ def update_driver(
 @admin_router.get("/orders", status_code=status.HTTP_200_OK)
 def get_all_orders():
     try:
-        return order_service.get_all_order()
+        return order_service.get_all_orders()
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching orders: {e}") from e
 
 
 @admin_router.get("/orders/{order_id}", status_code=status.HTTP_200_OK)
-def get_order(order_id: int):
+def get_order_by(order_id: int):
     try:
-        return order_service.get_order(order_id)
+        return order_service.get_order_by(order_id)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
 
@@ -473,9 +471,9 @@ def get_overview():
         customers = customer_service.get_all_customers()
         drivers = driver_service.get_all_drivers()
         orders = order_service.get_all_orders()
-        orders_prepared = order_service.get_all_orders_prepared()
+        orders_prepared = order_service.get_prepared_orders()
         current_orders = order_service.get_current_orders()
-        benef = [order.price for order in order_service.get_past_orders()]
+        benef = [order.order_price for order in order_service.get_past_orders()]
         items = menu_service.get_all_orderables(in_menu=True)
 
         return {

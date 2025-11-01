@@ -7,7 +7,7 @@ import pytest
 class TestOrderService:
     def test_get_order_exists(self, order_service, sample_order, clean_database):
         """Test getting an order by id"""
-        retrieved_order = order_service.get_order(sample_order.order_id)
+        retrieved_order = order_service.get_order_by(sample_order.order_id)
 
         assert retrieved_order is not None
         assert retrieved_order.order_id == sample_order.order_id
@@ -16,7 +16,7 @@ class TestOrderService:
     def test_get_order_not_exists(self, order_service, clean_database):
         """Test getting order by non-existing id raises error"""
         with pytest.raises(ValueError, match="Cannot get: order with ID 9999 not found"):
-            order_service.get_order(9999)
+            order_service.get_order_by(9999)
 
     def test_get_all_orders_empty(self, order_service, clean_database):
         """Test getting all orders when there are none"""
@@ -92,7 +92,7 @@ class TestOrderService:
         order_service.delete_order(sample_order.order_id)
 
         with pytest.raises(ValueError, match="Cannot get: order with ID"):
-            order_service.get_order(sample_order.order_id)
+            order_service.get_order_by(sample_order.order_id)
 
     def test_delete_order_not_exists(self, order_service, clean_database):
         """Test deleting non-existing order raises error"""

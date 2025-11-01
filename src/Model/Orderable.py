@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Literal
+from typing import Literal, Optional
 
 from pydantic import BaseModel
 
@@ -7,7 +7,7 @@ from pydantic import BaseModel
 class Orderable(BaseModel, ABC):
     orderable_id: int
     orderable_type: Literal["item", "bundle"]
-    orderable_image_data: bytes
+    orderable_image_data: Optional[bytes] = None
     is_in_menu: bool = False
 
     @abstractmethod

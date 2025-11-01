@@ -31,11 +31,11 @@ class BundleDAO(metaclass=Singleton):
         bundle_availability_start_date: datetime,
         bundle_availability_end_date: datetime,
         bundle_items: Dict[Item, int],
-        bundle_image: bytes,
+        bundle_image: Optional[bytes],
         is_in_menu: bool = False,
     ):
         orderable_id = self.orderable_dao.create_orderable(
-            "item", bundle_image, bundle_name, is_in_menu
+            "bundle", bundle_image, bundle_name, is_in_menu
         )
         raw_bundle = self.db_connector.sql_query(
             """
@@ -71,7 +71,6 @@ class BundleDAO(metaclass=Singleton):
             )
 
         raw_bundle["bundle_items"] = self._get_items_from_bundle(bundle_id)
-        raw_bundle["orderable_image_data"] = None
         return Bundle(**raw_bundle)
 
     # READ
@@ -102,7 +101,6 @@ class BundleDAO(metaclass=Singleton):
 
         raw_bundle["bundle_items"] = self._get_items_from_bundle(bundle_id)
         raw_bundle["is_in_menu"] = self.orderable_dao._is_in_menu(raw_bundle["orderable_id"])
-        raw_bundle["orderable_image_data"] = None
         return Bundle(**raw_bundle)
 
     @log
@@ -131,7 +129,6 @@ class BundleDAO(metaclass=Singleton):
 
         raw_bundle["bundle_items"] = self._get_items_from_bundle(raw_bundle["bundle_id"])
         raw_bundle["is_in_menu"] = self.orderable_dao._is_in_menu(raw_bundle["orderable_id"])
-        raw_bundle["orderable_image_data"] = None
         return Bundle(**raw_bundle)
 
     @log
@@ -145,7 +142,6 @@ class BundleDAO(metaclass=Singleton):
         for raw_bundle in raw_bundles:
             raw_bundle["bundle_items"] = self._get_items_from_bundle(raw_bundle["bundle_id"])
             raw_bundle["is_in_menu"] = self.orderable_dao._is_in_menu(raw_bundle["orderable_id"])
-            raw_bundle["orderable_image_data"] = None
             Bundles.append(Bundle(**raw_bundle))
 
         return Bundles
@@ -162,6 +158,7 @@ class BundleDAO(metaclass=Singleton):
             "bundle_availability_start_date",
             "bundle_availability_end_date",
             "bundle_items",
+            "bundle_image",
         ]
         for key in update.keys():
             if key not in parameters_update:
@@ -178,7 +175,7 @@ class BundleDAO(metaclass=Singleton):
             )
             update.pop("bundle_image")
 
-        if update["bundle_items"]:
+        if update.get("bundle_items"):
             bundle_items = update["bundle_items"]
             self.db_connector.sql_query(
                 """DELETE FROM Bundle_Items WHERE bundle_id=%s;

@@ -27,7 +27,7 @@ class OrderService:
         self.bundle_dao = bundle_dao
 
     @log
-    def get_order(self, order_id: int) -> Optional[Order]:
+    def get_order_by_id(self, order_id: int) -> Optional[Order]:
         order = self.order_dao.get_order_by_id(order_id)
         if order is None:
             raise ValueError(f"[Order Service] Cannot get: order with ID {order_id} not found.")
@@ -47,7 +47,7 @@ class OrderService:
 
     @log
     def get_paid_orders(self) -> Optional[List[Order]]:
-        return self.get_paid_orders()
+        return self.order_dao.get_paid_orders()
 
     @log
     def get_current_orders(self) -> Optional[List[Order]]:

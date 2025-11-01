@@ -80,7 +80,7 @@ def get_available_orders():
 def get_order_by_id(order_id: int):
     try:
         order = order_service.get_order_by_id(order_id)
-        if not order.is_paid or order.order_state != 0:
+        if not order.order_is_paid or order.order_state != 0:
             raise HTTPException(status_code=400, detail="This order cannot isn't available.")
 
     except Exception as e:
@@ -96,7 +96,7 @@ def get_order_by_id(order_id: int):
 def accept_order(order_id: int, driver_id: int = Depends(get_driver_id_from_token)):
     try:
         order = order_service.get_order_by_id(order_id)
-        if not order.is_paid:
+        if not order.order_is_paid:
             raise HTTPException(status_code=400, detail="This order isn't paid.")
 
         return driver_service.accept_order(order_id, driver_id)
@@ -112,9 +112,9 @@ def accept_order(order_id: int, driver_id: int = Depends(get_driver_id_from_toke
 def start_delivery(order_id: int, driver_id: int = Depends(get_driver_id_from_token)):
     try:
         order = order_service.get_order_by_id(order_id)
-        if not order.is_prepared:
+        if not order.order_is_prepared:
             raise HTTPException(status_code=400, detail="This order isn't prepared yet.")
-
+        return order
         return driver_service.start_delivery(order_id, driver_id)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e

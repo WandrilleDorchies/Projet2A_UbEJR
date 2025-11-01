@@ -49,7 +49,7 @@ def get_current_order_id(
 ) -> int:
     order = order_service.get_customer_current_order(customer_id)
     if order is None:
-        raise HTTPException("The order wasn't created")
+        raise HTTPException(status_code=404, detail="The order wasn't created")
 
     return order.order_id
 
