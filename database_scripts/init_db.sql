@@ -99,6 +99,8 @@ CREATE TABLE project.Bundle_Items (
 CREATE TABLE project.Orderables (
     orderable_id SERIAL PRIMARY KEY,
     orderable_type VARCHAR(8) NOT NULL CHECK (orderable_type IN ('item', 'bundle')),
+    orderable_image_name VARCHAR(255),
+    image_data LONGBLOB NOT NULL,
     is_in_menu BOOLEAN DEFAULT false
 );
 -- linking items and bundle to orderable
@@ -122,7 +124,6 @@ CREATE TABLE project.Deliveries (
     FOREIGN KEY (delivery_order_id) REFERENCES project.Orders(order_id),
     FOREIGN KEY (delivery_driver_id) REFERENCES project.Drivers(driver_id)
 );
-
 
 -- Table: Orders_Items 
 /*

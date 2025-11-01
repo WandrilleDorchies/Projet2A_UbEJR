@@ -25,9 +25,12 @@ class ItemDAO(metaclass=Singleton):
         item_type: str,
         item_description: str,
         item_stock: int,
+        item_image: bytes,
         is_in_menu: bool = False,
     ) -> Item:
-        orderable_id = self.orderable_dao.create_orderable("item", is_in_menu)
+        orderable_id = self.orderable_dao.create_orderable(
+            "item", item_image, item_name, is_in_menu
+        )
         raw_item = self.db_connector.sql_query(
             """
             INSERT INTO Items (orderable_id, item_name, item_price, item_type,
@@ -59,6 +62,10 @@ class ItemDAO(metaclass=Singleton):
             return None
 
         raw_item["is_in_menu"] = self.orderable_dao._is_in_menu(raw_item["orderable_id"])
+        raw_item["orderable_image"] = self.orderable_dao.get_image_from_orderable(
+            raw_item["orderable_id"]
+        )
+
         return Item(**raw_item)
 
     @log
@@ -70,6 +77,9 @@ class ItemDAO(metaclass=Singleton):
             return None
 
         raw_item["is_in_menu"] = self.orderable_dao._is_in_menu(raw_item["orderable_id"])
+        raw_item["orderable_image"] = self.orderable_dao.get_image_from_orderable(
+            raw_item["orderable_id"]
+        )
         return Item(**raw_item)
 
     @log
@@ -82,6 +92,9 @@ class ItemDAO(metaclass=Singleton):
         Items = []
         for raw_item in raw_items:
             raw_item["is_in_menu"] = self.orderable_dao._is_in_menu(raw_item["orderable_id"])
+            raw_item["orderable_image"] = self.orderable_dao.get_image_from_orderable(
+                raw_item["orderable_id"]
+            )
             Items.append(Item(**raw_item))
 
         return Items
@@ -98,10 +111,18 @@ class ItemDAO(metaclass=Singleton):
             "item_type",
             "item_description",
             "item_stock",
+            "item_image",
         ]
         for key in update.keys():
             if key not in parameters_update:
                 raise ValueError(f"{key} is not a parameter of Item.")
+
+        if update.get("item_image"):
+            item = self.get_item_by_id(item_id)
+            orderable_id = item.orderable_id
+            item_name = update.get("item_name") if update.get("item_name") else item.item_name
+            self.orderable_dao.update_image(orderable_id, "item", item_name, update["item_image"])
+            update.pop("item_image")
 
         updated_fields = [f"{field} = %({field})s" for field in update.keys()]
         set_field = ", ".join(updated_fields)
@@ -124,7 +145,8 @@ class ItemDAO(metaclass=Singleton):
     def delete_item_by_id(self, item_id: int) -> None:
         if self._item_is_in_bundle(item_id):
             raise ValueError("The item is in a bundle and cannot be deleted.")
-
+        item = self.get_item_by_id(item_id)
+        self.orderable_dao.delete_orderable(item.orderable_id)
         self.db_connector.sql_query(
             "DELETE FROM Items WHERE item_id = %(item_id)s", {"item_id": item_id}, None
         )

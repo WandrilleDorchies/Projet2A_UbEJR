@@ -31,9 +31,12 @@ class BundleDAO(metaclass=Singleton):
         bundle_availability_start_date: datetime,
         bundle_availability_end_date: datetime,
         bundle_items: Dict[Item, int],
+        bundle_image: bytes,
         is_in_menu: bool = False,
     ):
-        orderable_id = self.orderable_dao.create_orderable("bundle", is_in_menu)
+        orderable_id = self.orderable_dao.create_orderable(
+            "item", bundle_image, bundle_name, is_in_menu
+        )
         raw_bundle = self.db_connector.sql_query(
             """
             INSERT INTO Bundles (bundle_id, orderable_id, bundle_name,
@@ -68,7 +71,9 @@ class BundleDAO(metaclass=Singleton):
             )
 
         raw_bundle["bundle_items"] = self._get_items_from_bundle(bundle_id)
-
+        raw_bundle["orderable_image"] = self.orderable_dao.get_image_from_orderable(
+            raw_bundle["orderable_id"]
+        )
         return Bundle(**raw_bundle)
 
     # READ
@@ -99,6 +104,9 @@ class BundleDAO(metaclass=Singleton):
 
         raw_bundle["bundle_items"] = self._get_items_from_bundle(bundle_id)
         raw_bundle["is_in_menu"] = self.orderable_dao._is_in_menu(raw_bundle["orderable_id"])
+        raw_bundle["orderable_image"] = self.orderable_dao.get_image_from_orderable(
+            raw_bundle["orderable_id"]
+        )
         return Bundle(**raw_bundle)
 
     @log
@@ -127,6 +135,9 @@ class BundleDAO(metaclass=Singleton):
 
         raw_bundle["bundle_items"] = self._get_items_from_bundle(raw_bundle["bundle_id"])
         raw_bundle["is_in_menu"] = self.orderable_dao._is_in_menu(raw_bundle["orderable_id"])
+        raw_bundle["orderable_image"] = self.orderable_dao.get_image_from_orderable(
+            raw_bundle["orderable_id"]
+        )
         return Bundle(**raw_bundle)
 
     @log
@@ -140,6 +151,9 @@ class BundleDAO(metaclass=Singleton):
         for raw_bundle in raw_bundles:
             raw_bundle["bundle_items"] = self._get_items_from_bundle(raw_bundle["bundle_id"])
             raw_bundle["is_in_menu"] = self.orderable_dao._is_in_menu(raw_bundle["orderable_id"])
+            raw_bundle["orderable_image"] = self.orderable_dao.get_image_from_orderable(
+                raw_bundle["orderable_id"]
+            )
             Bundles.append(Bundle(**raw_bundle))
 
         return Bundles
@@ -160,6 +174,17 @@ class BundleDAO(metaclass=Singleton):
         for key in update.keys():
             if key not in parameters_update:
                 raise ValueError(f"{key} is not a parameter of Bundle.")
+
+        if update.get("bundle_image"):
+            bundle = self.get_bundle_by_id(bundle_id)
+            orderable_id = bundle.orderable_id
+            bundle_name = (
+                update.get("bundle_name") if update.get("bundle_name") else bundle.bundle_name
+            )
+            self.orderable_dao.update_image(
+                orderable_id, "bundle", bundle_name, update["bundle_image"]
+            )
+            update.pop("bundle_image")
 
         if update["bundle_items"]:
             bundle_items = update["bundle_items"]
@@ -197,16 +222,9 @@ class BundleDAO(metaclass=Singleton):
 
     @log
     def delete_bundle(self, bundle_id: int):
-        raw_bundle = self.db_connector.sql_query(
-            """ SELECT *
-                FROM Bundles
-                WHERE bundle_id=%s;
-            """,
-            [bundle_id],
-            "one",
-        )
-        if raw_bundle:
-            orderable_id = raw_bundle["orderable_id"]
+        bundle = self.get_bundle_by_id(bundle_id)
+        if bundle:
+            orderable_id = bundle.orderable_id
 
             self.db_connector.sql_query(
                 """DELETE FROM Bundle_Items WHERE bundle_id=%s;
@@ -214,12 +232,7 @@ class BundleDAO(metaclass=Singleton):
                 [bundle_id],
                 "none",
             )
-            self.db_connector.sql_query(
-                """DELETE FROM Orderables WHERE orderable_id=%s;
-                """,
-                [orderable_id],
-                "none",
-            )
+            self.orderable_dao.delete_orderable(orderable_id)
             self.db_connector.sql_query(
                 """ DELETE FROM Bundles WHERE bundle_id=%s
                     RETURNING *;""",

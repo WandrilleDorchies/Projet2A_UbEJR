@@ -7,6 +7,7 @@ from pydantic import BaseModel
 class Orderable(BaseModel, ABC):
     orderable_id: int
     orderable_type: Literal["item", "bundle"]
+    orderable_image: bytes
     is_in_menu: bool = False
 
     @abstractmethod

@@ -99,6 +99,8 @@ CREATE TABLE test.Bundle_Items (
 CREATE TABLE test.Orderables (
     orderable_id SERIAL PRIMARY KEY,
     orderable_type VARCHAR(8) NOT NULL CHECK (orderable_type IN ('item', 'bundle')),
+    orderable_image_name VARCHAR(255),
+    image_data LONGBLOB NOT NULL,
     is_in_menu BOOLEAN DEFAULT false
 );
 -- linking items and bundle to orderable
@@ -122,7 +124,6 @@ CREATE TABLE test.Deliveries (
     FOREIGN KEY (delivery_order_id) REFERENCES test.Orders(order_id),
     FOREIGN KEY (delivery_driver_id) REFERENCES test.Drivers(driver_id)
 );
-
 
 INSERT INTO Addresses (address_number, address_street, address_city, address_postal_code, address_country)
 VALUES

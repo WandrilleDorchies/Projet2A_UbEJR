@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Annotated, Dict
 
 import phonenumbers as pn
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
 from fastapi.security import HTTPAuthorizationCredentials
 
 from .init_app import (
@@ -82,16 +82,18 @@ def get_item_by_id(item_id: int):
 @admin_router.post(
     "/items", status_code=status.HTTP_201_CREATED, dependencies=[Depends(AdminBearer())]
 )
-def create_item(
+async def create_item(
     item_name: str,
     item_price: float,
     item_type: str,
     item_description: str,
     item_stock: int,
+    item_image: UploadFile,
 ):
     try:
+        data = await item_image.read()
         item = item_service.create_item(
-            item_name, item_price, item_type, item_description, item_stock
+            item_name, item_price, item_type, item_description, item_stock, data.filedata
         )
         return item
     except Exception as e:
@@ -108,6 +110,7 @@ def update_item(
     item_type: str = None,
     item_description: str = None,
     item_stock: int = None,
+    item_image: UploadFile = None,
 ):
     try:
         update = {}
@@ -119,6 +122,7 @@ def update_item(
                 ("item_type", item_type),
                 ("item_description", item_description),
                 ("item_stock", item_stock),
+                ("item_image", item_image),
             ]
             if value is not None
         }
@@ -171,6 +175,7 @@ def create_bundle(
     bundle_availability_start_date: str,
     bundle_availability_end_date: str,
     bundle_items: Dict,
+    bundle_image: UploadFile,
 ):
     try:
         Items = {}
@@ -187,6 +192,7 @@ def create_bundle(
             datetime.strptime(bundle_availability_start_date, "%d/%m/%Y"),
             datetime.strptime(bundle_availability_end_date, "%d/%m/%Y"),
             Items,
+            bundle_image,
         )
         return bundle
     except Exception as e:
@@ -204,6 +210,7 @@ def update_bundle(
     bundle_availability_start_date: datetime = None,
     bundle_availability_end_date: datetime = None,
     bundle_items: Dict[int, int] = None,
+    bundle_image: UploadFile = None,
 ):
     try:
         update = {}
@@ -221,6 +228,7 @@ def update_bundle(
                     "bundle_availability_end_date",
                     datetime.strptime(bundle_availability_end_date, "%d/%m/%Y"),
                 ),
+                ("bundle_image", bundle_image),
             ]
             if value is not None
         }
