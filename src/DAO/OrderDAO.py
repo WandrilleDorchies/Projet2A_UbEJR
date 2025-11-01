@@ -111,6 +111,19 @@ class OrderDAO(metaclass=Singleton):
         return Orders
 
     @log
+    def get_customer_current_order(self, customer_id: int) -> Optional[Order]:
+        raw_order = self.db_connector.sql_query(
+            "SELECT * from Orders WHERE order_customer_id=%s AND order_state != 2",
+            [customer_id],
+            "one",
+        )
+        if raw_order is None:
+            return None
+
+        raw_order["order_items"] = self._get_orderables_in_order(raw_order["order_id"])
+        return Order(**raw_order)
+
+    @log
     def get_paid_orders(self) -> Optional[List[Order]]:
         raw_orders = self.db_connector.sql_query(
             "SELECT * from Orders WHERE order_is_paid is True", return_type="all"

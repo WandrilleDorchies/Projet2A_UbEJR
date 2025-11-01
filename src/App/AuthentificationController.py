@@ -2,7 +2,7 @@ from typing import Literal, Optional
 
 from fastapi import APIRouter, HTTPException, Response, status
 
-from src.App.init_app import customer_service, jwt_service, user_service
+from src.App.init_app import customer_service, jwt_service, order_service, user_service
 from src.Model.JWTResponse import JWTResponse
 
 auth_router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -129,6 +129,9 @@ def login(
         user = user_service.login(identifier=identifier, password=password, user_type=user_type)
 
         token = jwt_service.encode_jwt(user.id, user.user_role)
+
+        if user.user_role == "customer":
+            order_service.create_order(user.id)
 
         response.set_cookie(
             key="access_token",

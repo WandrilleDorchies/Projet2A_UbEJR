@@ -45,6 +45,10 @@ class CustomerService:
         return customer
 
     @log
+    def get_address_by_customer_id(self, customer_id: int) -> Address:
+        return self.address_dao.get_address_by_customer_id(customer_id)
+
+    @log
     def get_customer_by_email(self, customer_email: str) -> Optional[Customer]:
         return self.customer_dao.get_customer_by_email(customer_email)
 

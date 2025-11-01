@@ -4,7 +4,7 @@ import phonenumbers as pn
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
 
-from .init_app import driver_service, jwt_service, order_service
+from .init_app import customer_service, driver_service, gm_service, jwt_service, order_service
 from .JWTBearer import DriverBearer
 
 driver_router = APIRouter(
@@ -118,6 +118,18 @@ def start_delivery(order_id: int, driver_id: int = Depends(get_driver_id_from_to
         return driver_service.start_delivery(order_id, driver_id)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
+
+
+@driver_router.get(
+    "/orders/{order_id}/path",
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(DriverBearer())],
+)
+def get_path(order_id: int):
+    order = order_service.get_order_by_id(order_id)
+    address = customer_service.get_address_by_customer_id(order.order_customer_id)
+
+    return gm_service.get_path(str(address))
 
 
 @driver_router.put(

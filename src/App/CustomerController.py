@@ -4,7 +4,7 @@ import phonenumbers as pn
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
 
-from .init_app import customer_service, jwt_service, menu_service
+from .init_app import customer_service, jwt_service, menu_service, order_service
 from .JWTBearer import CustomerBearer
 
 customer_router = APIRouter(
@@ -34,12 +34,24 @@ customer_router = APIRouter(
 #     return get_customer_from_credentials(credentials)
 
 
+# PROFILE
 def get_customer_id_from_token(
     credentials: Annotated[HTTPAuthorizationCredentials, Depends(CustomerBearer())],
 ) -> int:
     token = credentials.credentials
     customer_id = int(jwt_service.validate_user_jwt(token))
     return customer_id
+
+
+def get_current_order_id(
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(CustomerBearer())],
+    customer_id: int = Depends(get_customer_id_from_token),
+) -> int:
+    order = order_service.get_customer_current_order(customer_id)
+    if order is None:
+        raise HTTPException("The order wasn't created")
+
+    return order.order_id
 
 
 @customer_router.get(
@@ -91,6 +103,13 @@ def update_profile(
         raise HTTPException(status_code=500, detail=f"Error updating profile: {e}") from e
 
 
+@customer_router.put(
+    "me/password", status_code=status.HTTP_200_OK, dependencies=[Depends(CustomerBearer())]
+)
+def update_password(current_password: str, new_password: str, confirms_password: str):
+    pass
+
+
 @customer_router.get(
     "/menu", status_code=status.HTTP_200_OK, dependencies=[Depends(CustomerBearer())]
 )
@@ -116,17 +135,12 @@ def get_orderable_detail(orderable_id: int):
 
 
 @customer_router.get(
-    "/orders", status_code=status.HTTP_200_OK, dependencies=[Depends(CustomerBearer())]
-)
-def get_all_orders(customer_id: int = Depends(get_customer_id_from_token)):
-    pass
-
-
-@customer_router.get(
     "/orders/{order_id}", status_code=status.HTTP_200_OK, dependencies=[Depends(CustomerBearer())]
 )
-def get_order(order_id: int, customer_id: int = Depends(get_customer_id_from_token)):
-    pass
+def get_order(
+    order_id: int = Depends(get_current_order_id),
+):
+    return order_service.get_order_by_id(order_id)
 
 
 @customer_router.put(
@@ -136,10 +150,10 @@ def get_order(order_id: int, customer_id: int = Depends(get_customer_id_from_tok
 )
 def add_orderable_to_order(
     orderable_id: int,
-    order_id: int,
-    customer_id: int = Depends(get_customer_id_from_token),
+    quantity: int,
+    order_id: int = Depends(get_current_order_id),
 ):
-    pass
+    return order_service.add_orderable_to_order(orderable_id, order_id, quantity)
 
 
 @customer_router.put(
@@ -149,10 +163,10 @@ def add_orderable_to_order(
 )
 def remove_orderable_to_order(
     orderable_id: int,
-    order_id: int,
-    customer_id: int = Depends(get_customer_id_from_token),
+    quantity: int,
+    order_id: int = Depends(get_current_order_id),
 ):
-    pass
+    return order_service.remove_orderable_from_order(orderable_id, order_id, quantity)
 
 
 @customer_router.get(

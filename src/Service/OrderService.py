@@ -35,13 +35,15 @@ class OrderService:
 
     @log
     def get_all_orders(self) -> Optional[List[Order]]:
-        orders = self.order_dao.get_all_orders()
-        return orders
+        return self.order_dao.get_all_orders()
 
     @log
     def get_all_orders_by_customer(self, customer_id: int) -> Optional[List[Order]]:
-        orders = self.order_dao.get_all_orders_by_customer(customer_id)
-        return orders
+        return self.order_dao.get_all_orders_by_customer(customer_id)
+
+    @log
+    def get_customer_current_order(self, customer_id: int) -> Optional[Order]:
+        return self.order_dao.get_customer_current_order(customer_id)
 
     @log
     def get_paid_orders(self) -> Optional[List[Order]]:
@@ -62,6 +64,11 @@ class OrderService:
 
     @log
     def create_order(self, customer_id) -> Order:
+        orders = self.get_all_orders_by_customer(customer_id)
+        states = [order.order_state for order in orders]
+        if 0 in states:
+            return
+
         new_order = self.order_dao.create_order(customer_id=customer_id)
         return new_order
 

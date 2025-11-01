@@ -24,3 +24,9 @@ class Address(BaseModel):
 
     def get_attributes(self) -> dict:
         return {attribute: value for attribute, value in self.__dict__.items()}
+
+    def __str__(self) -> str:
+        return (
+            f"{self.address_number} {self.address_street}, {self.address_postal_code} "
+            f"{self.address_city}, {self.address_country}"
+        )
