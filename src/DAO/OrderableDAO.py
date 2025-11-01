@@ -1,5 +1,7 @@
 from typing import Dict, List, Optional
 
+import psycopg2
+
 from src.utils.log_decorator import log
 from src.utils.singleton import Singleton
 
@@ -17,7 +19,7 @@ class OrderableDAO(metaclass=Singleton):
     def create_orderable(
         self,
         orderable_type: str,
-        orderable_image: bytes,
+        orderable_image_data: bytes,
         orderable_name: str,
         is_in_menu: bool = False,
     ) -> int:
@@ -34,16 +36,16 @@ class OrderableDAO(metaclass=Singleton):
         result = self.db_connector.sql_query(
             """
             INSERT INTO Orderables (orderable_type, orderable_image_name,
-                                    orderable_image, is_in_menu)
+                                    orderable_image_data, is_in_menu)
             VALUES (%(orderable_type)s, %(orderable_image_name)s,
-                    %(orderable_image)s, %(is_in_menu)s)
+                    %(orderable_image_data)s, %(is_in_menu)s)
             RETURNING orderable_id;
             """,
             {
                 "orderable_type": orderable_type,
                 "is_in_menu": is_in_menu,
                 "orderable_image_name": orderable_image_name,
-                "orderable_image": orderable_image,
+                "orderable_image_data": psycopg2.Binary(orderable_image_data),
             },
             "one",
         )
@@ -81,22 +83,26 @@ class OrderableDAO(metaclass=Singleton):
         raw_orderable = self.db_connector.sql_query(
             "SELECT * FROM Orderables WHERE orderable_id=%s;", [orderable_id], "one"
         )
-        return raw_orderable["orderable_image"] if raw_orderable else None
+        return raw_orderable["orderable_image_data"] if raw_orderable else None
 
     @log
     def update_image(
-        self, orderable_id: int, orderable_type: str, orderable_name: str, orderable_image: bytes
+        self,
+        orderable_id: int,
+        orderable_type: str,
+        orderable_name: str,
+        orderable_image_data: bytes,
     ) -> Dict:
         orderable_image_name = f"image_{orderable_type}_{orderable_name}"
         raw_orderable = self.db_connector.sql_query(
             """UPDATE Orderables
             SET orderable_image_name = %(orderable_image_name)s,
-                orderable_image=%(orderable_image)s
+                orderable_image_data = %(orderable_image_data)s
             WHERE orderable_id = %(orderable_id)s
             RETURNING *;""",
             {
                 "orderable_image_name": orderable_image_name,
-                "orderable_image": orderable_image,
+                "orderable_image_data": psycopg2.Binary(orderable_image_data),
                 "orderable_id": orderable_id,
             },
             "one",

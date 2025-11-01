@@ -93,3 +93,7 @@ class MenuService:
 
         if orderable["orderable_type"] == "bundle":
             return self.bundle_dao.get_bundle_by_orderable_id(orderable["orderable_id"])
+
+    @log
+    def get_orderable_image(self, orderable_id: int) -> bytes:
+        return self.orderable_dao.get_image_from_orderable(orderable_id)

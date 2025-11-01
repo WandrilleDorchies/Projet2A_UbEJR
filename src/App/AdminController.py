@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Annotated, Dict
 
 import phonenumbers as pn
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, HTTPException, Response, UploadFile, status
 from fastapi.security import HTTPAuthorizationCredentials
 
 from .init_app import (
@@ -91,9 +91,9 @@ async def create_item(
     item_image: UploadFile,
 ):
     try:
-        data = await item_image.read()
+        image_data = await item_image.read() if item_image else None
         item = item_service.create_item(
-            item_name, item_price, item_type, item_description, item_stock, data.filedata
+            item_name, item_price, item_type, item_description, item_stock, image_data
         )
         return item
     except Exception as e:
@@ -103,7 +103,7 @@ async def create_item(
 @admin_router.put(
     "/items/{item_id}", status_code=status.HTTP_200_OK, dependencies=[Depends(AdminBearer())]
 )
-def update_item(
+async def update_item(
     item_id: int,
     item_name: str = None,
     item_price: float = None,
@@ -122,10 +122,12 @@ def update_item(
                 ("item_type", item_type),
                 ("item_description", item_description),
                 ("item_stock", item_stock),
-                ("item_image", item_image),
             ]
             if value is not None
         }
+        if item_image:
+            image_data = await item_image.read()
+            update["item_image"] = image_data
 
         updated_item = item_service.update_item(item_id, update)
         return updated_item
@@ -168,16 +170,17 @@ def get_bundle_by_id(bundle_id: int):
 @admin_router.post(
     "/bundles", status_code=status.HTTP_201_CREATED, dependencies=[Depends(AdminBearer())]
 )
-def create_bundle(
+async def create_bundle(
     bundle_name: str,
     bundle_reduction: int,
     bundle_description: str,
     bundle_availability_start_date: str,
     bundle_availability_end_date: str,
     bundle_items: Dict,
-    bundle_image: UploadFile,
+    bundle_image: UploadFile = None,
 ):
     try:
+        image_data = await bundle_image.read() if bundle_image else None
         Items = {}
         for item_id, nb in bundle_items.items():
             item = item_service.get_item_by_id(int(item_id))
@@ -192,7 +195,7 @@ def create_bundle(
             datetime.strptime(bundle_availability_start_date, "%d/%m/%Y"),
             datetime.strptime(bundle_availability_end_date, "%d/%m/%Y"),
             Items,
-            bundle_image,
+            image_data,
         )
         return bundle
     except Exception as e:
@@ -202,7 +205,7 @@ def create_bundle(
 @admin_router.put(
     "/bundles/{bundle_id}", status_code=status.HTTP_200_OK, dependencies=[Depends(AdminBearer())]
 )
-def update_bundle(
+async def update_bundle(
     bundle_id: int,
     bundle_name: str = None,
     bundle_reduction: int = None,
@@ -241,6 +244,10 @@ def update_bundle(
                 Items[item] = nb
             update["bundle_items"] = Items
 
+        if bundle_image:
+            image_data = await bundle_image.read()
+            update["bundle_image"] = image_data
+
         updated_bundle = bundle_service.update_bundle(bundle_id, update)
         return updated_bundle
     except Exception as e:
@@ -258,6 +265,20 @@ def delete_bundle(bundle_id: int):
         return
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Invalid request: {e}") from e
+
+
+@admin_router.get(
+    "/orderables/{orderable_id}/image", status_code=status.HTTP_200_OK, response_class=Response
+)
+def get_orderable_image(orderable_id: int):
+    try:
+        image_data = menu_service.get_orderable_image(orderable_id)
+        if image_data is None:
+            raise HTTPException(status_code=404, detail="Image not found")
+
+        return Response(content=image_data, media_type="image/jpg")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching image: {e}") from e
 
 
 # CUSTOMERS

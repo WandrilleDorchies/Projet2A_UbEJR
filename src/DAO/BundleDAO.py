@@ -71,9 +71,7 @@ class BundleDAO(metaclass=Singleton):
             )
 
         raw_bundle["bundle_items"] = self._get_items_from_bundle(bundle_id)
-        raw_bundle["orderable_image"] = self.orderable_dao.get_image_from_orderable(
-            raw_bundle["orderable_id"]
-        )
+        raw_bundle["orderable_image_data"] = None
         return Bundle(**raw_bundle)
 
     # READ
@@ -104,9 +102,7 @@ class BundleDAO(metaclass=Singleton):
 
         raw_bundle["bundle_items"] = self._get_items_from_bundle(bundle_id)
         raw_bundle["is_in_menu"] = self.orderable_dao._is_in_menu(raw_bundle["orderable_id"])
-        raw_bundle["orderable_image"] = self.orderable_dao.get_image_from_orderable(
-            raw_bundle["orderable_id"]
-        )
+        raw_bundle["orderable_image_data"] = None
         return Bundle(**raw_bundle)
 
     @log
@@ -135,9 +131,7 @@ class BundleDAO(metaclass=Singleton):
 
         raw_bundle["bundle_items"] = self._get_items_from_bundle(raw_bundle["bundle_id"])
         raw_bundle["is_in_menu"] = self.orderable_dao._is_in_menu(raw_bundle["orderable_id"])
-        raw_bundle["orderable_image"] = self.orderable_dao.get_image_from_orderable(
-            raw_bundle["orderable_id"]
-        )
+        raw_bundle["orderable_image_data"] = None
         return Bundle(**raw_bundle)
 
     @log
@@ -151,9 +145,7 @@ class BundleDAO(metaclass=Singleton):
         for raw_bundle in raw_bundles:
             raw_bundle["bundle_items"] = self._get_items_from_bundle(raw_bundle["bundle_id"])
             raw_bundle["is_in_menu"] = self.orderable_dao._is_in_menu(raw_bundle["orderable_id"])
-            raw_bundle["orderable_image"] = self.orderable_dao.get_image_from_orderable(
-                raw_bundle["orderable_id"]
-            )
+            raw_bundle["orderable_image_data"] = None
             Bundles.append(Bundle(**raw_bundle))
 
         return Bundles

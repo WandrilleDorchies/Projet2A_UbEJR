@@ -50,6 +50,7 @@ class ItemDAO(metaclass=Singleton):
             "one",
         )
         raw_item["is_in_menu"] = is_in_menu
+        raw_item["orderable_image_data"] = None
         return Item(**raw_item)
 
     # READ
@@ -62,9 +63,7 @@ class ItemDAO(metaclass=Singleton):
             return None
 
         raw_item["is_in_menu"] = self.orderable_dao._is_in_menu(raw_item["orderable_id"])
-        raw_item["orderable_image"] = self.orderable_dao.get_image_from_orderable(
-            raw_item["orderable_id"]
-        )
+        raw_item["orderable_image_data"] = None
 
         return Item(**raw_item)
 
@@ -77,9 +76,7 @@ class ItemDAO(metaclass=Singleton):
             return None
 
         raw_item["is_in_menu"] = self.orderable_dao._is_in_menu(raw_item["orderable_id"])
-        raw_item["orderable_image"] = self.orderable_dao.get_image_from_orderable(
-            raw_item["orderable_id"]
-        )
+        raw_item["orderable_image_data"] = None
         return Item(**raw_item)
 
     @log
@@ -92,9 +89,7 @@ class ItemDAO(metaclass=Singleton):
         Items = []
         for raw_item in raw_items:
             raw_item["is_in_menu"] = self.orderable_dao._is_in_menu(raw_item["orderable_id"])
-            raw_item["orderable_image"] = self.orderable_dao.get_image_from_orderable(
-                raw_item["orderable_id"]
-            )
+            raw_item["orderable_image_data"] = None
             Items.append(Item(**raw_item))
 
         return Items
