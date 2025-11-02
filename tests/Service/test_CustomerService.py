@@ -188,14 +188,6 @@ class TestCustomerService:
         assert updated_customer.last_name == "UpdatedLastName"
         assert updated_customer.customer_mail == sample_customer.customer_mail
 
-    def test_make_order(self, customer_service, sample_customer, clean_database):
-        """Test making an order"""
-        order = customer_service.make_order(sample_customer.id)
-
-        assert order is not None
-        assert order.order_id > 0
-        assert order.order_customer_id == sample_customer.id
-
     def test_order_history_empty(self, customer_service, sample_customer, clean_database):
         """Test getting order history when empty"""
         history = customer_service.order_history(sample_customer.id)

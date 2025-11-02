@@ -105,8 +105,26 @@ def update_profile(
 @customer_router.put(
     "me/password", status_code=status.HTTP_200_OK, dependencies=[Depends(CustomerBearer())]
 )
-def update_password(current_password: str, new_password: str, confirms_password: str):
-    pass
+def update_password(
+    current_password: str,
+    new_password: str,
+    confirm_password: str,
+    customer_id: int = Depends(get_customer_id_from_token),
+):
+    try:
+        if new_password != confirm_password:
+            raise HTTPException(status_code=400, detail="")
+
+        customer_service.update_password(customer_id, current_password, new_password)
+
+        return "Password "
+
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error while changing password: {str(e)}"
+        ) from e
 
 
 @customer_router.get(

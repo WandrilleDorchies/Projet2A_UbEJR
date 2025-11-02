@@ -1,6 +1,7 @@
 from typing import List, Optional
 
 import phonenumbers as pn
+from validate_email import validate_email
 
 from src.DAO.AddressDAO import AddressDAO
 from src.DAO.CustomerDAO import CustomerDAO
@@ -92,9 +93,13 @@ class CustomerService:
 
         phone_number = pn.parse(phone, "FR")
         if not pn.is_valid_number(phone_number) or not pn.is_possible_number(phone_number):
-            raise ValueError(f"The number {phone} is invalid.")
+            raise ValueError(f"[CustomerService] Cannot create: The number {phone} is invalid.")
 
         customer_phone = "0" + str(phone_number.national_number)
+
+        is_valid_email = validate_email(mail)
+        if not is_valid_email:
+            raise ValueError("[CustomerService] Cannot create: The email is not valid.")
 
         address = self.gm_service.validate_address(address_string)
         if address is None:
@@ -161,10 +166,6 @@ class CustomerService:
     def order_history(self, customer_id: int) -> Optional[List[Order]]:
         history = self.order_dao.get_all_orders_by_customer(customer_id)
         return history
-
-    @log
-    def make_order(self, customer_id: int) -> Order:
-        return self.order_dao.create_order(customer_id)
 
     @log
     def delete_customer(self, customer_id: int) -> None:
