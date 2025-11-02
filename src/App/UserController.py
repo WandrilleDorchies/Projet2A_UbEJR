@@ -46,7 +46,7 @@ def login(username: str, password: str) -> JWTResponse:
             status_code=403, detail="Invalid username and password combination"
         ) from error
 
-    return jwt_service.encode_jwt(user.id)
+    return jwt_service.encode_jwt(user.id, user.user_role)
 
 
 @user_router.get("/me", dependencies=[Depends(JWTBearer())])

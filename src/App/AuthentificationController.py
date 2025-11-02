@@ -17,6 +17,7 @@ def register(
     password: str,
     confirm_password: str,
     address_string: str,
+    response: Response,
 ):
     # Suggestion: registration has a field for each "component" of the address
     # Suggestion: login confirmation message using the returned dict
@@ -65,7 +66,17 @@ def register(
             first_name, last_name, phone, mail, password, address_string
         )
 
-        jwt_token = jwt_service.encode_jwt(customer.id)
+        jwt_token = jwt_service.encode_jwt(customer.id, "customer")
+
+        response.set_cookie(
+            key="access_token",
+            value=jwt_token.access_token,
+            httponly=True,
+            max_age=600,
+            samesite="lax",
+        )
+
+        order_service.create_order(customer.id)
 
         return {
             "user": {

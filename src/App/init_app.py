@@ -18,6 +18,7 @@ from src.Service.ItemService import ItemService
 from src.Service.JWTService import JwtService
 from src.Service.MenuService import MenuService
 from src.Service.OrderService import OrderService
+from src.Service.StripeService import StripeService
 from src.Service.UserService import UserService
 
 load_dotenv()
@@ -45,3 +46,4 @@ bundle_service = BundleService(bundle_dao)
 menu_service = MenuService(orderable_dao, item_dao, bundle_dao)
 
 jwt_service = JwtService()
+stripe_service = StripeService()

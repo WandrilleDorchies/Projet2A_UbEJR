@@ -4,7 +4,7 @@ import phonenumbers as pn
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
 
-from .init_app import customer_service, jwt_service, menu_service, order_service
+from .init_app import customer_service, jwt_service, menu_service, order_service, stripe_service
 from .JWTBearer import CustomerBearer
 
 customer_router = APIRouter(
@@ -39,7 +39,7 @@ def get_customer_id_from_token(
     credentials: Annotated[HTTPAuthorizationCredentials, Depends(CustomerBearer())],
 ) -> int:
     token = credentials.credentials
-    customer_id = int(jwt_service.validate_user_jwt(token))
+    customer_id = int(jwt_service.validate_user_jwt(token)["user_id"])
     return customer_id
 
 
@@ -134,7 +134,7 @@ def get_orderable_detail(orderable_id: int):
 
 
 @customer_router.get(
-    "/orders/current-order",
+    "/current-order",
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(CustomerBearer())],
 )
@@ -145,7 +145,7 @@ def get_order(
 
 
 @customer_router.put(
-    "/orders/current-order/{orderable_id}/add",
+    "/current-order/{orderable_id}/add",
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(CustomerBearer())],
 )
@@ -158,7 +158,7 @@ def add_orderable_to_order(
 
 
 @customer_router.put(
-    "/orders/current-order/{orderable_id}/remove",
+    "/current-order/{orderable_id}/remove",
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(CustomerBearer())],
 )
@@ -178,3 +178,56 @@ def view_order_history(customer_id: int = Depends(get_customer_id_from_token)):
         return customer_service.order_history(customer_id)
     except Exception:
         print("[CustomerController] could not get order history")
+
+
+# PAYMENT
+@customer_router.post(
+    "/payment/checkout",
+    status_code=status.HTTP_202_ACCEPTED,
+    dependencies=[Depends(CustomerBearer())],
+)
+def create_checkout_session(
+    order_id: int = Depends(get_current_order_id),
+    customer_id: int = Depends(get_customer_id_from_token),
+):
+    try:
+        order = order_service.get_order_by_id(order_id)
+
+        if order.order_is_paid:
+            raise HTTPException(status_code=400, detail="Order is already paid.")
+
+        customer = customer_service.get_customer_by_id(customer_id)
+
+        session_url = stripe_service.create_checkout_session(order, customer.customer_mail)
+
+        return session_url
+
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to create checkout session: {e}"
+        ) from e
+
+
+@customer_router.get(
+    "/payment/succes", status_code=status.HTTP_200_OK, dependencies=[Depends(CustomerBearer())]
+)
+def succesful_payment(session_id: int, order_id: int = Depends(get_current_order_id)):
+    try:
+        payment_info = stripe_service.verify_payment_status(session_id)
+
+        if not payment_info["paid"]:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Payment not completed. Status: {payment_info['payment_status']}",
+            )
+
+        order_service.update_order(order_id, {"order_is_paid": True})
+
+        return order_service.get_order_by_id(order_id)
+
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error processing payment: {e}") from e

@@ -1,6 +1,7 @@
 import os
 
-from stripe.error import StripeError
+import stripe
+from stripe._error import StripeError
 from stripe.checkout import Session
 
 from src.Model.Order import Order
@@ -9,12 +10,12 @@ from src.utils.log_decorator import log
 
 class StripeService:
     def __init__(self):
-        self.api_key = os.environ["STRIPE_SECRET_KEY"]
+        stripe.api_key = os.environ["STRIPE_SECRET_KEY"]
         self.base_url = os.environ["BASE_URL"]
         self.success_url = f"{self.base_url}/payment/success"
 
     @log
-    def create_checkout_session(self, order: Order, customer_email: str) -> Session:
+    def create_checkout_session(self, order: Order, customer_mail: str) -> Session:
         if len(order.order_orderables) == 0:
             raise ValueError("Your order is empty.")
 
@@ -29,7 +30,7 @@ class StripeService:
                 orderable_name = orderable.bundle_name
                 orderable_description = orderable.bundle_description
 
-            price = orderable.price * 100
+            price = int(orderable.price * 100)
 
             data = {
                 "price_data": {
@@ -46,8 +47,9 @@ class StripeService:
                 payment_method_types=["card"],
                 line_items=line_items,
                 mode="payment",
-                success_url=f"{self.success_url}?session_id={{CHECKOUT_SESSION_ID}}",
-                customer_email=customer_email,
+                success_url=f"{self.success_url}?session_id={{CHECKOUT_SESSION_ID}}"
+                f"&order_id={order.order_id}",
+                customer_email=customer_mail,
                 metadata={
                     "order_id": str(order.order_id),
                     "customer_id": str(order.order_customer_id),
@@ -58,10 +60,10 @@ class StripeService:
                     }
                 },
             )
-            return session
+            return session.url
 
         except StripeError as e:
-            raise ValueError(f"Error while creating Stripe checkout session: {str(e)}")
+            raise ValueError(f"Error while creating Stripe checkout session: {str(e)}") from e
 
     @log
     def verify_payment(self, session_id: int):
@@ -79,4 +81,4 @@ class StripeService:
             }
 
         except StripeError as e:
-            raise ValueError(f"Error while retrieving payment status: {str(e)}")
+            raise ValueError(f"Error while retrieving payment status: {str(e)}") from e
