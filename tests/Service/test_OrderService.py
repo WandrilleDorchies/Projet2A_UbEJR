@@ -121,7 +121,7 @@ class TestOrderService:
         updated_order = order_service.add_orderable_to_order(orderable_id, sample_order.order_id, 2)
 
         assert updated_order is not None
-        assert len(updated_order.order_items) == 1
+        assert len(updated_order.order_orderables) == 1
 
         updated_item = item_service.get_item_by_id(sample_item.item_id)
         assert updated_item.item_stock == initial_stock - 2
@@ -183,7 +183,7 @@ class TestOrderService:
         updated_order = order_service.add_orderable_to_order(orderable_id, sample_order.order_id, 1)
 
         assert updated_order is not None
-        assert len(updated_order.order_items) == 1
+        assert len(updated_order.order_orderables) == 1
 
         for item, quantity_in_bundle in sample_bundle.bundle_items.items():
             updated_item = item_service.get_item_by_id(item.item_id)
@@ -268,7 +268,7 @@ class TestOrderService:
         )
 
         assert updated_order is not None
-        assert len(updated_order.order_items) == 0
+        assert len(updated_order.order_orderables) == 0
 
         updated_item = item_service.get_item_by_id(sample_item.item_id)
         assert updated_item.item_stock == initial_stock
@@ -332,7 +332,7 @@ class TestOrderService:
         )
 
         assert updated_order is not None
-        assert len(updated_order.order_items) == 0
+        assert len(updated_order.order_orderables) == 0
 
         for item in sample_bundle.bundle_items.keys():
             updated_item = item_service.get_item_by_id(item.item_id)

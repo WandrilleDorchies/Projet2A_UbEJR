@@ -15,7 +15,7 @@ class TestOrderDAO:
         assert order.order_date == date.today()
         assert order.order_is_paid is False
         assert order.order_is_prepared is False
-        assert order.order_items == {} or order.order_items is None
+        assert order.order_orderables == {} or order.order_orderables is None
 
     def test_get_order_by_id_exists(self, order_dao, sample_customer, clean_database):
         """Test get an order by id"""
@@ -214,7 +214,7 @@ class TestOrderDAO:
         updated_order = order_dao.add_orderable_to_order(order.order_id, item.orderable_id)
 
         assert updated_order is not None
-        assert len(updated_order.order_items) == 1
+        assert len(updated_order.order_orderables) == 1
 
     def test_add_orderable_to_order_increment(
         self, order_dao, item_dao, sample_customer, clean_database, orderable_dao
@@ -235,7 +235,7 @@ class TestOrderDAO:
 
         quantity = order_dao._get_quantity_of_orderables(order.order_id, item.orderable_id)
         assert quantity == 2
-        assert list(order.order_items.keys())[0] == item
+        assert list(order.order_orderables.keys())[0] == item
 
     def test_remove_orderable_from_order_decrement(
         self, order_dao, item_dao, sample_customer, clean_database, orderable_dao

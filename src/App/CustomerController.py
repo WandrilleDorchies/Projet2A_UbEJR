@@ -44,7 +44,6 @@ def get_customer_id_from_token(
 
 
 def get_current_order_id(
-    credentials: Annotated[HTTPAuthorizationCredentials, Depends(CustomerBearer())],
     customer_id: int = Depends(get_customer_id_from_token),
 ) -> int:
     order = order_service.get_customer_current_order(customer_id)
@@ -135,7 +134,9 @@ def get_orderable_detail(orderable_id: int):
 
 
 @customer_router.get(
-    "/orders/{order_id}", status_code=status.HTTP_200_OK, dependencies=[Depends(CustomerBearer())]
+    "/orders/current-order",
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(CustomerBearer())],
 )
 def get_order(
     order_id: int = Depends(get_current_order_id),
@@ -144,7 +145,7 @@ def get_order(
 
 
 @customer_router.put(
-    "/orders/{order_id}/{orderable_id}/add",
+    "/orders/current-order/{orderable_id}/add",
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(CustomerBearer())],
 )
@@ -157,7 +158,7 @@ def add_orderable_to_order(
 
 
 @customer_router.put(
-    "/orders/{order_id}/{orderable_id}/remove",
+    "/orders/current-order/{orderable_id}/remove",
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(CustomerBearer())],
 )

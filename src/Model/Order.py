@@ -31,7 +31,7 @@ class Order(BaseModel):
     order_time: time
     order_is_paid: bool = False
     order_is_prepared: bool = False
-    order_items: Dict[Union[Bundle, Item], int]
+    order_orderables: Dict[Union[Bundle, Item], int]
 
     @property
     def order_price(self) -> float:
@@ -43,7 +43,7 @@ class Order(BaseModel):
             The total price of the order
         """
         total_price = 0.0
-        for orderable, qty in self.order_items.items():
+        for orderable, qty in self.order_orderables.items():
             total_price += orderable.price * qty
 
         return total_price

@@ -16,6 +16,7 @@ dependencies = [
     "pyyaml>=6.0.3",
     "phonenumbers>=9.0.17",
     "python-multipart>=0.0.20",
+    "stripe>=13.1.1",
 ]
 requires-python = "==3.12.*"
 readme = "README.md"

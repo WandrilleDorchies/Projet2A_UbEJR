@@ -5,7 +5,7 @@
 groups = ["default", "lint", "test", "typing"]
 strategy = []
 lock_version = "4.5.0"
-content_hash = "sha256:ca8740fae3bc55182edb4c3618f0fc7382521034d7ae2607bd4302fb1dd13729"
+content_hash = "sha256:eb27fb2ea6d84260266199b2242cd3dc661153b73fbc42831f865f15847a4b6c"
 
 [[metadata.targets]]
 requires_python = "==3.12.*"
@@ -442,6 +442,21 @@ dependencies = [
 files = [
     {file = "starlette-0.47.3-py3-none-any.whl", hash = "sha256:89c0778ca62a76b826101e7c709e70680a1699ca7da6b44d38eb0a7e61fe4b51"},
     {file = "starlette-0.47.3.tar.gz", hash = "sha256:6bc94f839cc176c4858894f1f8908f0ab79dfec1a6b8402f6da9be26ebea52e9"},
+]
+
+[[package]]
+name = "stripe"
+version = "13.1.1"
+requires_python = ">=3.7"
+summary = "Python bindings for the Stripe API"
+dependencies = [
+    "requests>=2.20; python_version >= \"3.0\"",
+    "typing-extensions<=4.2.0,>3.7.2; python_version < \"3.7\"",
+    "typing-extensions>=4.5.0; python_version >= \"3.7\"",
+]
+files = [
+    {file = "stripe-13.1.1-py3-none-any.whl", hash = "sha256:2a74981ba559f6e518e657b808c6339a397c3862f3e5dd10ec7603c3829addba"},
+    {file = "stripe-13.1.1.tar.gz", hash = "sha256:62141a5a2ede69c35e0f257a77acc3fa9cec6e8a30131a49f001bd90fda7a681"},
 ]
 
 [[package]]
