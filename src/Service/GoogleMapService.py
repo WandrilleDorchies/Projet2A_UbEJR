@@ -66,12 +66,10 @@ class GoogleMapService:
 
         coord_address = result[0]["geometry"]["location"]
 
-        if (
-            abs(coord_address["lat"] - self.coord_ensai["lat"]) > self.radius
-            or abs(coord_address["lng"] - self.coord_ensai["lng"]) > self.radius
-        ):
-            print("Location is too far away to get delivered.")
-            return None
+        if (coord_address["lat"] - self.coord_ensai["lat"]) ** 2 + (
+            coord_address["lng"] - self.coord_ensai["lng"]
+        ) ** 2 > self.radius**2:
+            raise ValueError("The destination is too far away to get delivered.")
 
         number = street = city = postal_code = country = None
         for component in result[0]["address_components"]:
@@ -99,9 +97,8 @@ class GoogleMapService:
             )
             return address_validated
 
-        except (ValueError, TypeError) as e:
-            print(f"An error occured during the creation of the Address class : {e}")
-            return None
+        except ValueError as e:
+            raise ValueError(f"An error occured during the creation of the Address class : {e}")
 
     @log
     def get_path(self, destination: str) -> Optional[dict]:
@@ -125,11 +122,9 @@ class GoogleMapService:
 
             if not directions_result:
                 raise ValueError("No route found.")
-                return None
 
         except Exception as e:
-            print(f"Error while computing path: {e}")
-            return None
+            raise Exception(f"Error while computing path: {e}")
 
         path = directions_result[0]["legs"][0]
         return path

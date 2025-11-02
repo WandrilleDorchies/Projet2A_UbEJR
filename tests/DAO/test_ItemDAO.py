@@ -93,7 +93,6 @@ class TestItemDAO:
         self, item_dao, bundle_dao, multiple_items, clean_database
     ):
         bundle_items = {multiple_items[0]: 1}
-        print(bundle_items)
 
         bundle_dao.create_bundle(
             bundle_name="Menu Test",

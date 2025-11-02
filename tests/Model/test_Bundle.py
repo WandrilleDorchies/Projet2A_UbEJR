@@ -65,7 +65,6 @@ def test_bundle_price(sample_item):
         bundle_availability_end_date=datetime(2025, 10, 9, 13, 0, 0),
         bundle_items={sample_item: 1},
     )
-    print(sample_item.price)
     assert bundle.price == sample_item.price * (1 - bundle.bundle_reduction / 100)
 
 

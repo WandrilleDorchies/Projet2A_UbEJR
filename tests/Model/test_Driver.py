@@ -103,11 +103,6 @@ class TestDriver:
             normalized_new = self._normalize_phone(phone)
             normalized_existing = self._normalize_phone(driver1.driver_phone)
 
-            print(
-                f"Testing: {phone} -> {normalized_new} vs {driver1.driver_phone} ->"
-                f"{normalized_existing}"
-            )
-
             if normalized_new == normalized_existing:
                 with pytest.raises(ValueError, match="Phone number already used"):
                     self._check_phone_uniqueness({"driver_phone": phone}, [driver1])

@@ -195,7 +195,7 @@ def view_order_history(customer_id: int = Depends(get_customer_id_from_token)):
     try:
         return customer_service.order_history(customer_id)
     except Exception:
-        print("[CustomerController] could not get order history")
+        raise Exception("[CustomerController] could not get order history")
 
 
 # PAYMENT

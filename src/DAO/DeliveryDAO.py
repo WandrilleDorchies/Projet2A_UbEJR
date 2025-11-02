@@ -25,7 +25,6 @@ class DeliveryDAO(metaclass=Singleton):
             {"order_id": order_id, "driver_id": driver_id},
             "one",
         )
-        print(raw_created_delivery)
         return Delivery(**raw_created_delivery)
 
     @log

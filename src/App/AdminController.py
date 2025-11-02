@@ -39,7 +39,7 @@ def get_all_orderables():
         raise HTTPException(status_code=500, detail=f"Error fetching orderables: {e}") from e
 
 
-@admin_router.put(
+@admin_router.post(
     "/orderables/{orderable_id}/add",
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(AdminBearer())],
@@ -52,7 +52,7 @@ def add_orderable_to_menu(orderable_id: int):
         raise HTTPException(status_code=500, detail=f"Error fetching orderables: {e}") from e
 
 
-@admin_router.put(
+@admin_router.delete(
     "/orderables/{orderable_id}/remove",
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(AdminBearer())],

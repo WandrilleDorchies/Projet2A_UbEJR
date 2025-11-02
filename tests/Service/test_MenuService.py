@@ -25,7 +25,6 @@ class TestMenuService:
     ):
         """Test getting all orderables in menu with items and bundles"""
         orderables = menu_service.get_all_orderables()
-        print(orderables)
         assert orderables is not None
         assert len(orderables) == 4
         types = [o.orderable_type for o in orderables]

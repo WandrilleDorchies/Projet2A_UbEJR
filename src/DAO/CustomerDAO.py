@@ -122,7 +122,6 @@ class CustomerDAO(metaclass=Singleton):
             raw_customer["customer_address"] = self.address_dao.get_address_by_customer_id(
                 raw_customer["customer_id"]
             )
-            print(raw_customer["customer_address"])
         return [Customer(**self._map_db_to_model(customer)) for customer in raw_customers]
 
     # UPDATE
