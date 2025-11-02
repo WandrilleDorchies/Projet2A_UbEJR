@@ -1,7 +1,5 @@
 from typing import Dict, List, Optional
 
-import psycopg2
-
 from src.utils.log_decorator import log
 from src.utils.singleton import Singleton
 
@@ -19,8 +17,8 @@ class OrderableDAO(metaclass=Singleton):
     def create_orderable(
         self,
         orderable_type: str,
-        orderable_image_data: bytes,
-        orderable_name: str,
+        orderable_name: str = None,
+        orderable_image_data: Optional[bytes] = None,
         is_in_menu: bool = False,
     ) -> int:
         """
@@ -32,7 +30,10 @@ class OrderableDAO(metaclass=Singleton):
             The orderable_id of the created instance
         """
 
-        orderable_image_name = f"image_{orderable_type}_{orderable_name}"
+        if orderable_image_data:
+            orderable_image_name = f"image_{orderable_type}_{orderable_name}"
+        else:
+            orderable_image_name = "No image available"
         result = self.db_connector.sql_query(
             """
             INSERT INTO Orderables (orderable_type, orderable_image_name,
@@ -45,7 +46,7 @@ class OrderableDAO(metaclass=Singleton):
                 "orderable_type": orderable_type,
                 "is_in_menu": is_in_menu,
                 "orderable_image_name": orderable_image_name,
-                "orderable_image_data": psycopg2.Binary(orderable_image_data),
+                "orderable_image_data": orderable_image_data,
             },
             "one",
         )
@@ -94,6 +95,7 @@ class OrderableDAO(metaclass=Singleton):
         orderable_image_data: bytes,
     ) -> Dict:
         orderable_image_name = f"image_{orderable_type}_{orderable_name}"
+
         raw_orderable = self.db_connector.sql_query(
             """UPDATE Orderables
             SET orderable_image_name = %(orderable_image_name)s,
@@ -102,7 +104,7 @@ class OrderableDAO(metaclass=Singleton):
             RETURNING *;""",
             {
                 "orderable_image_name": orderable_image_name,
-                "orderable_image_data": psycopg2.Binary(orderable_image_data),
+                "orderable_image_data": orderable_image_data,
                 "orderable_id": orderable_id,
             },
             "one",

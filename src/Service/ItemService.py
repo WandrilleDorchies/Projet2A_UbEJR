@@ -34,7 +34,7 @@ class ItemService:
         item_type: str,
         item_description: str,
         item_stock: int,
-        item_image: bytes,
+        item_image: Optional[bytes] = None,
         is_in_menu: bool = False,
     ) -> Optional[Item]:
         created_item = self.item_dao.create_item(

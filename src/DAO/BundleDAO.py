@@ -31,7 +31,7 @@ class BundleDAO(metaclass=Singleton):
         bundle_availability_start_date: datetime,
         bundle_availability_end_date: datetime,
         bundle_items: Dict[Item, int],
-        bundle_image: Optional[bytes],
+        bundle_image: Optional[bytes] = None,
         is_in_menu: bool = False,
     ):
         orderable_id = self.orderable_dao.create_orderable(

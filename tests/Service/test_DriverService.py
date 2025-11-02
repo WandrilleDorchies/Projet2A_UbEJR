@@ -104,7 +104,7 @@ class TestDriverService:
         """Test starting a delivery"""
         delivery_dao.create_delivery(sample_order.order_id, sample_driver.id)
 
-        updated_delivery = driver_service.delivery_start(sample_order.order_id, sample_driver.id)
+        updated_delivery = driver_service.start_delivery(sample_order.order_id, sample_driver.id)
 
         assert updated_delivery.delivery_state == 1
 
@@ -116,16 +116,16 @@ class TestDriverService:
         with pytest.raises(
             ValueError, match="Cannot start delivery: driver with ID 9999 not found"
         ):
-            driver_service.delivery_start(sample_order.order_id, 9999)
+            driver_service.start_delivery(sample_order.order_id, 9999)
 
     def test_delivery_end(
         self, driver_service, sample_order, sample_driver, clean_database, delivery_dao
     ):
         """Test ending a delivery"""
         delivery_dao.create_delivery(sample_order.order_id, sample_driver.id)
-        driver_service.delivery_start(sample_order.order_id, sample_driver.id)
+        driver_service.start_delivery(sample_order.order_id, sample_driver.id)
 
-        updated_delivery = driver_service.delivery_end(sample_order.order_id, sample_driver.id)
+        updated_delivery = driver_service.end_delivery(sample_order.order_id, sample_driver.id)
 
         assert updated_delivery.delivery_state == 2
 
@@ -135,7 +135,7 @@ class TestDriverService:
     def test_delivery_end_driver_not_exists(self, driver_service, sample_order, clean_database):
         """Test ending delivery with non-existing driver raises error"""
         with pytest.raises(ValueError, match="Cannot end delivery: driver with ID 9999 not found"):
-            driver_service.delivery_end(sample_order.order_id, 9999)
+            driver_service.end_delivery(sample_order.order_id, 9999)
 
     def test_delete_driver(self, driver_service, sample_driver, clean_database):
         """Test deleting a driver"""

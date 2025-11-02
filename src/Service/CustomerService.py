@@ -97,7 +97,10 @@ class CustomerService:
 
         customer_phone = "0" + str(phone_number.national_number)
 
-        is_valid_email = validate_email(mail)
+        is_valid_email = validate_email(
+            mail, check_blacklist=False, check_dns=False, check_smtp=False
+        )
+
         if not is_valid_email:
             raise ValueError("[CustomerService] Cannot create: The email is not valid.")
 

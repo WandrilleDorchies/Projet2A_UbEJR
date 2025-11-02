@@ -243,12 +243,11 @@ def sample_bundle(multiple_items, bundle_dao, clean_database):
         "Menu",
         15,
         "Plat + Boisson",
-        datetime(2025, 10, 9, 12, 30, 0),
+        datetime(2024, 10, 9, 12, 30, 0),
         datetime(2026, 10, 9, 12, 30, 0),
         bundle_items,
-        True,
+        is_in_menu=True,
     )
-
     return bundle
 
 

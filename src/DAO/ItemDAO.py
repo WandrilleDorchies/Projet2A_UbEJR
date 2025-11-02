@@ -25,7 +25,7 @@ class ItemDAO(metaclass=Singleton):
         item_type: str,
         item_description: str,
         item_stock: int,
-        item_image: Optional[bytes],
+        item_image: Optional[bytes] = None,
         is_in_menu: bool = False,
     ) -> Item:
         orderable_id = self.orderable_dao.create_orderable(

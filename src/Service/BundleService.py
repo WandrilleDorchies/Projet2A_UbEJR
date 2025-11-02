@@ -43,7 +43,7 @@ class BundleService:
         bundle_availability_start_date: datetime,
         bundle_availability_end_date: datetime,
         bundle_items: Dict[Item, int],
-        bundle_image: bytes,
+        bundle_image: Optional[bytes] = None,
         is_in_menu: bool = False,
     ) -> Optional[Bundle]:
         create_bundle = self.bundle_dao.create_bundle(

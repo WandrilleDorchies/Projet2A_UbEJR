@@ -67,7 +67,7 @@ class OrderService:
         orders = self.get_all_orders_by_customer(customer_id)
         states = [order.order_state for order in orders]
         if 0 in states:
-            return
+            return None
 
         new_order = self.order_dao.create_order(customer_id=customer_id)
         return new_order
