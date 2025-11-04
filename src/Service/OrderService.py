@@ -73,19 +73,20 @@ class OrderService:
         return new_order
 
     @log
-    def update_order(self, order_id: int, update) -> Order:
-        order = self.order_dao.get_order_by_id(order_id)
-        if order is None:
-            raise ValueError(f"[OrderService] Cannot update: order with ID {order_id} not found.")
+    def update_order(self, order_id: int, update: dict) -> Order:
+        self.order_dao.get_order_by_id(order_id)
+
+        if all([value is None for value in update.values()]):
+            raise ValueError("You must change at least one field.")
+
+        update = {key: value for key, value in update.items() if update[key]}
+
         updated_order = self.order_dao.update_order(order_id=order_id, update=update)
         return updated_order
 
     @log
     def delete_order(self, order_id: int) -> None:
-        order = self.order_dao.get_order_by_id(order_id)
-        if order is None:
-            raise ValueError(f"[OrderService] Cannot delete: order with ID {order_id} not found.")
-
+        self.order_dao.get_order_by_id(order_id)
         self.order_dao.delete_order(order_id)
 
     @log
@@ -105,10 +106,6 @@ class OrderService:
             The total price of the order
         """
         order = self.order_dao.get_order_by_id(order_id)
-
-        if order is None:
-            raise ValueError(f"No order found with id {order_id}")
-
         return order.order_price
 
     @log

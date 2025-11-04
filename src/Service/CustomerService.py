@@ -77,13 +77,13 @@ class CustomerService:
         password: str,
         address_string: str,
     ) -> Optional[Customer]:
-        existing_user = self.customer_dao.get_customer_by_email(mail)
+        existing_user = self.customer_dao.get_customer_by_email(mail.strip())
         if existing_user is not None:
             raise ValueError(
                 f"[CustomerService] Cannot create: customer with email {mail} already exists."
             )
 
-        existing_user = self.customer_dao.get_customer_by_phone(phone)
+        existing_user = self.customer_dao.get_customer_by_phone(phone.strip())
         if existing_user is not None:
             raise ValueError(
                 f"[CustomerService] Cannot create: customer with phone {phone} already exists."
@@ -127,18 +127,38 @@ class CustomerService:
     @log
     def update_customer(self, customer_id: int, update: dict) -> Customer:
         self.get_customer_by_id(customer_id)
+
+        if all([value is None for value in update.values()]):
+            raise ValueError("You must change at least one field.")
+
+        update = {key: value for key, value in update.items() if update[key]}
+
+        if update.get("customer_phone"):
+            phone_number = pn.parse(update["customer_phone"], "FR")
+            if not pn.is_valid_number(phone_number) or not pn.is_possible_number(phone_number):
+                raise ValueError(f"The number {update['customer_phone']} is invalid.")
+
+            update["customer_phone"] = "0" + str(phone_number.national_number)
+
+        if update.get("customer_mail"):
+            is_valid_email = validate_email(
+                update["customer_mail"], check_blacklist=False, check_dns=False, check_smtp=False
+            )
+
+            if not is_valid_email:
+                raise ValueError("[CustomerService] Cannot create: The email is not valid.")
+
         updated_customer = self.customer_dao.update_customer(customer_id=customer_id, update=update)
         return updated_customer
 
     @log
     def update_address(self, customer_id: int, update: dict) -> Customer:
         customer = self.get_customer_by_id(customer_id)
-        current_address = self.address_dao.get_address_by_customer_id(customer_id)
-        current_attributes = current_address.get_attributes()
 
-        for key, value in current_attributes.items():
-            if not update[key]:
-                update[key] = value
+        if all([value is None for value in update.values()]):
+            raise ValueError("You must change at least one field.")
+
+        update = {key: value for key, value in update.items() if update[key]}
 
         update["address_id"] = customer.address_id
         new_address = Address(**update)
@@ -148,6 +168,7 @@ class CustomerService:
 
     @log
     def update_password(self, customer_id: int, old_password: str, new_password: str) -> Customer:
+        self.get_customer_by_id(customer_id)
         return self.user_service.change_password(
             customer_id, old_password, new_password, "customer"
         )
@@ -180,10 +201,5 @@ class CustomerService:
         customer_id : int
             The ID of the customer to delete.
         """
-        customer = self.customer_dao.get_customer_by_id(customer_id)
-        if customer is None:
-            raise ValueError(
-                f"[CustomerService] Cannot delete: customer with ID {customer_id} not found."
-            )
-
+        self.customer_dao.get_customer_by_id(customer_id)
         self.customer_dao.delete_customer(customer_id)

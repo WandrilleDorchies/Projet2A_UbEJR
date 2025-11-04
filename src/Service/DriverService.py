@@ -42,7 +42,7 @@ class DriverService:
 
     @log
     def get_driver_by_phone(self, phone_number: str) -> Optional[Driver]:
-        driver = self.driver_dao.get_driver_by_phone(phone_number)
+        driver = self.driver_dao.get_driver_by_phone(phone_number.strip())
         if driver is None:
             raise ValueError(
                 f"[DriverService] Cannot update driver: driver with phone {phone_number} not found."
@@ -82,11 +82,22 @@ class DriverService:
         return created_driver
 
     @log
-    def update_driver(self, driver_id: int, update) -> Optional[Driver]:
-        if self.driver_dao.get_driver_by_id(driver_id) is None:
-            raise ValueError(
-                f"[DriverService] Cannot update driver: driver with ID {driver_id} not found."
-            )
+    def update_driver(self, driver_id: int, update: dict) -> Optional[Driver]:
+        self.driver_dao.get_driver_by_id(driver_id)
+
+        if all([value is None for value in update.values()]):
+            raise ValueError("You must change at least one field.")
+
+        update = {key: value for key, value in update.items() if update[key]}
+
+        if update.get("driver_phone"):
+            phone_number = pn.parse(update["driver_phone"], "FR")
+            if not pn.is_valid_number(phone_number) or not pn.is_possible_number(phone_number):
+                raise ValueError(f"The number {update['driver_phone']} is invalid.")
+
+            driver_phone = "0" + str(phone_number.national_number)
+            update["driver_phone"] = driver_phone
+
         updated_driver = self.driver_dao.update_driver(driver_id=driver_id, update=update)
         return updated_driver
 
@@ -145,10 +156,5 @@ class DriverService:
 
     @log
     def delete_driver(self, driver_id: int) -> None:
-        driver = self.driver_dao.get_driver_by_id(driver_id)
-        if driver is None:
-            raise ValueError(
-                f"[DriverService] Cannot delete: driver with ID {driver_id} not found."
-            )
-
+        self.driver_dao.get_driver_by_id(driver_id)
         self.driver_dao.delete_driver(driver_id)

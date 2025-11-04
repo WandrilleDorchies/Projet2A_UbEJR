@@ -74,20 +74,15 @@ class DriverDAO(metaclass=Singleton):
     # UPDATE
     @log
     def update_driver(self, driver_id: int, update: dict):
-        if not update:
-            raise ValueError("At least one value should be updated")
-
         parameters_update = [
             "driver_first_name",
             "driver_last_name",
-            "driver_password_hash",
-            "driver_salt",
             "driver_is_delivering",
             "driver_phone",
         ]
         for key in update.keys():
             if key not in parameters_update:
-                raise ValueError(f"{key} is not a parameter of Order.")
+                raise ValueError(f"{key} is not a parameter of Driver.")
 
         updated_fields = [f"{field} = %({field})s" for field in update.keys()]
         set_field = ", ".join(updated_fields)
