@@ -137,7 +137,9 @@ def login(
                 status_code=400, detail="Invalid user_type. Must be: customer, driver, or admin"
             )
 
-        user = user_service.login(identifier=identifier, password=password, user_type=user_type)
+        user = user_service.login(
+            identifier=identifier.strip(), password=password, user_type=user_type
+        )
 
         token = jwt_service.encode_jwt(user.id, user.user_role)
 

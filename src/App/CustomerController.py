@@ -1,6 +1,5 @@
 from typing import Annotated
 
-import phonenumbers as pn
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
 
@@ -79,29 +78,15 @@ def get_profile(customer_id: int = Depends(get_customer_id_from_token)) -> APICu
     "/me", status_code=status.HTTP_200_OK, dependencies=[Depends(CustomerBearer())]
 )
 def update_profile(
-    first_name: str = None,
-    last_name: str = None,
-    mail: str = None,
-    phone: str = None,
+    customer_first_name: str = None,
+    customer_last_name: str = None,
+    customer_mail: str = None,
+    customer_phone: str = None,
     customer_id: int = Depends(get_customer_id_from_token),
 ):
     try:
-        update_data = {}
-        if first_name:
-            update_data["customer_first_name"] = first_name
-        if last_name:
-            update_data["customer_last_name"] = last_name
-        if mail:
-            update_data["customer_mail"] = mail
-
-        if phone:
-            phone_number = pn.parse(phone, "FR")
-            if not pn.is_valid_number(phone_number) or not pn.is_possible_number(phone_number):
-                raise ValueError(f"The number {phone} is invalid.")
-
-            customer_phone = "0" + str(phone_number.national_number)
-            update_data["customer_phone"] = customer_phone
-
+        update_data = locals()
+        update_data.pop("customer_id")
         updated_customer = customer_service.update_customer(customer_id, update_data)
         return updated_customer
 
@@ -189,7 +174,7 @@ def add_orderable_to_order(
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(CustomerBearer())],
 )
-def remove_orderable_to_order(
+def remove_orderable_from_order(
     orderable_id: int,
     quantity: int,
     order_id: int = Depends(get_current_order_id),

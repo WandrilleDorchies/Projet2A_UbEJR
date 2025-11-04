@@ -1,6 +1,5 @@
 from typing import Annotated
 
-import phonenumbers as pn
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
 
@@ -16,7 +15,7 @@ def get_driver_id_from_token(
     credentials: Annotated[HTTPAuthorizationCredentials, Depends(DriverBearer())],
 ) -> int:
     token = credentials.credentials
-    driver_id = int(jwt_service.validate_user_jwt(token))
+    driver_id = int(jwt_service.validate_user_jwt(token)["user_id"])
     return driver_id
 
 
@@ -34,26 +33,14 @@ def get_profile(driver_id: int = Depends(get_driver_id_from_token)):
 
 @driver_router.put("/me", status_code=status.HTTP_200_OK, dependencies=[Depends(DriverBearer())])
 def update_profile(
-    first_name: str = None,
-    last_name: str = None,
-    phone: str = None,
+    driver_first_name: str = None,
+    driver_last_name: str = None,
+    driver_phone: str = None,
     driver_id: int = Depends(get_driver_id_from_token),
 ):
     try:
-        update_data = {}
-        if first_name:
-            update_data["driver_first_name"] = first_name
-        if last_name:
-            update_data["driver_last_name"] = last_name
-
-        if phone:
-            phone_number = pn.parse(phone, "FR")
-            if not pn.is_valid_number(phone_number) or not pn.is_possible_number(phone_number):
-                raise ValueError(f"The number {phone} is invalid.")
-
-            driver_phone = "0" + str(phone_number.national_number)
-            update_data["driver_phone"] = driver_phone
-
+        update_data = locals()
+        update_data.pop("driver_id")
         updated_driver = driver_service.update_driver(driver_id, update_data)
         return updated_driver
 
@@ -69,7 +56,7 @@ def update_profile(
 )
 def get_available_orders():
     try:
-        return order_service.get_paid_orders()
+        return order_service.get_available_orders()
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching orders: {e}") from e
 

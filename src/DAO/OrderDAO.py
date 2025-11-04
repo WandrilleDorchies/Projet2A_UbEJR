@@ -172,6 +172,26 @@ class OrderDAO(metaclass=Singleton):
         return Orders
 
     @log
+    def get_available_orders(self):
+        raw_orders = self.db_connector.sql_query(
+            """SELECT * from Orders
+            WHERE order_state = 0
+                  AND order_is_prepared=True
+                  AND order_is_prepared=True;""",
+            return_type="all",
+        )
+
+        if not raw_orders:
+            return []
+
+        Orders = []
+        for raw_order in raw_orders:
+            raw_order["order_orderables"] = self._get_orderables_in_order(raw_order["order_id"])
+            Orders.append(Order(**raw_order))
+
+        return Orders
+
+    @log
     def get_past_orders(self):
         raw_orders = self.db_connector.sql_query(
             "SELECT * from Orders WHERE order_state = 2", return_type="all"

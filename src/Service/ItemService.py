@@ -50,9 +50,14 @@ class ItemService:
 
     @log
     def update_item(self, item_id: int, update: dict) -> Optional[Item]:
+        self.driver_dao.get_item_by_id(item_id)
+
+        if all([value is None for value in update.values()]):
+            raise ValueError("You must change at least one field.")
+
+        update = {key: value for key, value in update.items() if update[key]}
+
         item = self.item_dao.update_item(item_id, update=update)
-        if item is None:
-            raise ValueError(f"[ItemService] Cannot update: item with ID {item_id} not found.")
         return item
 
     @log

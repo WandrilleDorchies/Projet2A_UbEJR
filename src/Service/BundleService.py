@@ -60,19 +60,26 @@ class BundleService:
 
     @log
     def update_bundle(self, bundle_id: int, update: dict) -> Optional[Bundle]:
-        bundle = self.bundle_dao.update_bundle(bundle_id=bundle_id, update=update)
-        if bundle is None:
-            raise ValueError(
-                f"[BundleService] Cannot update: bundle with ID {bundle_id} not found."
+        self.get_bundle_by_id(bundle_id)
+
+        if all([value is None for value in update.values()]):
+            raise ValueError("You must change at least one field.")
+
+        if update.get("bundle_availability_start_date"):
+            update["bundle_availability_start_date"] = datetime.strptime(
+                update.get("bundle_availability_start_date"), "%d/%m/%Y"
             )
-        return bundle
+
+        if update.get("bundle_availability_end_date"):
+            update["bundle_availability_end_date"] = datetime.strptime(
+                update.get("bundle_availability_start_date"), "%d/%m/%Y"
+            )
+
+        update = {key: value for key, value in update.items() if update[key]}
+        updated_bundle = self.bundle_dao.update_bundle(bundle_id=bundle_id, update=update)
+        return updated_bundle
 
     @log
     def delete_bundle(self, bundle_id: int) -> None:
-        bundle = self.bundle_dao.get_bundle_by_id(bundle_id)
-        if bundle is None:
-            raise ValueError(
-                f"[BundleService] Cannot delete: bundle with ID {bundle_id} not found."
-            )
-
+        self.bundle_dao.get_bundle_by_id(bundle_id)
         self.bundle_dao.delete_bundle(bundle_id)

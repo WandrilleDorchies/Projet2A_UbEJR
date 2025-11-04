@@ -250,7 +250,7 @@ class TestOrderService:
         initial_stock = sample_item.item_stock
         order_service.add_orderable_to_order(orderable_id, sample_order.order_id, 3)
 
-        updated_order = order_service.remove_orderable_to_order(
+        updated_order = order_service.remove_orderable_from_order(
             orderable_id, sample_order.order_id, 2
         )
 
@@ -268,7 +268,7 @@ class TestOrderService:
         initial_stock = sample_item.item_stock
         order_service.add_orderable_to_order(orderable_id, sample_order.order_id, 3)
 
-        updated_order = order_service.remove_orderable_to_order(
+        updated_order = order_service.remove_orderable_from_order(
             orderable_id, sample_order.order_id, 3
         )
 
@@ -285,7 +285,7 @@ class TestOrderService:
         with pytest.raises(
             ValueError, match=re.escape("[OrderService] Orderable with ID 9999 not found.")
         ):
-            order_service.remove_orderable_to_order(9999, sample_order.order_id, 1)
+            order_service.remove_orderable_from_order(9999, sample_order.order_id, 1)
 
     def test_remove_bundle_from_order_success(
         self,
@@ -304,7 +304,7 @@ class TestOrderService:
 
         order_service.add_orderable_to_order(orderable_id, sample_order.order_id, 2)
 
-        updated_order = order_service.remove_orderable_to_order(
+        updated_order = order_service.remove_orderable_from_order(
             orderable_id, sample_order.order_id, 1
         )
 
@@ -332,7 +332,7 @@ class TestOrderService:
 
         order_service.add_orderable_to_order(orderable_id, sample_order.order_id, 2)
 
-        updated_order = order_service.remove_orderable_to_order(
+        updated_order = order_service.remove_orderable_from_order(
             orderable_id, sample_order.order_id, 2
         )
 
