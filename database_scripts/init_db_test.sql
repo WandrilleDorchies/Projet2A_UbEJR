@@ -176,14 +176,14 @@ VALUES
 ('bundle', true);
 
 INSERT INTO Orders (order_customer_id, order_state, order_date, order_time, order_is_paid, order_is_prepared)
-VALUES (1, 4, '2025-10-21', '12:30:00', true, true),
-       (2, 1, '2025-10-21', '13:00:00', false, false),
-       (3, 3, '2025-10-22', '11:45:00', true, false),
-       (1, 4, '2025-10-22', '12:15:00', true, true),
-       (2, 5, '2025-10-22', '12:45:00', true, true),
-       (3, 6, '2025-10-23', '13:30:00', false, false),
-       (1, 7, '2025-10-23', '14:00:00', true, true),
-       (2, 8, '2025-10-24', '15:00:00', true, true);
+VALUES (1, 1, '2025-10-21', '12:30:00', true, true),
+       (2, 0, '2025-10-21', '13:00:00', false, false),
+       (3, 2, '2025-10-22', '11:45:00', true, true),
+       (1, 0, '2025-10-22', '12:15:00', true, true),
+       (2, 2, '2025-10-22', '12:45:00', true, true),
+       (3, 0, '2025-10-23', '13:30:00', false, false),
+       (1, 0, '2025-10-23', '14:00:00', true, true),
+       (2, 0, '2025-10-24', '15:00:00', true, true);
 
 INSERT INTO Order_contents (order_id, orderable_id, orderable_quantity)
 VALUES
@@ -204,7 +204,4 @@ VALUES
 (1, 2, 1),
 (2, 1, 0),
 (3, 1, 0),
-(4, 1, 1),
-(5, 2, 2),
-(7, 2, 1),
 (8, 1, 2);

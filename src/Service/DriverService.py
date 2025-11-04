@@ -128,18 +128,14 @@ class DriverService:
 
     @log
     def accept_order(self, order_id: int, driver_id: int) -> Delivery:
-        if self.driver_dao.get_driver_by_id(driver_id) is None:
-            raise ValueError(
-                f"[DriverService] Cannot accept order: driver with ID {driver_id} not found."
-            )
+        driver = self.get_driver_by_id(driver_id)
 
         if self.order_dao.get_order_by_id(order_id) is None:
             raise ValueError(
                 f"[DriverService] Cannot accept order: order with ID {order_id} not found."
             )
 
-        existing_delivery = self.delivery_dao.get_delivery_by_driver(driver_id)
-        if existing_delivery:
+        if driver.driver_is_delivering:
             raise ValueError(f"[DriverService] Driver {driver_id} is already on a delivery.")
 
         delivery = self.delivery_dao.create_delivery(order_id, driver_id)
