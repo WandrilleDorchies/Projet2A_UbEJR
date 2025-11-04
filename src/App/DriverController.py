@@ -41,8 +41,6 @@ def update_profile(
     try:
         update_data = locals()
         update_data.pop("driver_id")
-        print(update_data)
-        print(type(update_data))
         updated_driver = driver_service.update_driver(driver_id, update_data)
         return updated_driver
 

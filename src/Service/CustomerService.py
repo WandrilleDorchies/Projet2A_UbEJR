@@ -79,16 +79,20 @@ class CustomerService:
         password: str,
         address_string: str,
     ) -> Optional[Customer]:
-        existing_user = self.customer_dao.get_customer_by_email(mail.strip())
+        formatted_mail = mail.lower().strip()
+        existing_user = self.customer_dao.get_customer_by_email(formatted_mail)
         if existing_user is not None:
             raise ValueError(
-                f"[CustomerService] Cannot create: customer with email {mail} already exists."
+                f"[CustomerService] Cannot create: customer with email {formatted_mail} "
+                "already exists."
             )
 
-        existing_user = self.customer_dao.get_customer_by_phone(phone.strip())
+        formatted_phone = phone.strip()
+        existing_user = self.customer_dao.get_customer_by_phone(formatted_phone)
         if existing_user is not None:
             raise ValueError(
-                f"[CustomerService] Cannot create: customer with phone {phone} already exists."
+                f"[CustomerService] Cannot create: customer with phone {formatted_phone} "
+                "already exists."
             )
         if not re.match(self.pattern, first_name) or not re.match(self.pattern, last_name):
             raise ValueError(
@@ -96,12 +100,12 @@ class CustomerService:
                 "must only contains letters"
             )
 
-        phone_number = pn.parse(phone, "FR")
+        phone_number = pn.parse(formatted_phone, "FR")
         if not pn.is_valid_number(phone_number) or not pn.is_possible_number(phone_number):
             raise ValueError(f"[CustomerService] Cannot create: The number {phone} is invalid.")
 
         is_valid_email = validate_email(
-            mail, check_blacklist=False, check_dns=False, check_smtp=False
+            formatted_mail, check_blacklist=False, check_dns=False, check_smtp=False
         )
 
         if not is_valid_email:
@@ -128,7 +132,7 @@ class CustomerService:
             formatted_first_name,
             formatted_last_name,
             customer_phone,
-            mail,
+            formatted_mail,
             password_hash,
             salt,
             address.address_id,
@@ -175,7 +179,10 @@ class CustomerService:
 
         if update.get("customer_mail"):
             is_valid_email = validate_email(
-                update["customer_mail"], check_blacklist=False, check_dns=False, check_smtp=False
+                update["customer_mail"],
+                check_blacklist=False,
+                check_dns=False,
+                check_smtp=False,
             )
 
             if not is_valid_email:

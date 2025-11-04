@@ -1,7 +1,6 @@
 from datetime import datetime
 from typing import Annotated, Dict, Optional
 
-import phonenumbers as pn
 from fastapi import APIRouter, Depends, HTTPException, Response, UploadFile, status
 from fastapi.security import HTTPAuthorizationCredentials
 
@@ -113,17 +112,7 @@ async def update_item(
     item_image: Optional[UploadFile] = None,
 ):
     try:
-        update = {
-            key: value
-            for key, value in [
-                ("item_name", item_name),
-                ("item_price", item_price),
-                ("item_type", item_type),
-                ("item_description", item_description),
-                ("item_stock", item_stock),
-            ]
-            if value is not None
-        }
+        update = locals()
         if item_image:
             image_data = await item_image.read()
             update["item_image"] = image_data
@@ -215,24 +204,7 @@ async def update_bundle(
     bundle_image: Optional[UploadFile] = None,
 ):
     try:
-        update = {
-            key: value
-            for key, value in [
-                ("bundle_name", bundle_name),
-                ("bundle_reduction", bundle_reduction),
-                ("bundle_description", bundle_description),
-                (
-                    "bundle_availability_start_date",
-                    datetime.strptime(bundle_availability_start_date, "%d/%m/%Y"),
-                ),
-                (
-                    "bundle_availability_end_date",
-                    datetime.strptime(bundle_availability_end_date, "%d/%m/%Y"),
-                ),
-                ("bundle_image", bundle_image),
-            ]
-            if value is not None
-        }
+        update = locals()
         if bundle_items:
             Items = {}
             for item_id, nb in bundle_items.items():
@@ -325,23 +297,8 @@ def update_profile(
     phone: str = None,
 ):
     try:
-        customer_service.get_customer_by_id(customer_id)
-        update_data = {}
-        if first_name:
-            update_data["customer_first_name"] = first_name
-        if last_name:
-            update_data["customer_last_name"] = last_name
-        if mail:
-            update_data["customer_mail"] = mail
-
-        if phone:
-            phone_number = pn.parse(phone, "FR")
-            if not pn.is_valid_number(phone_number) or not pn.is_possible_number(phone_number):
-                raise ValueError(f"The number {phone} is invalid.")
-
-            customer_phone = "0" + str(phone_number.national_number)
-            update_data["customer_phone"] = customer_phone
-
+        update_data = locals()
+        update_data.pop("customer_id")
         updated_customer = customer_service.update_customer(customer_id, update_data)
         return updated_customer
 
@@ -412,20 +369,8 @@ def update_driver(
     phone: str = None,
 ):
     try:
-        update_data = {}
-        if first_name:
-            update_data["driver_first_name"] = first_name
-        if last_name:
-            update_data["driver_last_name"] = last_name
-
-        if phone:
-            phone_number = pn.parse(phone, "FR")
-            if not pn.is_valid_number(phone_number) or not pn.is_possible_number(phone_number):
-                raise ValueError(f"The number {phone} is invalid.")
-
-            driver_phone = "0" + str(phone_number.national_number)
-            update_data["driver_phone"] = driver_phone
-
+        update_data = locals()
+        update_data.pop("driver_id")
         updated_driver = driver_service.update_driver(driver_id, update_data)
         return updated_driver
 
