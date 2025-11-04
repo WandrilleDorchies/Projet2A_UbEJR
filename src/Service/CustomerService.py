@@ -1,3 +1,4 @@
+import re
 from typing import List, Optional
 
 import phonenumbers as pn
@@ -35,6 +36,7 @@ class CustomerService:
         self.address_dao = address_dao
         self.gm_service = gm_service
         self.user_service = user_service
+        self.pattern = r"^[A-Za-zÀ-ÖØ-öø-ÿ\- ]+$"
 
     @log
     def get_customer_by_id(self, customer_id: int) -> Optional[Customer]:
@@ -88,14 +90,15 @@ class CustomerService:
             raise ValueError(
                 f"[CustomerService] Cannot create: customer with phone {phone} already exists."
             )
-
-        check_password_strength(password)
+        if not re.match(self.pattern, first_name) or not re.match(self.pattern, last_name):
+            raise ValueError(
+                "[Customer Service] Cannot create customer: First name and last name "
+                "must only contains letters"
+            )
 
         phone_number = pn.parse(phone, "FR")
         if not pn.is_valid_number(phone_number) or not pn.is_possible_number(phone_number):
             raise ValueError(f"[CustomerService] Cannot create: The number {phone} is invalid.")
-
-        customer_phone = "0" + str(phone_number.national_number)
 
         is_valid_email = validate_email(
             mail, check_blacklist=False, check_dns=False, check_smtp=False
@@ -111,11 +114,24 @@ class CustomerService:
                 "is invalid or outside the delivery zone."
             )
 
+        check_password_strength(password)
+
+        formatted_first_name = first_name.strip().capitalize()
+        formatted_last_name = last_name.strip().upper()
+
+        customer_phone = "0" + str(phone_number.national_number)
+
         salt = create_salt()
         password_hash = hash_password(password, salt)
 
         customer = self.customer_dao.create_customer(
-            first_name, last_name, customer_phone, mail, password_hash, salt, address.address_id
+            formatted_first_name,
+            formatted_last_name,
+            customer_phone,
+            mail,
+            password_hash,
+            salt,
+            address.address_id,
         )
 
         return customer
@@ -132,6 +148,23 @@ class CustomerService:
             raise ValueError("You must change at least one field.")
 
         update = {key: value for key, value in update.items() if update[key]}
+
+        if update.get("customer_first_name"):
+            if not re.match(self.pattern, update.get("customer_first_name")):
+                raise ValueError(
+                    "[Customer Service] Cannot update customer: First name"
+                    "must only contains letters"
+                )
+            update["customer_first_name"] = update["customer_first_name"].strip().capitalize()
+
+        if update.get("customer_last_name"):
+            if not re.match(self.pattern, update.get("customer_last_name")):
+                raise ValueError(
+                    "[Customer Service] Cannot update customer: Last name "
+                    "must only contains letters"
+                )
+
+            update["customer_last_name"] = update["customer_last_name"].strip().upper()
 
         if update.get("customer_phone"):
             phone_number = pn.parse(update["customer_phone"], "FR")

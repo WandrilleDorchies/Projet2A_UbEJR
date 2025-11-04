@@ -1,3 +1,4 @@
+import re
 from typing import Optional
 
 import phonenumbers as pn
@@ -30,6 +31,7 @@ class DriverService:
         self.delivery_dao = delivery_dao
         self.user_service = user_service
         self.order_dao = order_dao
+        self.pattern = r"^[A-Za-zÀ-ÖØ-öø-ÿ\- ]+$"
 
     @log
     def get_driver_by_id(self, driver_id: int) -> Optional[Driver]:
@@ -62,19 +64,27 @@ class DriverService:
     def create_driver(
         self, first_name: str, last_name: str, phone: str, password: str
     ) -> Optional[Driver]:
-        check_password_strength(password)
-
         phone_number = pn.parse(phone, "FR")
         if not pn.is_valid_number(phone_number) or not pn.is_possible_number(phone_number):
             raise ValueError(f"The number {phone} is invalid.")
 
+        if not re.match(self.pattern, first_name) or not re.match(self.pattern, last_name):
+            raise ValueError(
+                "[Driver Service] Cannot create driver: First name and last name "
+                "must only contains letters"
+            )
+
+        check_password_strength(password)
         salt = create_salt()
         password_hash = hash_password(password, salt)
 
+        formatted_first_name = first_name.strip().capitalize()
+        formatted_last_name = last_name.strip().upper()
+
         driver_phone = "0" + str(phone_number.national_number)
         created_driver = self.driver_dao.create_driver(
-            first_name=first_name,
-            last_name=last_name,
+            first_name=formatted_first_name,
+            last_name=formatted_last_name,
             phone=driver_phone,
             password_hash=password_hash,
             salt=salt,
@@ -89,6 +99,21 @@ class DriverService:
             raise ValueError("You must change at least one field.")
 
         update = {key: value for key, value in update.items() if update[key]}
+
+        if update.get("driver_first_name"):
+            if not re.match(self.pattern, update.get("driver_first_name")):
+                raise ValueError(
+                    "[driver Service] Cannot update driver: First namemust only contains letters"
+                )
+            update["driver_first_name"] = update["driver_first_name"].strip().capitalize()
+
+        if update.get("driver_last_name"):
+            if not re.match(self.pattern, update.get("driver_last_name")):
+                raise ValueError(
+                    "[driver Service] Cannot update driver: Last name must only contains letters"
+                )
+
+            update["driver_last_name"] = update["driver_last_name"].strip().upper()
 
         if update.get("driver_phone"):
             phone_number = pn.parse(update["driver_phone"], "FR")
