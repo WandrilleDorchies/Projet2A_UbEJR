@@ -155,7 +155,7 @@ class OrderService:
         return self.order_dao.add_orderable_to_order(order_id, orderable.orderable_id, quantity)
 
     @log
-    def remove_orderable_to_order(
+    def remove_orderable_from_order(
         self, orderable_id: int, order_id: int, quantity: int = 1
     ) -> Order:
         """
