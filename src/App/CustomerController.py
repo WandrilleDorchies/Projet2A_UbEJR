@@ -176,7 +176,7 @@ def add_orderable_to_order(
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(CustomerBearer())],
 )
-def remove_orderable_to_order(
+def remove_orderable_from_order(
     orderable_id: int,
     quantity: int,
     order_id: int = Depends(get_current_order_id),
