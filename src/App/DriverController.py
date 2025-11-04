@@ -56,7 +56,7 @@ def update_profile(
 )
 def get_available_orders():
     try:
-        return order_service.get_paid_orders()
+        return order_service.get_available_orders()
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching orders: {e}") from e
 
