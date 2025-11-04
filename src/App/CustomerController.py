@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
 
 from src.Model.APICustomer import APICustomer
+from src.Model.Order import OrderState
 
 from .init_app import customer_service, jwt_service, menu_service, order_service, stripe_service
 from .JWTBearer import CustomerBearer
@@ -187,7 +188,7 @@ def remove_orderable_from_order(
 )
 def view_order_history(customer_id: int = Depends(get_customer_id_from_token)):
     try:
-        return customer_service.order_history(customer_id)
+        return order_service.get_all_orders_by_customer(customer_id)
     except Exception as e:
         raise Exception("[CustomerController] could not get order history") from e
 
@@ -235,7 +236,7 @@ def succesful_payment(session_id: int, order_id: int = Depends(get_current_order
                 detail=f"Payment not completed. Status: {payment_info['payment_status']}",
             )
 
-        order_service.update_order(order_id, {"order_is_paid": True})
+        order_service.update_order_state(order_id, OrderState.PAID.value)
 
         return order_service.get_order_by_id(order_id)
 

@@ -4,6 +4,8 @@ from typing import Annotated, Dict, Optional
 from fastapi import APIRouter, Depends, HTTPException, Response, UploadFile, status
 from fastapi.security import HTTPAuthorizationCredentials
 
+from src.Model.Order import OrderState
+
 from .init_app import (
     bundle_service,
     customer_service,
@@ -382,9 +384,11 @@ def update_driver(
 
 # ORDERS
 @admin_router.get("/orders", status_code=status.HTTP_200_OK)
-def get_all_orders():
+def get_all_orders(limit: int = 15):
     try:
-        return order_service.get_all_orders()
+        if limit < 0:
+            raise ValueError("You should choose a positive number of orders to see.")
+        return order_service.get_all_orders(limit)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching orders: {e}") from e
 
@@ -400,8 +404,7 @@ def get_order_by(order_id: int):
 @admin_router.put("/orders/{order_id}/prepared", status_code=status.HTTP_200_OK)
 def mark_order_as_prepared(order_id: int):
     try:
-        update_data = {"order_is_prepared": True}
-        updated_order = order_service.update_order(order_id, update_data)
+        updated_order = order_service.update_order_state(order_id, OrderState.PREPARED.value)
         return updated_order
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e

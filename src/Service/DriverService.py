@@ -8,6 +8,7 @@ from src.DAO.DriverDAO import DriverDAO
 from src.DAO.OrderDAO import OrderDAO
 from src.Model.Delivery import Delivery
 from src.Model.Driver import Driver
+from src.Model.Order import OrderState
 from src.Service.UserService import UserService
 from src.utils.log_decorator import log
 
@@ -127,51 +128,42 @@ class DriverService:
         return updated_driver
 
     @log
-    def accept_order(self, order_id: int, driver_id: int) -> Delivery:
+    def start_delivery(self, order_id: int, driver_id: int) -> Delivery:
         driver = self.get_driver_by_id(driver_id)
+        order = self.order_dao.get_order_by_id(order_id)
 
-        if self.order_dao.get_order_by_id(order_id) is None:
+        if order.order_state != OrderState.PREPARED:
             raise ValueError(
-                f"[DriverService] Cannot accept order: order with ID {order_id} not found."
+                "[DriverService] Cannot start delivery: "
+                f"Order isn't prepared, current state: {order.order_state.name}"
             )
 
         if driver.driver_is_delivering:
-            raise ValueError(f"[DriverService] Driver {driver_id} is already on a delivery.")
-
-        delivery = self.delivery_dao.create_delivery(order_id, driver_id)
-        return delivery
-
-    @log
-    def start_delivery(self, order_id: int, driver_id: int) -> Delivery:
-        if self.driver_dao.get_driver_by_id(driver_id) is None:
             raise ValueError(
-                f"[DriverService] Cannot start delivery: driver with ID {driver_id} not found."
+                f"[DriverService] Cannot start delivery: Driver {driver_id} "
+                "already has an active delivery"
             )
 
-        if self.delivery_dao.get_delivery_by_order_id(order_id) is None:
-            raise ValueError(
-                f"[DriverService] Cannot start delivery: order with ID {order_id} not found."
-            )
-
+        self.delivery_dao.create_delivery(order_id, driver_id)
         self.driver_dao.update_driver(driver_id, update={"driver_is_delivering": True})
-        self.order_dao.update_order(order_id, update={"order_state": 1})
+        self.order_dao.update_order_state(order_id, OrderState.DELIVERING.value)
         delivery = self.delivery_dao.update_delivery_state(order_id, 1)
         return delivery
 
     @log
     def end_delivery(self, order_id: int, driver_id: int) -> Delivery:
-        if self.driver_dao.get_driver_by_id(driver_id) is None:
-            raise ValueError(
-                f"[DriverService] Cannot end delivery: driver with ID {driver_id} not found."
-            )
+        self.get_driver_by_id(driver_id)
 
-        if self.delivery_dao.get_delivery_by_order_id(order_id) is None:
+        order = self.order_dao.get_order_by_id(order_id)
+
+        if order.order_state != OrderState.DELIVERING:
             raise ValueError(
-                f"[DriverService] Cannot end delivery: order with ID {order_id} not found."
+                "[DriverService] Cannot end delivery: Order must be delivering to complete, "
+                f"current state: {order.order_state.name}"
             )
 
         self.driver_dao.update_driver(driver_id, update={"driver_is_delivering": False})
-        self.order_dao.update_order(order_id, update={"order_state": 2})
+        self.order_dao.update_order_state(order_id, OrderState.DELIVERED.value)
         delivery = self.delivery_dao.update_delivery_state(order_id, 2)
         return delivery
 

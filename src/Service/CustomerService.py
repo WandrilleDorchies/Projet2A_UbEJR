@@ -6,10 +6,8 @@ from validate_email import validate_email
 
 from src.DAO.AddressDAO import AddressDAO
 from src.DAO.CustomerDAO import CustomerDAO
-from src.DAO.OrderDAO import OrderDAO
 from src.Model.Address import Address
 from src.Model.Customer import Customer
-from src.Model.Order import Order
 from src.Service.GoogleMapService import GoogleMapService
 from src.Service.PasswordService import check_password_strength, create_salt, hash_password
 from src.Service.UserService import UserService
@@ -18,7 +16,6 @@ from src.utils.log_decorator import log
 
 class CustomerService:
     customer_dao: CustomerDAO
-    order_dao: OrderDAO
     address_dao: AddressDAO
     gm_service: GoogleMapService
     user_service: UserService
@@ -26,13 +23,11 @@ class CustomerService:
     def __init__(
         self,
         customer_dao: CustomerDAO,
-        order_dao: OrderDAO,
         address_dao: AddressDAO,
         gm_service: GoogleMapService,
         user_service: UserService,
     ):
         self.customer_dao = customer_dao
-        self.order_dao = order_dao
         self.address_dao = address_dao
         self.gm_service = gm_service
         self.user_service = user_service
@@ -225,11 +220,6 @@ class CustomerService:
     #     update = {"customer_phone": customer_phone}
     #     updated_customer = self.update_customer(customer_id, update)
     #     return updated_customer
-
-    @log
-    def order_history(self, customer_id: int) -> Optional[List[Order]]:
-        history = self.order_dao.get_all_orders_by_customer(customer_id)
-        return history
 
     @log
     def delete_customer(self, customer_id: int) -> None:

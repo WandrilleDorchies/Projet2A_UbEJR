@@ -4,7 +4,7 @@ from src.DAO.BundleDAO import BundleDAO
 from src.DAO.ItemDAO import ItemDAO
 from src.DAO.OrderableDAO import OrderableDAO
 from src.DAO.OrderDAO import OrderDAO
-from src.Model.Order import Order
+from src.Model.Order import Order, OrderState
 from src.utils.log_decorator import log
 
 
@@ -25,6 +25,14 @@ class OrderService:
         self.orderable_dao = orderable_dao
         self.item_dao = item_dao
         self.bundle_dao = bundle_dao
+        self.valid_transition = {
+            OrderState.PENDING: [OrderState.PAID, OrderState.CANCELLED],
+            OrderState.PAID: [OrderState.PREPARED, OrderState.CANCELLED],
+            OrderState.PREPARED: [OrderState.DELIVERING, OrderState.CANCELLED],
+            OrderState.DELIVERING: [OrderState.DELIVERED, OrderState.CANCELLED],
+            OrderState.DELIVERED: [],
+            OrderState.CANCELLED: [],
+        }
 
     @log
     def get_order_by_id(self, order_id: int) -> Optional[Order]:
@@ -34,8 +42,8 @@ class OrderService:
         return order
 
     @log
-    def get_all_orders(self) -> Optional[List[Order]]:
-        return self.order_dao.get_all_orders()
+    def get_all_orders(self, limit: int) -> Optional[List[Order]]:
+        return self.order_dao.get_all_orders(limit)
 
     @log
     def get_all_orders_by_customer(self, customer_id: int) -> Optional[List[Order]]:
@@ -46,25 +54,19 @@ class OrderService:
         return self.order_dao.get_customer_current_order(customer_id)
 
     @log
-    def get_paid_orders(self) -> Optional[List[Order]]:
-        return self.order_dao.get_paid_orders()
+    def get_orders_by_state(
+        self,
+        state: int,
+    ) -> List[Order]:
+        return self.order_dao.get_orders_by_state(state)
 
     @log
-    def get_available_orders(self) -> Optional[List[Order]]:
-        return self.order_dao.get_available_orders()
+    def get_available_orders_for_drivers(self) -> List[Order]:
+        return self.order_dao.get_orders_by_state(OrderState.PREPARED.value)
 
     @log
-    def get_current_orders(self) -> Optional[List[Order]]:
-        return self.order_dao.get_current_orders()
-
-    @log
-    def get_past_orders(self) -> Optional[List[Order]]:
-        return self.order_dao.get_past_orders()
-
-    @log
-    def get_prepared_orders(self) -> Optional[List[Order]]:
-        orders = self.order_dao.get_prepared_orders()
-        return orders
+    def get_actives_orders(self) -> List[Order]:
+        return self.order_dao.get_actives_orders()
 
     @log
     def create_order(self, customer_id) -> Order:
@@ -77,40 +79,30 @@ class OrderService:
         return new_order
 
     @log
-    def update_order(self, order_id: int, update: dict) -> Order:
-        self.order_dao.get_order_by_id(order_id)
+    def update_order_state(self, order_id: int, new_state: OrderState) -> Optional[Order]:
+        order = self.order_dao.get_order_by_id(order_id)
 
-        if all([value is None for value in update.values()]):
-            raise ValueError("You must change at least one field.")
+        if new_state not in self.valid_transition[order.order_state]:
+            raise ValueError(
+                "[OrderService] Cannot change state: Cannot go from "
+                f"{order.order_state} to {new_state}."
+            )
 
-        update = {key: value for key, value in update.items() if update[key]}
-
-        updated_order = self.order_dao.update_order(order_id=order_id, update=update)
+        updated_order = self.order_dao.update_order_state(order_id, new_state)
         return updated_order
+
+    @log
+    def mark_as_paid(self, order_id: int) -> Order:
+        return self.transition_to_state(order_id, OrderState.PAID)
+
+    @log
+    def mark_as_prepared(self, order_id: int) -> Order:
+        return self.transition_to_state(order_id, OrderState.PREPARED)
 
     @log
     def delete_order(self, order_id: int) -> None:
         self.order_dao.get_order_by_id(order_id)
         self.order_dao.delete_order(order_id)
-
-    @log
-    def calculate_price(self, order_id: int) -> float:
-        """
-        Calculates the total price of an order and updates the Order object.
-        Currently applies only bundle reductions.
-        Parameters
-        ----------
-        order_id : int
-            The unique identifier of the order for which the total price
-            will be calculated.
-
-        Returns
-        -------
-        float:
-            The total price of the order
-        """
-        order = self.order_dao.get_order_by_id(order_id)
-        return order.order_price
 
     @log
     def add_orderable_to_order(self, orderable_id: int, order_id: int, quantity: int = 1) -> Order:

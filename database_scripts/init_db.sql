@@ -55,8 +55,6 @@ CREATE TABLE project.Orders (
     order_state INTEGER,
     order_date DATE,
     order_time TIME,
-    order_is_paid BOOLEAN,
-    order_is_prepared BOOLEAN,
     FOREIGN KEY (order_customer_id) REFERENCES project.Customers(customer_id)
 );
 
@@ -201,20 +199,25 @@ VALUES
 ('bundle', false),
 ('bundle', true);
 
-INSERT INTO Orders (order_customer_id, order_state, order_date, order_time, order_is_paid, order_is_prepared)
-VALUES (1, 1, '2025-10-21', '12:30:00', true, true),
-       (2, 0, '2025-10-21', '13:00:00', false, false),
-       (3, 2, '2025-10-22', '11:45:00', true, true),
-       (1, 0, '2025-10-22', '12:15:00', true, true),
-       (2, 2, '2025-10-22', '12:45:00', true, true),
-       (3, 0, '2025-10-23', '13:30:00', false, false),
-       (1, 0, '2025-10-23', '14:00:00', true, true),
-       (2, 0, '2025-10-24', '15:00:00', true, true);
+INSERT INTO Orders (order_customer_id, order_state, order_date, order_time)
+VALUES 
+
+(1, 4, '2025-10-21', '12:30:00'),
+(2, 0, '2025-10-21', '13:00:00'),
+(3, 4, '2025-10-22', '11:45:00'),
+(1, 1, '2025-10-22', '12:15:00'),
+(2, 4, '2025-10-22', '12:45:00'),
+(3, 2, '2025-10-23', '13:30:00'),
+(3, 2, '2025-10-24', '15:30:00'),
+(1, 1, '2025-10-24', '16:00:00'),
+(2, 0, '2025-10-24', '16:30:00'),
+(3, 6, '2025-10-24', '17:00:00');
+
 
 INSERT INTO Order_contents (order_id, orderable_id, orderable_quantity)
 VALUES
-(1, 1, 1),  
-(1, 2, 1), 
+(1, 1, 1),
+(1, 2, 1),
 (1, 5, 1),
 (2, 4, 2),
 (3, 3, 2),
@@ -222,12 +225,14 @@ VALUES
 (5, 1, 1),
 (5, 2, 1),
 (6, 4, 1),
-(7, 6, 1),
-(8, 5, 1);
-
+(7, 1, 1),
+(7, 2, 1), 
+(8, 5, 2), 
+(9, 4, 1), 
+(9, 3, 1), 
+(10, 6, 1);
 INSERT INTO Deliveries (delivery_order_id, delivery_driver_id, delivery_state)
 VALUES
-(1, 2, 1),
-(2, 1, 0),
-(3, 1, 0),
-(8, 1, 2);
+(1, 2, 2),
+(3, 1, 2), 
+(5, 2, 2);
