@@ -142,3 +142,5 @@ key.json
 /static
 /templates
 /src/App/WebController.py
+
+password.py
