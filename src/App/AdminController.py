@@ -447,7 +447,7 @@ def get_all_orders():
 @admin_router.get("/orders/{order_id}", status_code=status.HTTP_200_OK)
 def get_order_by(order_id: int):
     try:
-        return order_service.get_order_by(order_id)
+        return order_service.get_order_by_id(order_id)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
 
