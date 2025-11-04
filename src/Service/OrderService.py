@@ -50,6 +50,10 @@ class OrderService:
         return self.order_dao.get_paid_orders()
 
     @log
+    def get_available_orders(self) -> Optional[List[Order]]:
+        return self.order_dao.get_available_orders()
+
+    @log
     def get_current_orders(self) -> Optional[List[Order]]:
         return self.order_dao.get_current_orders()
 
