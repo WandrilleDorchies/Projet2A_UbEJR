@@ -159,7 +159,7 @@ VALUES
 
 INSERT INTO Customers (customer_first_name, customer_last_name, customer_phone, customer_mail, customer_password_hash, customer_salt, customer_address_id)
 VALUES
-('Ronan', 'LE SAOUT', '0612345678', 'ronan.le-saout@email.com', 'hash1', 'salt1', 1),
+('Ronan', 'LE SAOUT', '0612345678', 'ronan.le-saout@email.com', '877689f07988660e66e3503b342a4cb46edc802906ad007788468b4b5be83e9e', 'f8b1e585ae4e7090dbb885756b3b1b67ab1ca291f623d5881e02bba56167efa79bef1957c537ec58d8046437cdf911c8e0fef5b14d332acf231429ca3fff9309427d91a9feec3a00728de4117aad7e57243a9ef554e2e2fd79a5f9184ff12ec655a001a31f6753b8366cf42a821dca9e88cf2ad64022a40853238a84da599e5b', 1),
 ('Mental', 'CRASHOUT', '0699988777', 'aled.prozaczopixan@email.com', 'hash2', 'salt2', 2),
 ('Plus', 'DIDIER', '0699988777', 'pas.dinspi@email.com', 'hash3', 'salt3', 3);
 
