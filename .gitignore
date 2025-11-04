@@ -137,3 +137,8 @@ key.json
 
 # Logs
 /logs
+
+# Interface
+/static
+/templates
+/src/App/WebController.py
