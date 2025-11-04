@@ -5,7 +5,7 @@ from .Address import Address
 
 class APICustomer(BaseModel):
     """
-    User representation in the API
+    Customer representation in the API
 
     """
 
@@ -13,3 +13,5 @@ class APICustomer(BaseModel):
     first_name: str
     last_name: str
     address: Address
+    customer_phone: str
+    customer_mail: str
