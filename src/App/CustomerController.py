@@ -4,6 +4,8 @@ import phonenumbers as pn
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
 
+from src.Model.APICustomer import APICustomer
+
 from .init_app import customer_service, jwt_service, menu_service, order_service, stripe_service
 from .JWTBearer import CustomerBearer
 
@@ -56,10 +58,17 @@ def get_current_order_id(
 @customer_router.get(
     "/me", status_code=status.HTTP_200_OK, dependencies=[Depends(CustomerBearer())]
 )
-def get_profile(customer_id: int = Depends(get_customer_id_from_token)):
+def get_profile(customer_id: int = Depends(get_customer_id_from_token)) -> APICustomer:
     try:
         customer = customer_service.get_customer_by_id(customer_id)
-        return customer
+        return APICustomer(
+            id=customer.id,
+            first_name=customer.first_name,
+            last_name=customer.last_name,
+            address=customer.customer_address,
+            customer_phone=customer.customer_phone,
+            customer_mail=customer.customer_mail,
+        )
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
     except Exception as e:
@@ -194,8 +203,8 @@ def remove_orderable_to_order(
 def view_order_history(customer_id: int = Depends(get_customer_id_from_token)):
     try:
         return customer_service.order_history(customer_id)
-    except Exception:
-        raise Exception("[CustomerController] could not get order history")
+    except Exception as e:
+        raise Exception("[CustomerController] could not get order history") from e
 
 
 # PAYMENT
