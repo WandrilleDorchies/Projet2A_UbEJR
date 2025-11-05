@@ -127,9 +127,6 @@ class CustomerDAO(metaclass=Singleton):
     # UPDATE
     @log
     def update_customer(self, customer_id: int, update: dict):
-        if not update:
-            raise ValueError("At least one value should be updated")
-
         parameters_update = [
             "customer_first_name",
             "customer_last_name",

@@ -292,18 +292,21 @@ def delete_customer(customer_id: int):
 
 
 @admin_router.put(
-    "/customer", status_code=status.HTTP_200_OK, dependencies=[Depends(AdminBearer())]
+    "/customers/{customer_id}",
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(AdminBearer())],
 )
 def update_profile(
     customer_id: int,
-    first_name: str = None,
-    last_name: str = None,
-    mail: str = None,
-    phone: str = None,
+    customer_first_name: str = None,
+    customer_last_name: str = None,
+    customer_mail: str = None,
+    customer_phone: str = None,
 ):
     try:
         update_data = locals()
         update_data.pop("customer_id")
+        print(update_data)
         updated_customer = customer_service.update_customer(customer_id, update_data)
         return updated_customer
 
@@ -372,9 +375,9 @@ def delete_driver(driver_id: int):
 )
 def update_driver(
     driver_id: int,
-    first_name: str = None,
-    last_name: str = None,
-    phone: str = None,
+    driver_first_name: str = None,
+    driver_last_name: str = None,
+    driver_phone: str = None,
 ):
     try:
         update_data = locals()

@@ -151,7 +151,7 @@ class CustomerService:
         if update.get("customer_first_name"):
             if not re.match(self.pattern, update.get("customer_first_name")):
                 raise ValueError(
-                    "[Customer Service] Cannot update customer: First name"
+                    "[Customer Service] Cannot update customer: First name "
                     "must only contains letters"
                 )
             update["customer_first_name"] = update["customer_first_name"].strip().capitalize()
