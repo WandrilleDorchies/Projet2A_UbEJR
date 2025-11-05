@@ -157,7 +157,7 @@ class DriverService:
 
         self.delivery_dao.create_delivery(order_id, driver_id)
         self.driver_dao.update_driver(driver_id, update={"driver_is_delivering": True})
-        self.order_dao.update_order_state(order_id, OrderState.DELIVERING.value)
+        self.order_dao.update_order_state(order_id, OrderState.DELIVERING)
         delivery = self.delivery_dao.update_delivery_state(order_id, 1)
         return delivery
 

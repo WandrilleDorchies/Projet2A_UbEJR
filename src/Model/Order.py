@@ -64,4 +64,4 @@ class Order(BaseModel):
 
     @property
     def is_delivered(self) -> bool:
-        return self.order_state == OrderState.DELIVERED.value
+        return self.order_state == OrderState.DELIVERED

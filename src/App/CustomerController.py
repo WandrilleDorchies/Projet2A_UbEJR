@@ -4,7 +4,6 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
 
 from src.Model.APICustomer import APICustomer
-from src.Model.Order import OrderState
 
 from .init_app import customer_service, jwt_service, menu_service, order_service, stripe_service
 from .JWTBearer import CustomerBearer
@@ -206,7 +205,7 @@ def create_checkout_session(
     try:
         order = order_service.get_order_by_id(order_id)
 
-        if order.order_is_paid:
+        if order.is_paid:
             raise HTTPException(status_code=400, detail="Order is already paid.")
 
         customer = customer_service.get_customer_by_id(customer_id)
@@ -236,7 +235,7 @@ def succesful_payment(session_id: int, order_id: int = Depends(get_current_order
                 detail=f"Payment not completed. Status: {payment_info['payment_status']}",
             )
 
-        order_service.update_order_state(order_id, OrderState.PAID.value)
+        order_service.mark_as_paid(order_id)
 
         return order_service.get_order_by_id(order_id)
 

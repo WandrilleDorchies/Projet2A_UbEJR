@@ -40,9 +40,7 @@ class OrderDAO(metaclass=Singleton):
                                order_customer_id,
                                order_state,
                                order_date,
-                               order_time,
-                               order_is_paid,
-                               order_is_prepared)
+                               order_time)
             VALUES (DEFAULT,
                     %(customer_id)s,
                     0,
@@ -113,7 +111,12 @@ class OrderDAO(metaclass=Singleton):
     @log
     def get_customer_current_order(self, customer_id: int) -> Optional[Order]:
         raw_order = self.db_connector.sql_query(
-            "SELECT * from Orders WHERE order_customer_id=%s AND order_state IN (0, 1, 2, 3);",
+            """SELECT * from Orders
+               WHERE order_customer_id=%s
+               AND order_state NOT IN (4, 5)
+               ORDER BY order_time DESC
+               LIMIT 1;
+            """,
             [customer_id],
             "one",
         )

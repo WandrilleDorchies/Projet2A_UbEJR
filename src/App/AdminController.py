@@ -4,8 +4,6 @@ from typing import Annotated, Dict, Optional
 from fastapi import APIRouter, Depends, HTTPException, Response, UploadFile, status
 from fastapi.security import HTTPAuthorizationCredentials
 
-from src.Model.Order import OrderState
-
 from .init_app import (
     bundle_service,
     customer_service,
@@ -404,7 +402,7 @@ def get_order_by(order_id: int):
 @admin_router.put("/orders/{order_id}/prepared", status_code=status.HTTP_200_OK)
 def mark_order_as_prepared(order_id: int):
     try:
-        updated_order = order_service.update_order_state(order_id, OrderState.PREPARED.value)
+        updated_order = order_service.mark_as_prepared(order_id)
         return updated_order
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
