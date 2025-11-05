@@ -1,3 +1,5 @@
+from typing import Literal
+
 from .Orderable import Orderable
 
 
@@ -20,7 +22,7 @@ class Item(Orderable):
     orderable_id: int
     item_name: str
     item_price: float
-    item_type: str
+    item_type: Literal["Plat", "Entrée", "Dessert", "Boisson", "Accompagnement", "Autres"]
     item_description: str
     item_stock: int
 
