@@ -1,5 +1,6 @@
+import asyncio
 import re
-from typing import Optional
+from typing import List, Optional
 
 import phonenumbers as pn
 
@@ -33,6 +34,7 @@ class DriverService:
         self.user_service = user_service
         self.order_dao = order_dao
         self.pattern = r"^[A-Za-zÀ-ÖØ-öø-ÿ\- ]+$"
+        self.driver_queues: List[asyncio.Queue] = []
 
     @log
     def get_driver_by_id(self, driver_id: int) -> Optional[Driver]:
@@ -51,6 +53,38 @@ class DriverService:
                 f"[DriverService] Cannot update driver: driver with phone {phone_number} not found."
             )
         return driver
+
+    # NOTIFICATIONS
+    @log
+    async def register_driver_queue(self) -> asyncio.Queue:
+        """Create and register a new SSE queue for a connected driver."""
+        queue = asyncio.Queue()
+        self.driver_queues.append(queue)
+        return queue
+
+    @log
+    def unregister_driver_queue(self, queue: asyncio.Queue):
+        """Remove a queue when the driver disconnects."""
+        if queue in self.driver_queues:
+            self.driver_queues.remove(queue)
+
+    @log
+    async def event_generator(self, queue: asyncio.Queue):
+        """Generate SSE messages from the driver's queue."""
+        try:
+            while True:
+                message = await queue.get()
+                yield f"data: {message}\n\n"
+        except asyncio.CancelledError:
+            pass
+
+    @log
+    async def notify_all_drivers(self, message: str):
+        """Broadcast a message to all connected drivers."""
+        for queue in self.driver_queues:
+            await queue.put(message)
+
+    # END NOTIFICATIONS
 
     @log
     def get_all_drivers(self) -> Optional[Driver]:

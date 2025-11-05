@@ -1,6 +1,7 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi.responses import StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials
 
 from src.Model.Order import OrderState
@@ -66,6 +67,25 @@ def get_available_orders():
         return order_service.get_available_orders_for_drivers()
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching orders: {e}") from e
+
+
+# NOTIFICATIONS
+
+
+@driver_router.get("/events/drivers")
+async def driver_events(request: Request):
+    queue = await driver_service.register_driver_queue()
+
+    async def event_stream():
+        try:
+            async for event in driver_service.event_generator(queue):
+                yield event
+                if await request.is_disconnected():
+                    break
+        finally:
+            driver_service.unregister_driver_queue(queue)
+
+    return StreamingResponse(event_stream(), media_type="text/event-stream")
 
 
 @driver_router.get(

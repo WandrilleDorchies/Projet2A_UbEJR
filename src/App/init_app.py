@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 
+from Service.KitchenService import KitchenService
 from src.DAO.AddressDAO import AddressDAO
 from src.DAO.AdminDAO import AdminDAO
 from src.DAO.BundleDAO import BundleDAO
@@ -16,6 +17,7 @@ from src.Service.DriverService import DriverService
 from src.Service.GoogleMapService import GoogleMapService
 from src.Service.ItemService import ItemService
 from src.Service.JWTService import JwtService
+from src.Service.KitchenService import KitchenService
 from src.Service.MenuService import MenuService
 from src.Service.OrderService import OrderService
 from src.Service.StripeService import StripeService
@@ -44,6 +46,6 @@ order_service = OrderService(order_dao, orderable_dao, item_dao, bundle_dao)
 item_service = ItemService(item_dao, order_dao)
 bundle_service = BundleService(bundle_dao)
 menu_service = MenuService(orderable_dao, item_dao, bundle_dao)
-
+kitchen_service = KitchenService(order_dao, driver_service)
 jwt_service = JwtService()
 stripe_service = StripeService()
