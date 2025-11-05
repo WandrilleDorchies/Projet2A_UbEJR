@@ -93,11 +93,11 @@ class OrderService:
 
     @log
     def mark_as_paid(self, order_id: int) -> Order:
-        return self.transition_to_state(order_id, OrderState.PAID)
+        return self.update_order_state(order_id, OrderState.PAID)
 
     @log
     def mark_as_prepared(self, order_id: int) -> Order:
-        return self.transition_to_state(order_id, OrderState.PREPARED)
+        return self.update_order_state(order_id, OrderState.PREPARED)
 
     @log
     def delete_order(self, order_id: int) -> None:
