@@ -101,6 +101,31 @@ def update_profile(
 
 
 @customer_router.put(
+    "/address", status_code=status.HTTP_200_OK, dependencies=[Depends(CustomerBearer())]
+)
+def update_address(
+    address_number: int = None,
+    address_street: str = None,
+    address_city: str = None,
+    address_postal_code: int = None,
+    address_country: str = None,
+    customer_id: int = Depends(get_customer_id_from_token),
+):
+    try:
+        update_data = locals()
+        update_data.pop("customer_id")
+        print(update_data)
+        print(type(update_data))
+        updated_address = customer_service.update_address(customer_id, update_data)
+        return updated_address
+
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error updating address: {e}") from e
+
+
+@customer_router.put(
     "me/password", status_code=status.HTTP_200_OK, dependencies=[Depends(CustomerBearer())]
 )
 def update_password(
