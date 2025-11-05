@@ -157,6 +157,6 @@ def login(
         return token
 
     except ValueError as e:
-        raise HTTPException(status_code=401, detail="Invalid credentials") from e
+        raise HTTPException(status_code=401, detail=f"Invalid credentials: {str(e)}") from e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Login failed: {e}") from e

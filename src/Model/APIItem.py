@@ -23,11 +23,11 @@ class APIItem(BaseModel):
 
     def __eq__(self, other):
         return (
-            isinstance(other, APIItem) and
-            self.item_name == other.item_name and
-            self.item_price == other.item_price and
-            self.item_type == other.item_type and
-            self.item_description == other.item_description
+            isinstance(other, APIItem)
+            and self.item_name == other.item_name
+            and self.item_price == other.item_price
+            and self.item_type == other.item_type
+            and self.item_description == other.item_description
         )
 
     def __repr__(self):
