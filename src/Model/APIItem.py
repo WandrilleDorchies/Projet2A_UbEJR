@@ -1,7 +1,7 @@
-from .Orderable import Orderable
+from pydantic import BaseModel
 
 
-class APIItem(Orderable):
+class APIItem(BaseModel):
     """
     Represents an item/product in the system.
 
@@ -21,19 +21,3 @@ class APIItem(Orderable):
     item_price: float
     item_type: str
     item_description: str
-
-    def __init__(self, **args):
-        args["orderable_type"] = "item"
-        super().__init__(**args)
-
-    def __hash__(self) -> str:
-        return hash(self.orderable_id)
-
-    def __eq__(self, other):
-        if not isinstance(other, APIItem):
-            return False
-        return self.orderable_id == other.orderable_id
-
-    @property
-    def price(self) -> float:
-        return self.item_price
