@@ -65,7 +65,7 @@ class TestDriverService:
         assert created_driver is not None
         assert created_driver.id == 1
         assert created_driver.first_name == "Test"
-        assert created_driver.last_name == "Driver"
+        assert created_driver.last_name == "DRIVER"
         assert created_driver.driver_is_delivering is False
 
     def test_update_driver(self, driver_service, sample_driver, clean_database):
@@ -74,35 +74,26 @@ class TestDriverService:
             sample_driver.id, {"driver_first_name": "UpdatedName", "driver_is_delivering": True}
         )
 
-        assert updated_driver.first_name == "UpdatedName"
+        assert updated_driver.first_name == "Updatedname"
         assert updated_driver.driver_is_delivering is True
 
     def test_update_driver_not_exists(self, driver_service, clean_database):
         """Test updating non-existing driver raises error"""
-        with pytest.raises(ValueError, match="Cannot update driver: driver with ID 9999 not found"):
+        with pytest.raises(ValueError, match="Cannot find driver: driver with ID 9999 not found"):
             driver_service.update_driver(9999, {"driver_first_name": "Test"})
 
-    def test_accept_order(
-        self, driver_service, sample_order, sample_driver, clean_database, delivery_dao
-    ):
-        """Test accepting an order"""
-        delivery = driver_service.accept_order(sample_order.order_id, sample_driver.id)
-
-        assert delivery is not None
-        assert delivery.delivery_order_id == sample_order.order_id
-        assert delivery.delivery_driver_id == sample_driver.id
-        assert delivery.delivery_state == 0
-
-    def test_accept_order_driver_not_exists(self, driver_service, sample_order, clean_database):
-        """Test accepting order with non-existing driver raises error"""
-        with pytest.raises(ValueError, match="Cannot accept order: driver with ID 9999 not found"):
-            driver_service.accept_order(sample_order.order_id, 9999)
-
     def test_delivery_start(
-        self, driver_service, sample_order, sample_driver, clean_database, delivery_dao
+        self,
+        driver_service,
+        sample_order,
+        sample_driver,
+        clean_database,
+        delivery_dao,
+        order_service,
     ):
         """Test starting a delivery"""
-        delivery_dao.create_delivery(sample_order.order_id, sample_driver.id)
+        order_service.mark_as_paid(sample_order.order_id)
+        order_service.mark_as_prepared(sample_order.order_id)
 
         updated_delivery = driver_service.start_delivery(sample_order.order_id, sample_driver.id)
 

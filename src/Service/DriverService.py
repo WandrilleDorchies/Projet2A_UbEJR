@@ -39,7 +39,7 @@ class DriverService:
         driver = self.driver_dao.get_driver_by_id(driver_id)
         if driver is None:
             raise ValueError(
-                f"[DriverService] Cannot update driver: driver with ID {driver_id} not found."
+                f"[DriverService] Cannot find driver: driver with ID {driver_id} not found."
             )
         return driver
 
@@ -105,7 +105,7 @@ class DriverService:
 
     @log
     def update_driver(self, driver_id: int, update: dict) -> Optional[Driver]:
-        self.driver_dao.get_driver_by_id(driver_id)
+        self.get_driver_by_id(driver_id)
 
         if all([value is None for value in update.values()]):
             raise ValueError("You must change at least one field.")

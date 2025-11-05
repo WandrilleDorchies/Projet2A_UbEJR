@@ -81,5 +81,5 @@ class BundleService:
 
     @log
     def delete_bundle(self, bundle_id: int) -> None:
-        self.bundle_dao.get_bundle_by_id(bundle_id)
+        self.get_bundle_by_id(bundle_id)
         self.bundle_dao.delete_bundle(bundle_id)

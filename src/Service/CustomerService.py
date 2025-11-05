@@ -109,7 +109,7 @@ class CustomerService:
         address = self.gm_service.validate_address(address_string)
         if address is None:
             raise ValueError(
-                "[CustomerService] Cannot create: customer address"
+                "[CustomerService] Cannot create: customer address "
                 "is invalid or outside the delivery zone."
             )
 
@@ -231,5 +231,5 @@ class CustomerService:
         customer_id : int
             The ID of the customer to delete.
         """
-        self.customer_dao.get_customer_by_id(customer_id)
+        self.get_customer_by_id(customer_id)
         self.customer_dao.delete_customer(customer_id)
