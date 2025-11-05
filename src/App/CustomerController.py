@@ -219,23 +219,22 @@ def view_order_history(customer_id: int = Depends(get_customer_id_from_token)):
         orders = order_service.get_all_orders_by_customer(customer_id)
 
         for order in orders:
-            for i, contents in enumerate(order.order_orderables):
-                for j, article in enumerate(contents):
+            for i, content in enumerate(order.order_orderables):
 
-                    if isinstance(article, Item):
+                    if isinstance(content, Item):
 
-                        order.order_orderables[i][j] = APIItem(
-                            item_id=article.item_id,
-                            orderable_id=article.orderable_id,
-                            item_name=article.item_name,
-                            item_price=article.item_price,
-                            item_type=article.item_type,
-                            item_description=article.item_description,
+                        order.order_orderables[i] = APIItem(
+                            item_id=content.item_id,
+                            orderable_id=content.orderable_id,
+                            item_name=content.item_name,
+                            item_price=content.item_price,
+                            item_type=content.item_type,
+                            item_description=content.item_description,
                         )
 
-                    elif isinstance(article, Bundle):
-                        for k, item in enumerate(article.bundle_items):
-                            article.bundle_items[k] = APIItem(
+                    elif isinstance(content, Bundle):
+                        for k, item in enumerate(content.bundle_items):
+                            content.bundle_items[k] = APIItem(
                                 item_id=item.item_id,
                                 orderable_id=item.orderable_id,
                                 item_name=item.item_name,
@@ -244,12 +243,12 @@ def view_order_history(customer_id: int = Depends(get_customer_id_from_token)):
                                 item_description=item.item_description,
                             )
 
-                        order.order_orderables[i][j] = APIBundle(
-                            bundle_id=article.bundle_id,
-                            orderable_id=article.orderable_id,
-                            bundle_name=article.bundle_name,
-                            bundle_description=article.bundle_description,
-                            bundle_items=article.bundle_items,
+                        order.order_orderables[i] = APIBundle(
+                            bundle_id=content.bundle_id,
+                            orderable_id=content.orderable_id,
+                            bundle_name=content.bundle_name,
+                            bundle_description=content.bundle_description,
+                            bundle_items=content.bundle_items,
                         )
         return orders
     except Exception as e:
