@@ -18,7 +18,7 @@ class ItemService:
     def get_item_by_id(self, item_id: int) -> Optional[Item]:
         item = self.item_dao.get_item_by_id(item_id)
         if item is None:
-            raise ValueError(f"[ItemService] Cannot get: item with ID {item_id} not found.")
+            raise ValueError(f"[ItemService] Cannot find: item with ID {item_id} not found.")
         return item
 
     @log
@@ -50,7 +50,7 @@ class ItemService:
 
     @log
     def update_item(self, item_id: int, update: dict) -> Optional[Item]:
-        self.driver_dao.get_item_by_id(item_id)
+        self.get_item_by_id(item_id)
 
         if all([value is None for value in update.values()]):
             raise ValueError("You must change at least one field.")
@@ -70,8 +70,5 @@ class ItemService:
         item_id : int
             The ID of the item to delete.
         """
-        item = self.item_dao.get_item_by_id(item_id)
-        if item is None:
-            raise ValueError(f"[ItemService] Cannot delete: item with ID {item_id} not found.")
-
+        self.get_item_by_id(item_id)
         self.item_dao.delete_item_by_id(item_id)

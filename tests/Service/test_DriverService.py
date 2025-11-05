@@ -33,7 +33,7 @@ class TestDriverService:
 
     def test_get_driver_by_id_not_exists(self, driver_service, clean_database):
         """Test getting driver by non-existing id raises error"""
-        with pytest.raises(ValueError, match="Cannot update driver: driver with ID 9999 not found"):
+        with pytest.raises(ValueError, match="Cannot find driver: driver with ID 9999 not found"):
             driver_service.get_driver_by_id(9999)
 
     def test_get_all_drivers_empty(self, driver_service, clean_database):
@@ -104,16 +104,21 @@ class TestDriverService:
 
     def test_delivery_start_driver_not_exists(self, driver_service, sample_order, clean_database):
         """Test starting delivery with non-existing driver raises error"""
-        with pytest.raises(
-            ValueError, match="Cannot start delivery: driver with ID 9999 not found"
-        ):
+        with pytest.raises(ValueError, match="Cannot find driver: driver with ID 9999 not found"):
             driver_service.start_delivery(sample_order.order_id, 9999)
 
     def test_delivery_end(
-        self, driver_service, sample_order, sample_driver, clean_database, delivery_dao
+        self,
+        driver_service,
+        sample_order,
+        sample_driver,
+        clean_database,
+        delivery_dao,
+        order_service,
     ):
         """Test ending a delivery"""
-        delivery_dao.create_delivery(sample_order.order_id, sample_driver.id)
+        order_service.mark_as_paid(sample_order.order_id)
+        order_service.mark_as_prepared(sample_order.order_id)
         driver_service.start_delivery(sample_order.order_id, sample_driver.id)
 
         updated_delivery = driver_service.end_delivery(sample_order.order_id, sample_driver.id)
@@ -125,17 +130,17 @@ class TestDriverService:
 
     def test_delivery_end_driver_not_exists(self, driver_service, sample_order, clean_database):
         """Test ending delivery with non-existing driver raises error"""
-        with pytest.raises(ValueError, match="Cannot end delivery: driver with ID 9999 not found"):
+        with pytest.raises(ValueError, match="Cannot find driver: driver with ID 9999 not found"):
             driver_service.end_delivery(sample_order.order_id, 9999)
 
     def test_delete_driver(self, driver_service, sample_driver, clean_database):
         """Test deleting a driver"""
         driver_service.delete_driver(sample_driver.id)
 
-        with pytest.raises(ValueError, match="Cannot update driver: driver with ID .* not found"):
+        with pytest.raises(ValueError, match="Cannot find driver: driver with ID 1 not found"):
             driver_service.get_driver_by_id(sample_driver.id)
 
     def test_delete_driver_not_exists(self, driver_service, clean_database):
         """Test deleting non-existing driver raises error"""
-        with pytest.raises(ValueError, match="Cannot delete: driver with ID 9999 not found"):
+        with pytest.raises(ValueError, match="Cannot find driver: driver with ID 9999 not found"):
             driver_service.delete_driver(9999)

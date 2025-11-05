@@ -189,7 +189,7 @@ class TestOrderDAO:
         order = order_dao.add_orderable_to_order(order.order_id, item.orderable_id)
         order = order_dao.add_orderable_to_order(order.order_id, item.orderable_id)
 
-        quantity = order_dao._get_quantity_of_orderables(order.order_id, item.orderable_id)
+        quantity = order_dao.get_quantity_of_orderables(order.order_id, item.orderable_id)
         assert quantity == 2
         assert list(order.order_orderables.keys())[0] == item
 
@@ -232,5 +232,5 @@ class TestOrderDAO:
 
         order_dao.remove_orderable_from_order(order.order_id, item.orderable_id)
 
-        quantity = order_dao._get_quantity_of_orderables(order.order_id, item.orderable_id)
+        quantity = order_dao.get_quantity_of_orderables(order.order_id, item.orderable_id)
         assert quantity == 0

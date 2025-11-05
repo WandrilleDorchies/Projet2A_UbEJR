@@ -209,7 +209,13 @@ def remove_orderable_from_order(
     quantity: int,
     order_id: int = Depends(get_current_order_id),
 ):
-    return order_service.remove_orderable_from_order(orderable_id, order_id, quantity)
+    try:
+        return order_service.remove_orderable_from_order(orderable_id, order_id, quantity)
+    except Exception as e:
+        raise HTTPException(
+            status_code=403,
+            detail=f"[CustomerController]: cannot remove orderable from order - {str(e)}",
+        ) from e
 
 
 @customer_router.get(

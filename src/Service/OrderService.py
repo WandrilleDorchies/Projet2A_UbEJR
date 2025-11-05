@@ -38,7 +38,7 @@ class OrderService:
     def get_order_by_id(self, order_id: int) -> Optional[Order]:
         order = self.order_dao.get_order_by_id(order_id)
         if order is None:
-            raise ValueError(f"[Order Service] Cannot get: order with ID {order_id} not found.")
+            raise ValueError(f"[Order Service] Cannot find: order with ID {order_id} not found.")
         return order
 
     @log
@@ -71,9 +71,10 @@ class OrderService:
     @log
     def create_order(self, customer_id) -> Order:
         orders = self.get_all_orders_by_customer(customer_id)
-        states = [order.order_state for order in orders]
-        if 0 in states:
-            return None
+        states = [order.order_state.value for order in orders]
+
+        if any(state < OrderState.DELIVERED.value for state in states):
+            raise ValueError("An order is already in progress.")
 
         new_order = self.order_dao.create_order(customer_id=customer_id)
         return new_order
@@ -101,7 +102,7 @@ class OrderService:
 
     @log
     def delete_order(self, order_id: int) -> None:
-        self.order_dao.get_order_by_id(order_id)
+        self.get_order_by_id(order_id)
         self.order_dao.delete_order(order_id)
 
     @log
@@ -156,7 +157,7 @@ class OrderService:
 
         Parameters
         ----------
-        item_id : int
+        orderable_id : int
             ID of the item to remove.
         order_id : int
             ID of the order
@@ -166,7 +167,11 @@ class OrderService:
         raw_orderable = self.orderable_dao.get_orderable_by_id(orderable_id)
         if raw_orderable is None:
             raise ValueError(f"[OrderService] Orderable with ID {orderable_id} not found.")
-
+        quantity_in_order = self.order_dao.get_quantity_of_orderables(order_id, orderable_id)
+        if quantity_in_order < quantity:
+            raise ValueError(
+                f"[OrderService] Trying to remove {quantity} of orderable {orderable_id} when there is only {quantity_in_order} of it in the order !"
+            )
         if raw_orderable["orderable_type"] == "item":
             orderable = self.item_dao.get_item_by_orderable_id(orderable_id)
 
