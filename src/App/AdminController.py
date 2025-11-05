@@ -364,7 +364,7 @@ def delete_driver(driver_id: int):
 
 
 @admin_router.put(
-    "/drivers/{customer_id}",
+    "/drivers/{driver_id}",
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(AdminBearer())],
 )
