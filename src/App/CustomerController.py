@@ -3,7 +3,11 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
 
+from src.Model.APIBundle import APIBundle
 from src.Model.APICustomer import APICustomer
+from src.Model.APIItem import APIItem
+from src.Model.Bundle import Bundle
+from src.Model.Item import Item
 
 from .init_app import customer_service, jwt_service, menu_service, order_service, stripe_service
 from .JWTBearer import CustomerBearer
@@ -97,6 +101,31 @@ def update_profile(
 
 
 @customer_router.put(
+    "/address", status_code=status.HTTP_200_OK, dependencies=[Depends(CustomerBearer())]
+)
+def update_address(
+    address_number: int = None,
+    address_street: str = None,
+    address_city: str = None,
+    address_postal_code: int = None,
+    address_country: str = None,
+    customer_id: int = Depends(get_customer_id_from_token),
+):
+    try:
+        update_data = locals()
+        update_data.pop("customer_id")
+        print(update_data)
+        print(type(update_data))
+        updated_address = customer_service.update_address(customer_id, update_data)
+        return updated_address
+
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error updating address: {e}") from e
+
+
+@customer_router.put(
     "me/password", status_code=status.HTTP_200_OK, dependencies=[Depends(CustomerBearer())]
 )
 def update_password(
@@ -187,7 +216,41 @@ def remove_orderable_from_order(
 )
 def view_order_history(customer_id: int = Depends(get_customer_id_from_token)):
     try:
-        return order_service.get_all_orders_by_customer(customer_id)
+        orders = order_service.get_all_orders_by_customer(customer_id)
+
+        for order in orders:
+            for i, content in enumerate(order.order_orderables):
+
+                    if isinstance(content, Item):
+
+                        order.order_orderables[i] = APIItem(
+                            item_id=content.item_id,
+                            orderable_id=content.orderable_id,
+                            item_name=content.item_name,
+                            item_price=content.item_price,
+                            item_type=content.item_type,
+                            item_description=content.item_description,
+                        )
+
+                    elif isinstance(content, Bundle):
+                        for k, item in enumerate(content.bundle_items):
+                            content.bundle_items[k] = APIItem(
+                                item_id=item.item_id,
+                                orderable_id=item.orderable_id,
+                                item_name=item.item_name,
+                                item_price=item.item_price,
+                                item_type=item.item_type,
+                                item_description=item.item_description,
+                            )
+
+                        order.order_orderables[i] = APIBundle(
+                            bundle_id=content.bundle_id,
+                            orderable_id=content.orderable_id,
+                            bundle_name=content.bundle_name,
+                            bundle_description=content.bundle_description,
+                            bundle_items=content.bundle_items,
+                        )
+        return orders
     except Exception as e:
         raise Exception("[CustomerController] could not get order history") from e
 
