@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 
 import pytest
@@ -99,7 +100,10 @@ class TestBundleService:
 
     def test_update_bundle_not_exists(self, bundle_service, clean_database):
         """Test updating non-existing bundle raises error"""
-        with pytest.raises(ValueError, match="Cannot update: bundle with ID 9999 not found"):
+        with pytest.raises(
+            ValueError,
+            match=re.escape("[BundleService] Cannot get: bundle with ID 9999 not found."),
+        ):
             bundle_service.update_bundle(9999, {"bundle_name": "Test"})
 
     def test_delete_bundle(self, bundle_service, sample_bundle, clean_database):
@@ -111,5 +115,8 @@ class TestBundleService:
 
     def test_delete_bundle_not_exists(self, bundle_service, clean_database):
         """Test deleting non-existing bundle raises error"""
-        with pytest.raises(ValueError, match="Cannot delete: bundle with ID 9999 not found"):
+        with pytest.raises(
+            ValueError,
+            match=re.escape("[BundleService] Cannot get: bundle with ID 9999 not found."),
+        ):
             bundle_service.delete_bundle(9999)

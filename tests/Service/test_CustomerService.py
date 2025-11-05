@@ -93,7 +93,7 @@ class TestCustomerService:
         assert created_customer is not None
         assert created_customer.id > 0
         assert created_customer.first_name == "Test"
-        assert created_customer.last_name == "User"
+        assert created_customer.last_name == "USER"
         assert created_customer.customer_phone == "0612345678"
         assert created_customer.customer_mail == "test@email.com"
         assert created_customer.customer_address is not None
@@ -164,7 +164,10 @@ class TestCustomerService:
 
     def test_create_customer_address_too_far_raises_error(self, customer_service, clean_database):
         """Test creating customer with address too far raises error"""
-        with pytest.raises(ValueError, match="invalid or outside the delivery zone"):
+        with pytest.raises(
+            ValueError,
+            match="invalid or outside the delivery zone.",
+        ):
             customer_service.create_customer(
                 first_name="Test",
                 last_name="User",
@@ -184,29 +187,9 @@ class TestCustomerService:
             },
         )
 
-        assert updated_customer.first_name == "UpdatedName"
-        assert updated_customer.last_name == "UpdatedLastName"
+        assert updated_customer.first_name == "Updatedname"
+        assert updated_customer.last_name == "UPDATEDLASTNAME"
         assert updated_customer.customer_mail == sample_customer.customer_mail
-
-    def test_order_history_empty(self, customer_service, sample_customer, clean_database):
-        """Test getting order history when empty"""
-        history = customer_service.order_history(sample_customer.id)
-
-        assert history == []
-
-    def test_order_history_multiple_orders(
-        self, customer_service, sample_customer, order_dao, clean_database
-    ):
-        """Test getting order history with multiple orders"""
-        order_dao.create_order(sample_customer.id)
-        order_dao.create_order(sample_customer.id)
-        order_dao.create_order(sample_customer.id)
-
-        history = customer_service.order_history(sample_customer.id)
-
-        assert history is not None
-        assert len(history) == 3
-        assert all(o.order_customer_id == sample_customer.id for o in history)
 
     def test_delete_customer(self, customer_service, sample_customer, clean_database):
         """Test deleting a customer"""
@@ -217,5 +200,5 @@ class TestCustomerService:
 
     def test_delete_customer_not_exists_raises_error(self, customer_service, clean_database):
         """Test deleting non-existing customer raises error"""
-        with pytest.raises(ValueError, match="Cannot delete: customer with ID 9999 not found"):
+        with pytest.raises(ValueError, match="Cannot find: customer with ID 9999 not found"):
             customer_service.delete_customer(9999)

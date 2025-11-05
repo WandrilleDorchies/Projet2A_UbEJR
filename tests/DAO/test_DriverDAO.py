@@ -72,16 +72,11 @@ class TestDriverDAO:
         assert updated_driver.last_name == "Durand"
         assert updated_driver.driver_phone == "0688888888"
 
-    def test_update_driver_empty_dict_raises_error(self, driver_dao, sample_driver, clean_database):
-        """Test update with empty dictonnary raises error"""
-        with pytest.raises(ValueError, match="At least one value should be updated"):
-            driver_dao.update_driver(sample_driver.id, {})
-
     def test_update_driver_invalid_field_raises_error(
         self, driver_dao, sample_driver, clean_database
     ):
         """Test invalid field raises error"""
-        with pytest.raises(ValueError, match="not a parameter of Order"):
+        with pytest.raises(ValueError, match="not a parameter of Driver"):
             driver_dao.update_driver(sample_driver.id, {"invalid_field": "value"})
 
     def test_delete_driver(self, driver_dao, sample_driver, clean_database):

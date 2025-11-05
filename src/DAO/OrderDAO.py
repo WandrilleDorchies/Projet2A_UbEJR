@@ -45,9 +45,7 @@ class OrderDAO(metaclass=Singleton):
                     %(customer_id)s,
                     0,
                     %(order_date)s,
-                    %(order_time)s,
-                    FALSE,
-                    FALSE)
+                    %(order_time)s)
             RETURNING *;
             """,
             {
@@ -170,9 +168,6 @@ class OrderDAO(metaclass=Singleton):
     # UPDATE
     @log
     def update_order_state(self, order_id: int, new_state: int) -> Order:
-        if not new_state:
-            raise ValueError("Order state should change")
-
         self.db_connector.sql_query(
             """
             UPDATE Orders

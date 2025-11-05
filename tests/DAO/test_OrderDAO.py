@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-import pytest
+from src.Model.Order import OrderState
 
 
 class TestOrderDAO:
@@ -11,10 +11,8 @@ class TestOrderDAO:
         assert order is not None
         assert order.order_id > 0
         assert order.order_customer_id == sample_customer.id
-        assert order.order_state == 0
+        assert order.order_state == OrderState.PENDING
         assert order.order_date == date.today()
-        assert order.order_is_paid is False
-        assert order.order_is_prepared is False
         assert order.order_orderables == {} or order.order_orderables is None
 
     def test_get_order_by_id_exists(self, order_dao, sample_customer, clean_database):
@@ -35,7 +33,7 @@ class TestOrderDAO:
 
     def test_get_all_orders_empty(self, order_dao, clean_database):
         """Tests that get_all_orders returns None"""
-        orders = order_dao.get_all_orders()
+        orders = order_dao.get_all_orders(limit=10)
 
         assert orders == []
 
@@ -45,7 +43,7 @@ class TestOrderDAO:
         order_dao.create_order(sample_customer.id)
         order_dao.create_order(sample_customer.id)
 
-        orders = order_dao.get_all_orders()
+        orders = order_dao.get_all_orders(limit=10)
 
         assert orders is not None
         assert len(orders) == 3
@@ -72,18 +70,17 @@ class TestOrderDAO:
         """Test fetching all prepared orders"""
 
         order1 = order_dao.create_order(sample_customer.id)
-        order2 = order_dao.create_order(sample_customer.id)
+        order_dao.create_order(sample_customer.id)
         order3 = order_dao.create_order(sample_customer.id)
 
-        order_dao.update_order(order1.order_id, {"order_is_prepared": True})
-        order_dao.update_order(order2.order_id, {"order_is_prepared": False})
-        order_dao.update_order(order3.order_id, {"order_is_prepared": True})
+        order_dao.update_order_state(order1.order_id, OrderState.PREPARED.value)
+        order_dao.update_order_state(order3.order_id, OrderState.PREPARED.value)
 
-        prepared_orders = order_dao.get_prepared_orders()
+        prepared_orders = order_dao.get_orders_by_state(OrderState.PREPARED.value)
 
         assert prepared_orders is not None
         assert len(prepared_orders) == 2
-        assert all(o.order_is_prepared is True for o in prepared_orders)
+        assert all(o.is_prepared is True for o in prepared_orders)
 
     def test_no_orders_prepared(self, order_dao, sample_customer, clean_database):
         """Test fetching orders prepared when there is no orders prepared"""
@@ -92,7 +89,7 @@ class TestOrderDAO:
         order_dao.create_order(sample_customer.id)
         order_dao.create_order(sample_customer.id)
 
-        prepared_orders = order_dao.get_prepared_orders()
+        prepared_orders = order_dao.get_orders_by_state(OrderState.PREPARED.value)
 
         assert prepared_orders == []
 
@@ -100,62 +97,21 @@ class TestOrderDAO:
         """Test updating payment status"""
         created_order = order_dao.create_order(sample_customer.id)
 
-        updated_order = order_dao.update_order(
-            order_id=created_order.order_id, update={"order_is_paid": True}
-        )
+        updated_order = order_dao.update_order_state(created_order.order_id, OrderState.PAID.value)
 
-        assert updated_order.order_is_paid is True
-        assert updated_order.order_is_prepared is False
+        assert updated_order.is_paid is True
+        assert updated_order.is_prepared is False
 
     def test_update_order_preparation_status(self, order_dao, sample_customer, clean_database):
         """Test updating preparation status"""
         created_order = order_dao.create_order(sample_customer.id)
-
-        updated_order = order_dao.update_order(
-            order_id=created_order.order_id, update={"order_is_prepared": True}
+        order_dao.update_order_state(created_order.order_id, OrderState.PAID.value)
+        updated_order = order_dao.update_order_state(
+            created_order.order_id, OrderState.PREPARED.value
         )
 
-        assert updated_order.order_is_prepared is True
-        assert updated_order.order_is_paid is False
-
-    def test_update_order_state(self, order_dao, sample_customer, clean_database):
-        """Test updating order state"""
-        created_order = order_dao.create_order(sample_customer.id)
-
-        updated_order = order_dao.update_order(
-            order_id=created_order.order_id, update={"order_state": 2}
-        )
-
-        assert updated_order.order_state == 2
-
-    def test_update_order_all_fields(self, order_dao, sample_customer, clean_database):
-        """Test updating all fields at once"""
-        created_order = order_dao.create_order(sample_customer.id)
-
-        updated_order = order_dao.update_order(
-            order_id=created_order.order_id,
-            update={"order_is_paid": True, "order_is_prepared": True, "order_state": 2},
-        )
-
-        assert updated_order.order_is_paid is True
-        assert updated_order.order_is_prepared is True
-        assert updated_order.order_state == 2
-
-    def test_update_order_empty_dict_raises_error(self, order_dao, sample_customer, clean_database):
-        """Test updating with empty dictionnary"""
-        created_order = order_dao.create_order(sample_customer.id)
-
-        with pytest.raises(ValueError, match="At least one value should be updated"):
-            order_dao.update_order(created_order.order_id, {})
-
-    def test_update_order_invalid_field_raises_error(
-        self, order_dao, sample_customer, clean_database
-    ):
-        """Test updating with wrong field"""
-        created_order = order_dao.create_order(sample_customer.id)
-
-        with pytest.raises(ValueError, match="not a parameter of Order"):
-            order_dao.update_order(created_order.order_id, {"invalid_field": "value"})
+        assert updated_order.is_prepared is True
+        assert updated_order.is_paid is True
 
     def test_delete_order(self, order_dao, sample_customer, clean_database):
         """Test deleting order"""

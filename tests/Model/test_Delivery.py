@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import pytest
 from pydantic_core import ValidationError
 
@@ -5,7 +7,12 @@ from src.Model.Delivery import Delivery
 
 
 def test_delivery_constructor_ok():
-    delivery_test = Delivery(delivery_order_id=1, delivery_driver_id=1, delivery_state=0)
+    delivery_test = Delivery(
+        delivery_order_id=1,
+        delivery_driver_id=1,
+        delivery_state=0,
+        delivery_created_at=datetime.now(),
+    )
 
     assert isinstance(delivery_test, Delivery)
     assert delivery_test.delivery_order_id == 1
