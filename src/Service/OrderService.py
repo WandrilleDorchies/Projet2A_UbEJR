@@ -73,7 +73,7 @@ class OrderService:
         orders = self.get_all_orders_by_customer(customer_id)
         states = [order.order_state.value for order in orders]
 
-        if any(state < OrderState.DELIVERED.value for state in states):
+        if any(state < OrderState.PAID.value for state in states):
             return self.get_customer_current_order(customer_id)
 
         new_order = self.order_dao.create_order(customer_id=customer_id)

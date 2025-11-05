@@ -303,7 +303,11 @@ def create_checkout_session(
 @customer_router.get(
     "/payment/succes", status_code=status.HTTP_200_OK, dependencies=[Depends(CustomerBearer())]
 )
-def succesful_payment(session_id: int, order_id: int = Depends(get_current_order_id)):
+def succesful_payment(
+    session_id: int,
+    customer_id: int = Depends(get_customer_id_from_token),
+    order_id: int = Depends(get_current_order_id),
+):
     try:
         payment_info = stripe_service.verify_payment_status(session_id)
 
@@ -314,6 +318,7 @@ def succesful_payment(session_id: int, order_id: int = Depends(get_current_order
             )
 
         order_service.mark_as_paid(order_id)
+        order_service.create_order(customer_id)
 
         return order_service.get_order_by_id(order_id)
 
