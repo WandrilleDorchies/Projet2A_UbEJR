@@ -269,7 +269,10 @@ def get_all_customers():
 )
 def get_customer_by_id(customer_id: int):
     try:
-        return customer_service.get_customer_by_id(customer_id)
+        customer = customer_service.get_customer_by_id(customer_id)
+        if customer is None:
+            raise HTTPException(status_code=404, detail=f"Customer with id [{customer_id}] not found")
+        return customer
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Invalid request: {e}") from e
 
@@ -340,7 +343,10 @@ def get_all_drivers():
 )
 def get_driver_by_id(driver_id: int):
     try:
-        return driver_service.get_driver_by_id(driver_id)
+        driver = driver_service.get_driver_by_id(driver_id)
+        if driver is None:
+            raise HTTPException(status_code=404, detail=f"Driver with id [{driver_id}] not found")
+        return driver
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Invalid request: {e}") from e
 
@@ -394,7 +400,10 @@ def get_all_orders(limit: int = 15):
 @admin_router.get("/orders/{order_id}", status_code=status.HTTP_200_OK)
 def get_order_by(order_id: int):
     try:
-        return order_service.get_order_by_id(order_id)
+        order = order_service.get_order_by_id(order_id)
+        if order is None:
+            raise HTTPException(status_code=404, detail=f"Order with id [{order_id}] not found")
+        return order
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
 
