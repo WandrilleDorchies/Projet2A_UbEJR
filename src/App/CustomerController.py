@@ -196,7 +196,19 @@ def add_orderable_to_order(
     quantity: int,
     order_id: int = Depends(get_current_order_id),
 ):
-    return order_service.add_orderable_to_order(orderable_id, order_id, quantity)
+    if quantity <= 0:
+        errortext = "[CustomerController] Invalid input:"
+        errortext += " cannot add 0 or a negative number of orderables."
+        raise HTTPException(
+            status_code=403,
+            detail=errortext,
+        )
+    try:
+        return order_service.add_orderable_to_order(orderable_id, order_id, quantity)
+    except Exception as e:
+        raise HTTPException(
+            status_code=403, detail=f"[CustomerController] cannot add orderable : {str(e)}"
+        ) from e
 
 
 @customer_router.put(
@@ -209,12 +221,19 @@ def remove_orderable_from_order(
     quantity: int,
     order_id: int = Depends(get_current_order_id),
 ):
+    if quantity <= 0:
+        errortext = "[CustomerController] Invalid input:"
+        errortext += " cannot remove 0 or a negative number of orderables."
+        raise HTTPException(
+            status_code=403,
+            detail=errortext,
+        )
     try:
         return order_service.remove_orderable_from_order(orderable_id, order_id, quantity)
     except Exception as e:
         raise HTTPException(
             status_code=403,
-            detail=f"[CustomerController]: cannot remove orderable from order - {str(e)}",
+            detail=f"[CustomerController] Invalid input: cannot remove orderable from order - {str(e)}",
         ) from e
 
 
