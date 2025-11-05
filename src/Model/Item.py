@@ -21,7 +21,7 @@ class Item(Orderable):
     item_id: int
     orderable_id: int
     item_name: str
-    item_price: float >= 0
+    item_price: float
     item_type: Literal["Plat", "Entrée", "Dessert", "Boisson", "Accompagnement", "Autres"]
     item_description: str
     item_stock: int
