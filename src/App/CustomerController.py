@@ -3,7 +3,11 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
 
+from src.Model.APIBundle import APIBundle
 from src.Model.APICustomer import APICustomer
+from src.Model.APIItem import APIItem
+from src.Model.Bundle import Bundle
+from src.Model.Item import Item
 from src.Model.Order import OrderState
 
 from .init_app import customer_service, jwt_service, menu_service, order_service, stripe_service
@@ -188,7 +192,42 @@ def remove_orderable_from_order(
 )
 def view_order_history(customer_id: int = Depends(get_customer_id_from_token)):
     try:
-        return order_service.get_all_orders_by_customer(customer_id)
+        orders = order_service.get_all_orders_by_customer(customer_id)
+
+        for order in orders:
+            for i, contents in enumerate(order.order_orderable):
+                for j, article in enumerate(contents):
+
+                    if isinstance(article, Item):
+
+                        order.order_orderable[i][j] = APIItem(
+                            item_id=article.item_id,
+                            orderable_id=article.orderable_id,
+                            item_name=article.item_name,
+                            item_price=article.item_price,
+                            item_type=article.item_type,
+                            item_description=article.item_description,
+                        )
+
+                    elif isinstance(article, Bundle):
+                        for k, item in enumerate(article.bundle_items):
+                            article.bundle_items[k] = APIItem(
+                                item_id=item.item_id,
+                                orderable_id=item.orderable_id,
+                                item_name=item.item_name,
+                                item_price=item.item_price,
+                                item_type=item.item_type,
+                                item_description=item.item_description,
+                            )
+
+                        order.order_orderable[i][j] = APIBundle(
+                            bundle_id=article.bundle_id,
+                            orderable_id=article.orderable_id,
+                            bundle_name=article.bundle_name,
+                            bundle_description=article.bundle_description,
+                            bundle_items=article.bundle_items,
+                        )
+        return orders
     except Exception as e:
         raise Exception("[CustomerController] could not get order history") from e
 
