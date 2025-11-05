@@ -141,8 +141,8 @@ def menu_service(orderable_dao, item_dao, bundle_dao):
 
 
 @pytest.fixture
-def customer_service(customer_dao, order_dao, address_dao, google_map_service, user_service):
-    return CustomerService(customer_dao, order_dao, address_dao, google_map_service, user_service)
+def customer_service(customer_dao, address_dao, google_map_service, user_service):
+    return CustomerService(customer_dao, address_dao, google_map_service, user_service)
 
 
 @pytest.fixture

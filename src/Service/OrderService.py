@@ -56,9 +56,9 @@ class OrderService:
     @log
     def get_orders_by_state(
         self,
-        state: int,
+        state: OrderState,
     ) -> List[Order]:
-        return self.order_dao.get_orders_by_state(state)
+        return self.order_dao.get_orders_by_state(state.value)
 
     @log
     def get_available_orders_for_drivers(self) -> List[Order]:
@@ -88,7 +88,7 @@ class OrderService:
                 f"{order.order_state} to {new_state}."
             )
 
-        updated_order = self.order_dao.update_order_state(order_id, new_state)
+        updated_order = self.order_dao.update_order_state(order_id, new_state.value)
         return updated_order
 
     @log

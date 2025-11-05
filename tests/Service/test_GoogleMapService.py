@@ -1,3 +1,5 @@
+import pytest
+
 from src.Model.Address import Address
 from src.Service.GoogleMapService import GoogleMapService
 
@@ -46,7 +48,5 @@ class TestGoogleMapService:
     def test_get_path_to_invalid_destination(self, address_dao):
         GMService = GoogleMapService(address_dao)
         destination = "Whisky vert : jugez cinq fox d'aplomb"
-
-        result = GMService.get_path(destination)
-
-        assert result is None
+        with pytest.raises(Exception, match="Error while computing path: NOT_FOUND"):
+            GMService.get_path(destination)

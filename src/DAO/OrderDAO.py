@@ -168,9 +168,6 @@ class OrderDAO(metaclass=Singleton):
     # UPDATE
     @log
     def update_order_state(self, order_id: int, new_state: int) -> Order:
-        if not new_state:
-            raise ValueError("Order state should change")
-
         self.db_connector.sql_query(
             """
             UPDATE Orders

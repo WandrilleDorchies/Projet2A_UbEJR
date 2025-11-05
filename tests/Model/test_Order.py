@@ -5,7 +5,7 @@ import pytest
 from pydantic_core import ValidationError
 
 from src.Model.Item import Item
-from src.Model.Order import Order
+from src.Model.Order import Order, OrderState
 
 
 def test_order_constructor_ok():
@@ -22,13 +22,13 @@ def test_order_constructor_ok():
     assert isinstance(order_test, Order)
     assert order_test.order_id == 1
     assert order_test.order_customer_id == 1
-    assert order_test.order_state == 0
+    assert order_test.order_state == OrderState.PENDING
     assert order_test.order_date == date(2025, 5, 5)
     assert order_test.order_time == time(12, 30)
     assert list(order_test.order_orderables)[0] == mock_item
     assert list(order_test.order_orderables.values())[0] == 1
-    assert order_test.order_is_paid is False
-    assert order_test.order_is_prepared is False
+    assert order_test.is_paid is False
+    assert order_test.is_prepared is False
 
 
 def test_order_constructor_throws_on_incorrect_input():

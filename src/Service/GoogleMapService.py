@@ -69,15 +69,15 @@ class GoogleMapService:
         if (coord_address["lat"] - self.coord_ensai["lat"]) ** 2 + (
             coord_address["lng"] - self.coord_ensai["lng"]
         ) ** 2 > self.radius**2:
-            raise ValueError("The destination is too far away to get delivered.")
+            return None
 
         number = street = city = postal_code = country = None
         for component in result[0]["address_components"]:
-            if "street_number" in component["types"]:
-                number = component["long_name"]
-
             if "route" in component["types"]:
                 street = component["long_name"]
+
+            if "street_number" in component["types"]:
+                number = component["long_name"]
 
             if "locality" in component["types"]:
                 city = component["long_name"]
@@ -87,18 +87,15 @@ class GoogleMapService:
 
             if "country" in component["types"]:
                 country = component["long_name"]
-        try:
-            address_validated = self.address_dao.create_address(
-                number=int(number),
-                street=street,
-                city=city,
-                postal_code=int(postal_code),
-                country=country,
-            )
-            return address_validated
 
-        except ValueError as e:
-            raise ValueError(f"An error occured during the creation of the Address class : {e}")
+        address_validated = self.address_dao.create_address(
+            number=int(number),
+            street=street,
+            city=city,
+            postal_code=int(postal_code),
+            country=country,
+        )
+        return address_validated
 
     @log
     def get_path(self, destination: str) -> Optional[dict]:
@@ -124,7 +121,7 @@ class GoogleMapService:
                 raise ValueError("No route found.")
 
         except Exception as e:
-            raise Exception(f"Error while computing path: {e}")
+            raise Exception(f"Error while computing path: {e}") from e
 
         path = directions_result[0]["legs"][0]
         return path
