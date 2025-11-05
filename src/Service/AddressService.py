@@ -9,66 +9,63 @@ from .GoogleMapService import GoogleMapService
 
 class AddressService:
     address_dao: AddressDAO
+    gm_service: GoogleMapService
 
-    def __init__(self, address_dao: AddressDAO) -> None:
+    def __init__(self, address_dao: AddressDAO, gm_service: GoogleMapService) -> None:
         self.address_dao = address_dao
-        self.service = GoogleMapService()
+        self.gm_service = gm_service
 
     @log
     def get_address_by_id(self, address_id: int) -> Optional[Address]:
-        address = self.dao.get_address(address_id)
+        address = self.address_dao.get_address(address_id)
+        if address is None:
+            raise ValueError(
+                f"[AddressService]: Cannot find: Addres with ID {address_id} not found."
+            )
         return address
 
     @log
     def get_address_by_customer_id(self, customer_id: int) -> Optional[Address]:
-        address = self.dao.get_address_by_customer_id(customer_id)
+        address = self.address_dao.get_address_by_customer_id(customer_id)
         return address
 
     @log
     def get_all_address(self) -> Optional[List[Address]]:
-        addresses = self.dao.get_all_address()
+        addresses = self.address_dao.get_all_address()
         return addresses
-
-    @log
-    def is_valid(self, adress: str) -> bool:
-        res: bool = self.service.validate_adress(adress)
-        return True if res else False
 
     @log
     def create_address(
         self,
-        address_number: int,
-        address_street: str,
-        address_city: str,
-        address_postal_code: int,
-        address_country: str,
+        address: str,
     ) -> Optional[Address]:
-        address: str = (
-            f"{address_number} {address_street},"
-            f"{address_postal_code} {address_city}, {address_country}"
-        )
-        # Est-ce que c'est au service de faire ça ? ou au controller ?
+        self.gm_service.validate_adress(address)
 
-        if self.is_valid(address):
-            self.dao.create_address(
-                address_number, address_street, address_city, address_postal_code, address_country
-            )
+        components = self.gm_service.extract_components(address)
+        return self.address_dao.create_address(**components)
 
     @log
     def update_address(self, address_id: int, update: dict) -> Optional[Address]:
-        update_message_parts = []
-        for field, value in update.address():
-            update_message_parts.append(f"{field}={value}")
+        current_address = self.get_address_by_id(address_id)
 
-        updated_address = self.address_dao.update_address(address_id=id, update=update)
-        return updated_address
+        if all([value is None for value in update.values()]):
+            raise ValueError(
+                "[AddressService] Cannot update address: You must change at least one field."
+            )
+        update.pop("address_id")
+        for key, value in update.items():
+            if not value:
+                update[key] = current_address[key]
+
+        address = (
+            f"{update['address_number']} {update['address_street']},"
+            f"{update['address_postal_code']} {update['address_city']}, {update['address_country']}"
+        )
+        self.gm_service.validate_adress(address)
+        components = self.gm_service.extract_components(address)
+        return self.address_dao.update_address(address_id, components)
 
     @log
     def delete_address(self, address_id: int) -> None:
-        address = self.address_dao.get_address_by_id(address_id)
-        if address is None:
-            raise ValueError(
-                f"[AddressService] Cannot delete: address with ID {address_id} not found."
-            )
-
+        self.get_address_by_id(address_id)
         self.address_dao.delete_address_by_id(address_id)

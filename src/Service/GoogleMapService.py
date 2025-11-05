@@ -1,12 +1,10 @@
 import math
 import os
 from datetime import datetime
-from typing import Optional
+from typing import Dict, Optional, Union
 
 import googlemaps
 
-from src.DAO.AddressDAO import AddressDAO
-from src.Model.Address import Address
 from src.utils.log_decorator import log
 
 
@@ -26,9 +24,7 @@ class GoogleMapService:
         Maximum delivery distance from ENSAI
     """
 
-    addressDAO: AddressDAO
-
-    def __init__(self, address_dao: AddressDAO) -> None:
+    def __init__(self) -> None:
         self.__gmaps = googlemaps.Client(key=os.environ["GOOGLE_MAPS_API_KEY"])
         self.ensai_address = "51 Rue Blaise Pascal, 35170 Bruz, France"
 
@@ -40,10 +36,9 @@ class GoogleMapService:
             (self.coord_rennes[0] - self.coord_ensai["lat"]) ** 2
             + (self.coord_rennes[1] - self.coord_ensai["lng"]) ** 2
         )
-        self.address_dao = address_dao
 
     @log
-    def validate_address(self, address: str) -> Optional[Address]:
+    def validate_address(self, address: str) -> bool:
         """
         Validate that an address exists and is within the delivery zone.
         The delivery zone is defined as a circle centered on ENSAI with radius
@@ -62,16 +57,23 @@ class GoogleMapService:
         result = self.__gmaps.geocode(address)
 
         if not result:
-            return None
+            raise ValueError("[GoogleMapService]: Address not found.")
 
         coord_address = result[0]["geometry"]["location"]
 
         if (coord_address["lat"] - self.coord_ensai["lat"]) ** 2 + (
             coord_address["lng"] - self.coord_ensai["lng"]
         ) ** 2 > self.radius**2:
-            return None
+            raise ValueError("[GoogleMapService]: Destination is too far away.")
+
+        return True
+
+    @log
+    def extract_components(self, address: str) -> Dict[str, Union[str, int]]:
+        result = self.__gmaps.geocode(address)
 
         number = street = city = postal_code = country = None
+
         for component in result[0]["address_components"]:
             if "route" in component["types"]:
                 street = component["long_name"]
@@ -88,14 +90,13 @@ class GoogleMapService:
             if "country" in component["types"]:
                 country = component["long_name"]
 
-        address_validated = self.address_dao.create_address(
-            number=int(number),
-            street=street,
-            city=city,
-            postal_code=int(postal_code),
-            country=country,
-        )
-        return address_validated
+        return {
+            "number": int(number),
+            "street": street,
+            "city": city,
+            "postal_code": int(postal_code),
+            "country": country,
+        }
 
     @log
     def get_path(self, destination: str) -> Optional[dict]:

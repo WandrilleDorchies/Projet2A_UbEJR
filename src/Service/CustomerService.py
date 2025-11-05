@@ -8,7 +8,7 @@ from src.DAO.AddressDAO import AddressDAO
 from src.DAO.CustomerDAO import CustomerDAO
 from src.Model.Address import Address
 from src.Model.Customer import Customer
-from src.Service.GoogleMapService import GoogleMapService
+from src.Service.AddressService import AddressService
 from src.Service.PasswordService import check_password_strength, create_salt, hash_password
 from src.Service.UserService import UserService
 from src.utils.log_decorator import log
@@ -17,19 +17,19 @@ from src.utils.log_decorator import log
 class CustomerService:
     customer_dao: CustomerDAO
     address_dao: AddressDAO
-    gm_service: GoogleMapService
+    address_service: AddressService
     user_service: UserService
 
     def __init__(
         self,
         customer_dao: CustomerDAO,
         address_dao: AddressDAO,
-        gm_service: GoogleMapService,
+        address_service: AddressService,
         user_service: UserService,
     ):
         self.customer_dao = customer_dao
         self.address_dao = address_dao
-        self.gm_service = gm_service
+        self.address_service = address_service
         self.user_service = user_service
         self.pattern = r"^(?=.*[A-Za-zÀ-ÖØ-öø-ÿ])[-A-Za-zÀ-ÖØ-öø-ÿ ]+$"
 
@@ -44,6 +44,7 @@ class CustomerService:
 
     @log
     def get_address_by_customer_id(self, customer_id: int) -> Address:
+        self.get_customer_by_id(customer_id)
         return self.address_dao.get_address_by_customer_id(customer_id)
 
     @log
@@ -106,15 +107,9 @@ class CustomerService:
         if not is_valid_email:
             raise ValueError("[CustomerService] Cannot create: The email is not valid.")
 
-        address = self.gm_service.validate_address(address_string)
-        if address is None:
-            raise ValueError(
-                "[CustomerService] Cannot create: customer address "
-                "is invalid or outside the delivery zone."
-            )
-
         check_password_strength(password)
 
+        address = self.address_service.create_address(address_string)
         formatted_first_name = first_name.strip().capitalize()
         formatted_last_name = last_name.strip().upper()
 

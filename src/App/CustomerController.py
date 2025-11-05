@@ -9,7 +9,14 @@ from src.Model.APIItem import APIItem
 from src.Model.Bundle import Bundle
 from src.Model.Item import Item
 
-from .init_app import customer_service, jwt_service, menu_service, order_service, stripe_service
+from .init_app import (
+    address_service,
+    customer_service,
+    jwt_service,
+    menu_service,
+    order_service,
+    stripe_service,
+)
 from .JWTBearer import CustomerBearer
 
 customer_router = APIRouter(
@@ -114,9 +121,7 @@ def update_address(
     try:
         update_data = locals()
         update_data.pop("customer_id")
-        print(update_data)
-        print(type(update_data))
-        updated_address = customer_service.update_address(customer_id, update_data)
+        updated_address = address_service.update_address(customer_id, update_data)
         return updated_address
 
     except ValueError as e:
