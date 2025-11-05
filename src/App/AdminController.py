@@ -294,10 +294,10 @@ def delete_customer(customer_id: int):
 )
 def update_profile(
     customer_id: int,
-    first_name: str = None,
-    last_name: str = None,
-    mail: str = None,
-    phone: str = None,
+    customer_first_name: str = None,
+    customer_last_name: str = None,
+    customer_mail: str = None,
+    customer_phone: str = None,
 ):
     try:
         update_data = locals()
