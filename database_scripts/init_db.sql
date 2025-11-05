@@ -117,6 +117,7 @@ CREATE TABLE project.Order_contents (
 CREATE TABLE project.Deliveries (
     delivery_order_id INTEGER,
     delivery_driver_id INTEGER,
+    delivery_created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     delivery_state INTEGER DEFAULT 0,
     PRIMARY KEY (delivery_order_id, delivery_driver_id),
     FOREIGN KEY (delivery_order_id) REFERENCES project.Orders(order_id),

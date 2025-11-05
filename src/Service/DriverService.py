@@ -8,7 +8,7 @@ from src.DAO.DriverDAO import DriverDAO
 from src.DAO.OrderDAO import OrderDAO
 from src.Model.Delivery import Delivery
 from src.Model.Driver import Driver
-from src.Model.Order import OrderState
+from src.Model.Order import Order, OrderState
 from src.Service.UserService import UserService
 from src.utils.log_decorator import log
 
@@ -60,6 +60,17 @@ class DriverService:
     @log
     def login(self, identifier: str, password: str) -> Optional[Driver]:
         return self.user_service.login(identifier, password)
+
+    @log
+    def get_driver_current_order(self, driver_id: int) -> Optional[Order]:
+        delivery = self.delivery_dao.get_driver_current_delivery(driver_id)
+        if delivery is None or delivery.delivery_state == 2:
+            raise ValueError(
+                "[DriverService] Cannot get delivery: There isn't any delivery "
+                "assigned to this driver."
+            )
+
+        return self.order_dao.get_order_by_id(delivery.delivery_order_id)
 
     @log
     def create_driver(

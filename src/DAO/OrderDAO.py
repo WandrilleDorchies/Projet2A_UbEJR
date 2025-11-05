@@ -113,7 +113,7 @@ class OrderDAO(metaclass=Singleton):
     @log
     def get_customer_current_order(self, customer_id: int) -> Optional[Order]:
         raw_order = self.db_connector.sql_query(
-            "SELECT * from Orders WHERE order_customer_id=%s AND order_state != 2",
+            "SELECT * from Orders WHERE order_customer_id=%s AND order_state IN (0, 1, 2, 3);",
             [customer_id],
             "one",
         )

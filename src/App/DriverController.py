@@ -21,6 +21,11 @@ def get_driver_id_from_token(
     return driver_id
 
 
+def get_current_order_id(driver_id: int = Depends(get_driver_id_from_token)) -> int:
+    order = driver_service.get_driver_current_order(driver_id)
+    return order.order_id
+
+
 # PROFILE
 @driver_router.get("/me", status_code=status.HTTP_200_OK, dependencies=[Depends(DriverBearer())])
 def get_profile(driver_id: int = Depends(get_driver_id_from_token)):
@@ -105,7 +110,7 @@ def start_delivery(order_id: int, driver_id: int = Depends(get_driver_id_from_to
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(DriverBearer())],
 )
-def get_path(order_id: int):
+def get_path(order_id: int = Depends(get_current_order_id)):
     order = order_service.get_order_by_id(order_id)
     address = customer_service.get_address_by_customer_id(order.order_customer_id)
 
@@ -117,7 +122,10 @@ def get_path(order_id: int):
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(DriverBearer())],
 )
-def end_delivery(order_id: int, driver_id: int = Depends(get_driver_id_from_token)):
+def end_delivery(
+    order_id: int = Depends(get_current_order_id),
+    driver_id: int = Depends(get_driver_id_from_token),
+):
     try:
         return driver_service.end_delivery(order_id, driver_id)
     except ValueError as e:
