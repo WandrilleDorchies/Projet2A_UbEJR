@@ -45,9 +45,7 @@ class OrderDAO(metaclass=Singleton):
                     %(customer_id)s,
                     0,
                     %(order_date)s,
-                    %(order_time)s,
-                    FALSE,
-                    FALSE)
+                    %(order_time)s)
             RETURNING *;
             """,
             {
