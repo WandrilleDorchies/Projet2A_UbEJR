@@ -53,8 +53,8 @@ CREATE TABLE project.Orders (
     order_id SERIAL PRIMARY KEY,
     order_customer_id INTEGER,
     order_state INTEGER,
-    order_date DATE,
-    order_time TIME,
+    order_created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    order_paid_at TIMESTAMP DEFAULT NULL,
     FOREIGN KEY (order_customer_id) REFERENCES project.Customers(customer_id)
 );
 
@@ -200,19 +200,18 @@ VALUES
 ('bundle', false),
 ('bundle', true);
 
-INSERT INTO Orders (order_customer_id, order_state, order_date, order_time)
+INSERT INTO Orders (order_customer_id, order_state, order_created_at, order_paid_at)
 VALUES 
-
-(1, 4, '2025-10-21', '12:30:00'),
-(2, 0, '2025-10-21', '13:00:00'),
-(3, 4, '2025-10-22', '11:45:00'),
-(1, 1, '2025-10-22', '12:15:00'),
-(2, 4, '2025-10-22', '12:45:00'),
-(3, 2, '2025-10-23', '13:30:00'),
-(3, 2, '2025-10-24', '15:30:00'),
-(1, 1, '2025-10-24', '16:00:00'),
-(2, 0, '2025-10-24', '16:30:00'),
-(3, 6, '2025-10-24', '17:00:00');
+(1, 4, '2025-10-21 12:30:00', '2025-10-21 13:0:00'),
+(2, 0, '2025-10-21 12:30:00', NULL),
+(3, 4, '2025-10-22 12:30:00', '2025-10-21 13:0:00'),
+(1, 1, '2025-10-22 12:30:00', '2025-10-21 13:0:00'),
+(2, 4, '2025-10-23 12:30:00', '2025-10-21 13:0:00'),
+(3, 2, '2025-10-23 12:30:00', '2025-10-21 13:0:00'),
+(3, 2, '2025-10-23 12:30:00', '2025-10-21 13:0:00'),
+(1, 1, '2025-10-24 12:30:00', '2025-10-21 13:0:00'),
+(2, 0, '2025-10-24 12:30:00', NULL),
+(3, 5, '2025-10-24 12:30:00', NULL);
 
 
 INSERT INTO Order_contents (order_id, orderable_id, orderable_quantity)

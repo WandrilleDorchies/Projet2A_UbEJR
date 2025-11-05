@@ -1,9 +1,9 @@
 from datetime import datetime
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Literal, Optional, Union
 
 from src.Model.Bundle import Bundle
 from src.Model.Item import Item
-from src.Model.Order import Order
+from src.Model.Order import Order, OrderState
 from src.utils.log_decorator import log
 from src.utils.singleton import Singleton
 
@@ -39,19 +39,18 @@ class OrderDAO(metaclass=Singleton):
             INSERT INTO Orders (order_id,
                                order_customer_id,
                                order_state,
-                               order_date,
-                               order_time)
+                               order_created_at,
+                               order_paid_at)
             VALUES (DEFAULT,
                     %(customer_id)s,
                     0,
                     %(order_date)s,
-                    %(order_time)s)
+                    DEFAULT)
             RETURNING *;
             """,
             {
                 "customer_id": customer_id,
-                "order_date": datetime.today().strftime("%Y-%m-%d"),
-                "order_time": datetime.now(),
+                "order_date": datetime.now(),
             },
             "one",
         )
@@ -112,7 +111,7 @@ class OrderDAO(metaclass=Singleton):
             """SELECT * from Orders
                WHERE order_customer_id=%s
                AND order_state NOT IN (4, 5)
-               ORDER BY order_time DESC
+               ORDER BY order_paid_at DESC
                LIMIT 1;
             """,
             [customer_id],
@@ -125,13 +124,15 @@ class OrderDAO(metaclass=Singleton):
         return Order(**raw_order)
 
     @log
-    def get_orders_by_state(self, state: int) -> List[Order]:
+    def get_orders_by_state(
+        self, state: int, order_by: Literal["DESC", "ASC"] = "DESC"
+    ) -> List[Order]:
         raw_orders = self.db_connector.sql_query(
             """SELECT * FROM Orders
-                WHERE order_state = %s
-                ORDER BY order_time DESC;
+                WHERE order_state = %(order_state)s
+                ORDER BY order_created_at %(order_by)s;
             """,
-            [state],
+            {"order_state": state, "order_by": order_by},
             "all",
         )
 
@@ -150,7 +151,7 @@ class OrderDAO(metaclass=Singleton):
         raw_orders = self.db_connector.sql_query(
             """SELECT * FROM Orders
                     WHERE order_state IN (0, 1, 2, 3)
-                    ORDER BY order_time DESC;
+                    ORDER BY order_paid_at DESC;
                 """,
             return_type="all",
         )
@@ -177,6 +178,16 @@ class OrderDAO(metaclass=Singleton):
             {"new_state": new_state, "order_id": order_id},
             "none",
         )
+        if new_state == OrderState.PAID.value:
+            self.db_connector.sql_query(
+                """
+                UPDATE Orders
+                SET order_paid_at = %(timestamp)s
+                WHERE order_id = %(order_id)s;
+                """,
+                {"timestamp": datetime.now(), "order_id": order_id},
+                "none",
+            )
 
         return self.get_order_by_id(order_id)
 

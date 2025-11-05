@@ -269,7 +269,12 @@ def get_all_customers():
 )
 def get_customer_by_id(customer_id: int):
     try:
-        return customer_service.get_customer_by_id(customer_id)
+        customer = customer_service.get_customer_by_id(customer_id)
+        if customer is None:
+            raise HTTPException(
+                status_code=404, detail=f"Customer with id [{customer_id}] not found"
+            )
+        return customer
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Invalid request: {e}") from e
 
@@ -287,18 +292,21 @@ def delete_customer(customer_id: int):
 
 
 @admin_router.put(
-    "/customer", status_code=status.HTTP_200_OK, dependencies=[Depends(AdminBearer())]
+    "/customers/{customer_id}",
+    status_code=status.HTTP_200_OK,
+    dependencies=[Depends(AdminBearer())],
 )
 def update_profile(
     customer_id: int,
-    first_name: str = None,
-    last_name: str = None,
-    mail: str = None,
-    phone: str = None,
+    customer_first_name: str = None,
+    customer_last_name: str = None,
+    customer_mail: str = None,
+    customer_phone: str = None,
 ):
     try:
         update_data = locals()
         update_data.pop("customer_id")
+        print(update_data)
         updated_customer = customer_service.update_customer(customer_id, update_data)
         return updated_customer
 
@@ -340,7 +348,10 @@ def get_all_drivers():
 )
 def get_driver_by_id(driver_id: int):
     try:
-        return driver_service.get_driver_by_id(driver_id)
+        driver = driver_service.get_driver_by_id(driver_id)
+        if driver is None:
+            raise HTTPException(status_code=404, detail=f"Driver with id [{driver_id}] not found")
+        return driver
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Invalid request: {e}") from e
 
@@ -358,15 +369,15 @@ def delete_driver(driver_id: int):
 
 
 @admin_router.put(
-    "/drivers/{customer_id}",
+    "/drivers/{driver_id}",
     status_code=status.HTTP_201_CREATED,
     dependencies=[Depends(AdminBearer())],
 )
 def update_driver(
     driver_id: int,
-    first_name: str = None,
-    last_name: str = None,
-    phone: str = None,
+    driver_first_name: str = None,
+    driver_last_name: str = None,
+    driver_phone: str = None,
 ):
     try:
         update_data = locals()
@@ -394,7 +405,10 @@ def get_all_orders(limit: int = 15):
 @admin_router.get("/orders/{order_id}", status_code=status.HTTP_200_OK)
 def get_order_by(order_id: int):
     try:
-        return order_service.get_order_by_id(order_id)
+        order = order_service.get_order_by_id(order_id)
+        if order is None:
+            raise HTTPException(status_code=404, detail=f"Order with id [{order_id}] not found")
+        return order
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
 
