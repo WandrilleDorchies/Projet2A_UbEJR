@@ -183,6 +183,7 @@ def get_order(
     order_id: int = Depends(get_current_order_id),
 ):
     return order_service.get_order_by_id(order_id)
+    # Modif Néo comme pour history
 
 
 @customer_router.put(
@@ -208,7 +209,13 @@ def remove_orderable_from_order(
     quantity: int,
     order_id: int = Depends(get_current_order_id),
 ):
-    return order_service.remove_orderable_from_order(orderable_id, order_id, quantity)
+    try:
+        return order_service.remove_orderable_from_order(orderable_id, order_id, quantity)
+    except Exception as e:
+        raise HTTPException(
+            status_code=403,
+            detail=f"[CustomerController]: cannot remove orderable from order - {str(e)}",
+        ) from e
 
 
 @customer_router.get(
@@ -219,40 +226,43 @@ def view_order_history(customer_id: int = Depends(get_customer_id_from_token)):
         orders = order_service.get_all_orders_by_customer(customer_id)
 
         for order in orders:
-            for content in order.order_orderables.keys():
+            history = {}
+            for key, value in order.order_orderables.items():
 
-                    if isinstance(content, Item):
+                    if isinstance(key, Item):
 
-                        order.order_orderables[content] = APIItem(
-                            item_id=content.item_id,
-                            orderable_id=content.orderable_id,
-                            item_name=content.item_name,
-                            item_price=content.item_price,
-                            item_type=content.item_type,
-                            item_description=content.item_description,
-                        )
+                        history[APIItem(
+                            item_name=key.item_name,
+                            item_price=key.item_price,
+                            item_type=key.item_type,
+                            item_description=key.item_description,
+                        )] = value
 
-                    elif isinstance(content, Bundle):
-                        for j, item in enumerate(content.bundle_items):
-                            content.bundle_items[j] = APIItem(
-                                item_id=item.item_id,
-                                orderable_id=item.orderable_id,
-                                item_name=item.item_name,
-                                item_price=item.item_price,
-                                item_type=item.item_type,
-                                item_description=item.item_description,
-                            )
+                    elif isinstance(key, Bundle):
+                        for key2, value2 in key.bundle_items.items():
+                            items = {}
+                            items[APIItem(
+                                item_name=key2.item_name,
+                                item_price=key2.item_price,
+                                item_type=key2.item_type,
+                                item_description=key2.item_description,
+                            )] = value2
 
-                        order.order_orderables[i] = APIBundle(
-                            bundle_id=content.bundle_id,
-                            orderable_id=content.orderable_id,
-                            bundle_name=content.bundle_name,
-                            bundle_description=content.bundle_description,
-                            bundle_items=content.bundle_items,
-                        )
+                        history[APIBundle(
+                            bundle_name=key.bundle_name,
+                            bundle_description=key.bundle_description,
+                            bundle_items=items
+                        )] = value
+
+            order.order_orderables = history
         return orders
     except Exception as e:
-        raise Exception("[CustomerController] could not get order history") from e
+        raise Exception("[CustomerController] Could not get order history") from e
+
+# PROBLEME : Les objets custom comme clé de dict ne sont jamais automatiquement convertis en JSON.
+# Pour un affichage lisible avec des virgules (JSON),
+# il faudrait utiliser une string ou un tuple comme clé.
+# Peut-être : prendre les élèments voulus et faire un tuple (mais APIBunde & APIIteam dégage)
 
 
 # PAYMENT
