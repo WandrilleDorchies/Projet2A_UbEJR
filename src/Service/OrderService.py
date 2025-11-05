@@ -38,7 +38,7 @@ class OrderService:
     def get_order_by_id(self, order_id: int) -> Optional[Order]:
         order = self.order_dao.get_order_by_id(order_id)
         if order is None:
-            raise ValueError(f"[Order Service] Cannot get: order with ID {order_id} not found.")
+            raise ValueError(f"[Order Service] Cannot find: order with ID {order_id} not found.")
         return order
 
     @log
@@ -71,9 +71,10 @@ class OrderService:
     @log
     def create_order(self, customer_id) -> Order:
         orders = self.get_all_orders_by_customer(customer_id)
-        states = [order.order_state for order in orders]
-        if 0 in states:
-            return None
+        states = [order.order_state.value for order in orders]
+
+        if any(state < OrderState.DELIVERED.value for state in states):
+            raise ValueError("An order is already in progress.")
 
         new_order = self.order_dao.create_order(customer_id=customer_id)
         return new_order
@@ -101,7 +102,7 @@ class OrderService:
 
     @log
     def delete_order(self, order_id: int) -> None:
-        self.order_dao.get_order_by_id(order_id)
+        self.get_order_by_id(order_id)
         self.order_dao.delete_order(order_id)
 
     @log

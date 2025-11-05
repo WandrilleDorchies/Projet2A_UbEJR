@@ -14,7 +14,7 @@ class TestItemService:
 
     def test_get_item_by_id_not_exists(self, item_service, clean_database):
         """Test getting item by non-existing id raises error"""
-        with pytest.raises(ValueError, match="Cannot get: item with ID 9999 not found"):
+        with pytest.raises(ValueError, match="Cannot find: item with ID 9999 not found"):
             item_service.get_item_by_id(9999)
 
     def test_get_all_items_empty(self, item_service, clean_database):
@@ -55,19 +55,19 @@ class TestItemService:
 
     def test_update_item_not_exists(self, item_service, clean_database):
         """Test updating non-existing item raises error"""
-        with pytest.raises(ValueError, match="Cannot update: item with ID 9999 not found"):
+        with pytest.raises(ValueError, match="Cannot find: item with ID 9999 not found"):
             item_service.update_item(9999, {"item_stock": 25})
 
     def test_delete_item_exists(self, item_service, sample_item, clean_database):
         """Test deleting an item"""
         item_service.delete_item(sample_item.item_id)
 
-        with pytest.raises(ValueError, match="Cannot get: item with ID"):
+        with pytest.raises(ValueError, match="Cannot find: item with ID"):
             item_service.get_item_by_id(sample_item.item_id)
 
     def test_delete_item_not_exists(self, item_service, clean_database):
         """Test deleting non-existing item raises error"""
-        with pytest.raises(ValueError, match="Cannot delete: item with ID 9999 not found"):
+        with pytest.raises(ValueError, match="Cannot find: item with ID 9999 not found"):
             item_service.delete_item(9999)
 
     def test_delete_item_in_bundle_raises_error(

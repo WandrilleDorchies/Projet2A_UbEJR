@@ -79,6 +79,7 @@ class DriverDAO(metaclass=Singleton):
             "driver_last_name",
             "driver_is_delivering",
             "driver_phone",
+            "driver_password_hash",
         ]
         for key in update.keys():
             if key not in parameters_update:

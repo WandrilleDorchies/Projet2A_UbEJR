@@ -157,7 +157,7 @@ class DriverService:
 
         self.delivery_dao.create_delivery(order_id, driver_id)
         self.driver_dao.update_driver(driver_id, update={"driver_is_delivering": True})
-        self.order_dao.update_order_state(order_id, OrderState.DELIVERING)
+        self.order_dao.update_order_state(order_id, OrderState.DELIVERING.value)
         delivery = self.delivery_dao.update_delivery_state(order_id, 1)
         return delivery
 
@@ -180,5 +180,5 @@ class DriverService:
 
     @log
     def delete_driver(self, driver_id: int) -> None:
-        self.driver_dao.get_driver_by_id(driver_id)
+        self.get_driver_by_id(driver_id)
         self.driver_dao.delete_driver(driver_id)
