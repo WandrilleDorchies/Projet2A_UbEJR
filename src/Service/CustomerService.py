@@ -31,7 +31,7 @@ class CustomerService:
         self.address_dao = address_dao
         self.gm_service = gm_service
         self.user_service = user_service
-        self.pattern = r"^[A-Za-zÀ-ÖØ-öø-ÿ\- ]+$"
+        self.pattern = r"^(?=.*[A-Za-zÀ-ÖØ-öø-ÿ])[-A-Za-zÀ-ÖØ-öø-ÿ ]+$"
 
     @log
     def get_customer_by_id(self, customer_id: int) -> Optional[Customer]:

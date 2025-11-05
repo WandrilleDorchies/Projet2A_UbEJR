@@ -233,7 +233,8 @@ def remove_orderable_from_order(
     except Exception as e:
         raise HTTPException(
             status_code=403,
-            detail=f"[CustomerController] Invalid input: cannot remove orderable from order - {str(e)}",
+            detail="[CustomerController] Invalid input: "
+            "cannot remove orderable from order - {str(e)}",
         ) from e
 
 
@@ -328,7 +329,7 @@ def succesful_payment(
     order_id: int = Depends(get_current_order_id),
 ):
     try:
-        payment_info = stripe_service.verify_payment_status(session_id)
+        payment_info = stripe_service.verify_payment(session_id)
 
         if not payment_info["paid"]:
             raise HTTPException(

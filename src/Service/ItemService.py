@@ -37,6 +37,12 @@ class ItemService:
         item_image: Optional[bytes] = None,
         is_in_menu: bool = False,
     ) -> Optional[Item]:
+        if item_price < 0:
+            raise ValueError("[ItemService] Cannot create item: Price must be positive")
+
+        if item_stock < 0:
+            raise ValueError("[ItemService] Cannot create item: Stock must be positive")
+
         created_item = self.item_dao.create_item(
             item_name=item_name,
             item_price=item_price,
@@ -53,9 +59,18 @@ class ItemService:
         self.get_item_by_id(item_id)
 
         if all([value is None for value in update.values()]):
-            raise ValueError("You must change at least one field.")
+            raise ValueError(
+                "[ItemService] Cannot update item: You must change at least one field."
+            )
+
+        if update.get("item_price") and update.get("item_price") < 0:
+            raise ValueError("[ItemService] Cannot update item: Price must be positive")
+
+        if update.get("item_stock") and update.get("item_stock") < 0:
+            raise ValueError("[ItemService] Cannot update item: Stock must be positive")
 
         update = {key: value for key, value in update.items() if update[key]}
+        update.pop("item_id")
 
         item = self.item_dao.update_item(item_id, update=update)
         return item

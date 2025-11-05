@@ -32,7 +32,7 @@ class DriverService:
         self.delivery_dao = delivery_dao
         self.user_service = user_service
         self.order_dao = order_dao
-        self.pattern = r"^[A-Za-zÀ-ÖØ-öø-ÿ\- ]+$"
+        self.pattern = r"^(?=.*[A-Za-zÀ-ÖØ-öø-ÿ])[-A-Za-zÀ-ÖØ-öø-ÿ ]+$"
 
     @log
     def get_driver_by_id(self, driver_id: int) -> Optional[Driver]:
@@ -79,7 +79,13 @@ class DriverService:
         phone_number = pn.parse(phone, "FR")
         if not pn.is_valid_number(phone_number) or not pn.is_possible_number(phone_number):
             raise ValueError(f"The number {phone} is invalid.")
+        driver_phone = "0" + str(phone_number.national_number)
 
+        existing_driver = self.driver_dao.get_driver_by_phone(driver_phone)
+        if existing_driver is not None:
+            raise ValueError(
+                f"[DriverService] Cannot create: customer with phone {driver_phone} already exists."
+            )
         if not re.match(self.pattern, first_name) or not re.match(self.pattern, last_name):
             raise ValueError(
                 "[Driver Service] Cannot create driver: First name and last name "
@@ -93,7 +99,6 @@ class DriverService:
         formatted_first_name = first_name.strip().capitalize()
         formatted_last_name = last_name.strip().upper()
 
-        driver_phone = "0" + str(phone_number.national_number)
         created_driver = self.driver_dao.create_driver(
             first_name=formatted_first_name,
             last_name=formatted_last_name,

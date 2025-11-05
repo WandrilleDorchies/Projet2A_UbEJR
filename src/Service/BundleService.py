@@ -46,6 +46,11 @@ class BundleService:
         bundle_image: Optional[bytes] = None,
         is_in_menu: bool = False,
     ) -> Optional[Bundle]:
+        if not (0 <= bundle_reduction <= 100):
+            raise ValueError(
+                "[BundleService] Cannot create bundle: Bundle reduction must be between 0 and 100."
+            )
+
         create_bundle = self.bundle_dao.create_bundle(
             bundle_name=bundle_name,
             bundle_reduction=bundle_reduction,
@@ -73,6 +78,11 @@ class BundleService:
         if update.get("bundle_availability_end_date"):
             update["bundle_availability_end_date"] = datetime.strptime(
                 update.get("bundle_availability_start_date"), "%d/%m/%Y"
+            )
+
+        if update.get("bundle_reduction") and not (0 <= update.get("bundle_reduction") <= 100):
+            raise ValueError(
+                "[BundleService] Cannot create bundle: Bundle reduction must be between 0 and 100."
             )
 
         update = {key: value for key, value in update.items() if update[key]}

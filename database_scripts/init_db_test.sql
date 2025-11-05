@@ -147,10 +147,10 @@ VALUES
 
 INSERT INTO Items (orderable_id, item_name, item_price, item_type, item_description, item_stock)
 VALUES
-(1, 'Galette-Saucisse', 4.5, 'Plat', 'La fameuse galette-saucisse de l''EJR', 50),
-(2, 'Coca-Cola 33cl', 0.5, 'Boisson', 'Canette de Coca-Cola', 100),
+(1, 'Galette-Saucisse', 4.5, 'Main course', 'La fameuse galette-saucisse de l''EJR', 50),
+(2, 'Coca-Cola 33cl', 0.5, 'Drink', 'Canette de Coca-Cola', 100),
 (3, 'Tiramisu', 2.0, 'Dessert', 'Tiramisu-holic', 30),
-(4, 'Banh-Mi', 4.5, 'Plat', 'Sandwich vietnamien', 40);
+(4, 'Banh-Mi', 4.5, 'Main Course', 'Sandwich vietnamien', 40);
 
 INSERT INTO Bundles (orderable_id, bundle_name, bundle_reduction, bundle_description, bundle_availability_start_date, bundle_availability_end_date)
 VALUES
