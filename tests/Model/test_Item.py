@@ -4,6 +4,7 @@ from pydantic_core import ValidationError
 from src.Model.Item import Item
 
 
+#
 def test_item_constructor_ok():
     item_test = Item(
         item_id=1,

@@ -21,7 +21,7 @@ class Item(Orderable):
     item_id: int
     orderable_id: int
     item_name: str
-    item_price: float
+    item_price: float >= 0
     item_type: Literal["Plat", "Entrée", "Dessert", "Boisson", "Accompagnement", "Autres"]
     item_description: str
     item_stock: int
@@ -30,7 +30,7 @@ class Item(Orderable):
         args["orderable_type"] = "item"
         super().__init__(**args)
 
-    def __hash__(self) -> str:
+    def __hash__(self) -> int:
         return hash(self.orderable_id)
 
     def __eq__(self, other):
@@ -50,7 +50,7 @@ class Item(Orderable):
         return self.item_stock > 0 and self.is_in_menu
 
     def check_stock(self, quantity) -> bool:
-        return self.check_availability() and self.item_stock - quantity > 0
+        return self.check_availability() and self.item_stock - quantity >= 0
 
     @property
     def price(self) -> float:
