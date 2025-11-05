@@ -271,7 +271,9 @@ def get_customer_by_id(customer_id: int):
     try:
         customer = customer_service.get_customer_by_id(customer_id)
         if customer is None:
-            raise HTTPException(status_code=404, detail=f"Customer with id [{customer_id}] not found")
+            raise HTTPException(
+                status_code=404, detail=f"Customer with id [{customer_id}] not found"
+            )
         return customer
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Invalid request: {e}") from e
