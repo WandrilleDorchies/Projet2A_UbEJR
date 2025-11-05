@@ -1,6 +1,6 @@
-from datetime import date, time
+from datetime import datetime
 from enum import Enum
-from typing import Dict, Union
+from typing import Dict, Optional, Union
 
 from pydantic import BaseModel
 
@@ -35,8 +35,8 @@ class Order(BaseModel):
     order_id: int
     order_customer_id: int
     order_state: OrderState = OrderState.PENDING
-    order_date: date
-    order_time: time
+    order_created_at: datetime
+    order_paid_at: Optional[datetime] = None
     order_orderables: Dict[Union[Bundle, Item], int]
 
     @property

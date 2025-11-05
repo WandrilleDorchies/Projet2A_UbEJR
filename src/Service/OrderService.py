@@ -62,7 +62,7 @@ class OrderService:
 
     @log
     def get_available_orders_for_drivers(self) -> List[Order]:
-        return self.order_dao.get_orders_by_state(OrderState.PREPARED.value)
+        return self.order_dao.get_orders_by_state(OrderState.PREPARED.value, order_by="ASC")
 
     @log
     def get_actives_orders(self) -> List[Order]:
@@ -74,7 +74,7 @@ class OrderService:
         states = [order.order_state.value for order in orders]
 
         if any(state < OrderState.DELIVERED.value for state in states):
-            raise ValueError("An order is already in progress.")
+            return self.get_customer_current_order(customer_id)
 
         new_order = self.order_dao.create_order(customer_id=customer_id)
         return new_order
@@ -170,7 +170,8 @@ class OrderService:
         quantity_in_order = self.order_dao.get_quantity_of_orderables(order_id, orderable_id)
         if quantity_in_order < quantity:
             raise ValueError(
-                f"[OrderService] Trying to remove {quantity} of orderable {orderable_id} when there is only {quantity_in_order} of it in the order !"
+                f"[OrderService] Trying to remove {quantity} of orderable {orderable_id} when "
+                f"there is only {quantity_in_order} of it in the order !"
             )
         if raw_orderable["orderable_type"] == "item":
             orderable = self.item_dao.get_item_by_orderable_id(orderable_id)

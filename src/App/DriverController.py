@@ -64,6 +64,8 @@ def update_profile(
 def get_available_orders():
     try:
         return order_service.get_available_orders_for_drivers()
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching orders: {e}") from e
 
@@ -81,7 +83,8 @@ def get_order_by_id(order_id: int):
             )
 
         return order
-
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching orders: {e}") from e
 
@@ -103,6 +106,8 @@ def start_delivery(order_id: int, driver_id: int = Depends(get_driver_id_from_to
         return driver_service.start_delivery(order_id, driver_id)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error starting delivery: {e}") from e
 
 
 @driver_router.get(
@@ -111,10 +116,14 @@ def start_delivery(order_id: int, driver_id: int = Depends(get_driver_id_from_to
     dependencies=[Depends(DriverBearer())],
 )
 def get_path(order_id: int = Depends(get_current_order_id)):
-    order = order_service.get_order_by_id(order_id)
-    address = customer_service.get_address_by_customer_id(order.order_customer_id)
-
-    return gm_service.get_path(str(address))
+    try:
+        order = order_service.get_order_by_id(order_id)
+        address = customer_service.get_address_by_customer_id(order.order_customer_id)
+        return gm_service.get_path(str(address))
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching path: {e}") from e
 
 
 @driver_router.put(
@@ -130,3 +139,5 @@ def end_delivery(
         return driver_service.end_delivery(order_id, driver_id)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error finishing delivery: {e}") from e

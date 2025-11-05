@@ -228,36 +228,41 @@ def view_order_history(customer_id: int = Depends(get_customer_id_from_token)):
         for order in orders:
             history = {}
             for key, value in order.order_orderables.items():
-
-                    if isinstance(key, Item):
-
-                        history[APIItem(
+                if isinstance(key, Item):
+                    history[
+                        APIItem(
                             item_name=key.item_name,
                             item_price=key.item_price,
                             item_type=key.item_type,
                             item_description=key.item_description,
-                        )] = value
+                        )
+                    ] = value
 
-                    elif isinstance(key, Bundle):
-                        for key2, value2 in key.bundle_items.items():
-                            items = {}
-                            items[APIItem(
+                elif isinstance(key, Bundle):
+                    for key2, value2 in key.bundle_items.items():
+                        items = {}
+                        items[
+                            APIItem(
                                 item_name=key2.item_name,
                                 item_price=key2.item_price,
                                 item_type=key2.item_type,
                                 item_description=key2.item_description,
-                            )] = value2
+                            )
+                        ] = value2
 
-                        history[APIBundle(
+                    history[
+                        APIBundle(
                             bundle_name=key.bundle_name,
                             bundle_description=key.bundle_description,
-                            bundle_items=items
-                        )] = value
+                            bundle_items=items,
+                        )
+                    ] = value
 
             order.order_orderables = history
         return orders
     except Exception as e:
         raise Exception("[CustomerController] Could not get order history") from e
+
 
 # PROBLEME : Les objets custom comme clé de dict ne sont jamais automatiquement convertis en JSON.
 # Pour un affichage lisible avec des virgules (JSON),
