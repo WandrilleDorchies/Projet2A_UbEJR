@@ -1,3 +1,4 @@
+import re
 from typing import Optional
 
 import phonenumbers as pn
@@ -7,6 +8,7 @@ from src.DAO.DriverDAO import DriverDAO
 from src.DAO.OrderDAO import OrderDAO
 from src.Model.Delivery import Delivery
 from src.Model.Driver import Driver
+from src.Model.Order import Order, OrderState
 from src.Service.UserService import UserService
 from src.utils.log_decorator import log
 
@@ -30,6 +32,7 @@ class DriverService:
         self.delivery_dao = delivery_dao
         self.user_service = user_service
         self.order_dao = order_dao
+        self.pattern = r"^[A-Za-zÀ-ÖØ-öø-ÿ\- ]+$"
 
     @log
     def get_driver_by_id(self, driver_id: int) -> Optional[Driver]:
@@ -59,22 +62,41 @@ class DriverService:
         return self.user_service.login(identifier, password)
 
     @log
+    def get_driver_current_order(self, driver_id: int) -> Optional[Order]:
+        delivery = self.delivery_dao.get_driver_current_delivery(driver_id)
+        if delivery is None or delivery.delivery_state == 2:
+            raise ValueError(
+                "[DriverService] Cannot get delivery: There isn't any delivery "
+                "assigned to this driver."
+            )
+
+        return self.order_dao.get_order_by_id(delivery.delivery_order_id)
+
+    @log
     def create_driver(
         self, first_name: str, last_name: str, phone: str, password: str
     ) -> Optional[Driver]:
-        check_password_strength(password)
-
         phone_number = pn.parse(phone, "FR")
         if not pn.is_valid_number(phone_number) or not pn.is_possible_number(phone_number):
             raise ValueError(f"The number {phone} is invalid.")
 
+        if not re.match(self.pattern, first_name) or not re.match(self.pattern, last_name):
+            raise ValueError(
+                "[Driver Service] Cannot create driver: First name and last name "
+                "must only contains letters"
+            )
+
+        check_password_strength(password)
         salt = create_salt()
         password_hash = hash_password(password, salt)
 
+        formatted_first_name = first_name.strip().capitalize()
+        formatted_last_name = last_name.strip().upper()
+
         driver_phone = "0" + str(phone_number.national_number)
         created_driver = self.driver_dao.create_driver(
-            first_name=first_name,
-            last_name=last_name,
+            first_name=formatted_first_name,
+            last_name=formatted_last_name,
             phone=driver_phone,
             password_hash=password_hash,
             salt=salt,
@@ -90,6 +112,21 @@ class DriverService:
 
         update = {key: value for key, value in update.items() if update[key]}
 
+        if update.get("driver_first_name"):
+            if not re.match(self.pattern, update.get("driver_first_name")):
+                raise ValueError(
+                    "[driver Service] Cannot update driver: First namemust only contains letters"
+                )
+            update["driver_first_name"] = update["driver_first_name"].strip().capitalize()
+
+        if update.get("driver_last_name"):
+            if not re.match(self.pattern, update.get("driver_last_name")):
+                raise ValueError(
+                    "[driver Service] Cannot update driver: Last name must only contains letters"
+                )
+
+            update["driver_last_name"] = update["driver_last_name"].strip().upper()
+
         if update.get("driver_phone"):
             phone_number = pn.parse(update["driver_phone"], "FR")
             if not pn.is_valid_number(phone_number) or not pn.is_possible_number(phone_number):
@@ -102,55 +139,42 @@ class DriverService:
         return updated_driver
 
     @log
-    def accept_order(self, order_id: int, driver_id: int) -> Delivery:
-        if self.driver_dao.get_driver_by_id(driver_id) is None:
-            raise ValueError(
-                f"[DriverService] Cannot accept order: driver with ID {driver_id} not found."
-            )
-
-        if self.order_dao.get_order_by_id(order_id) is None:
-            raise ValueError(
-                f"[DriverService] Cannot accept order: order with ID {order_id} not found."
-            )
-
-        existing_delivery = self.delivery_dao.get_delivery_by_driver(driver_id)
-        if existing_delivery:
-            raise ValueError(f"[DriverService] Driver {driver_id} is already on a delivery.")
-
-        delivery = self.delivery_dao.create_delivery(order_id, driver_id)
-        return delivery
-
-    @log
     def start_delivery(self, order_id: int, driver_id: int) -> Delivery:
-        if self.driver_dao.get_driver_by_id(driver_id) is None:
+        driver = self.get_driver_by_id(driver_id)
+        order = self.order_dao.get_order_by_id(order_id)
+
+        if order.order_state != OrderState.PREPARED:
             raise ValueError(
-                f"[DriverService] Cannot start delivery: driver with ID {driver_id} not found."
+                "[DriverService] Cannot start delivery: "
+                f"Order isn't prepared, current state: {order.order_state.name}"
             )
 
-        if self.delivery_dao.get_delivery_by_order_id(order_id) is None:
+        if driver.driver_is_delivering:
             raise ValueError(
-                f"[DriverService] Cannot start delivery: order with ID {order_id} not found."
+                f"[DriverService] Cannot start delivery: Driver {driver_id} "
+                "already has an active delivery"
             )
 
+        self.delivery_dao.create_delivery(order_id, driver_id)
         self.driver_dao.update_driver(driver_id, update={"driver_is_delivering": True})
-        self.order_dao.update_order(order_id, update={"order_state": 1})
+        self.order_dao.update_order_state(order_id, OrderState.DELIVERING)
         delivery = self.delivery_dao.update_delivery_state(order_id, 1)
         return delivery
 
     @log
     def end_delivery(self, order_id: int, driver_id: int) -> Delivery:
-        if self.driver_dao.get_driver_by_id(driver_id) is None:
-            raise ValueError(
-                f"[DriverService] Cannot end delivery: driver with ID {driver_id} not found."
-            )
+        self.get_driver_by_id(driver_id)
 
-        if self.delivery_dao.get_delivery_by_order_id(order_id) is None:
+        order = self.order_dao.get_order_by_id(order_id)
+
+        if order.order_state != OrderState.DELIVERING:
             raise ValueError(
-                f"[DriverService] Cannot end delivery: order with ID {order_id} not found."
+                "[DriverService] Cannot end delivery: Order must be delivering to complete, "
+                f"current state: {order.order_state.name}"
             )
 
         self.driver_dao.update_driver(driver_id, update={"driver_is_delivering": False})
-        self.order_dao.update_order(order_id, update={"order_state": 2})
+        self.order_dao.update_order_state(order_id, OrderState.DELIVERED.value)
         delivery = self.delivery_dao.update_delivery_state(order_id, 2)
         return delivery
 

@@ -1,10 +1,20 @@
 from datetime import date, time
+from enum import Enum
 from typing import Dict, Union
 
 from pydantic import BaseModel
 
 from .Bundle import Bundle
 from .Item import Item
+
+
+class OrderState(Enum):
+    PENDING = 0
+    PAID = 1
+    PREPARED = 2
+    DELIVERING = 3
+    DELIVERED = 4
+    CANCELLED = 5
 
 
 class Order(BaseModel):
@@ -15,22 +25,18 @@ class Order(BaseModel):
     ----------
         id_order (int): Unique identifier of the order.
         client_id (int): ID of the client.
-        state (int, optional): Order status (0 = pending, 1 = delivering, 2 = delivered).
-                               Default is 0.
+        state (int, optional): Order status (0 = pending, 1 = paid, 2 = prepared,
+                                3 = delivery, 4 = delivered, 5 = cancelled).
         items (Dict[Bundle | Item, int]): List of items and bundles in the order.
         date (date): Date of the order.
         time (time): Time of the order.
-        is_paid (bool, optional): Whether the order has been paid. Default is False.
-        is_prepared (bool, optional): Whether the order is prepared. Default is False.
     """
 
     order_id: int
     order_customer_id: int
-    order_state: int = 0
+    order_state: OrderState = OrderState.PENDING
     order_date: date
     order_time: time
-    order_is_paid: bool = False
-    order_is_prepared: bool = False
     order_orderables: Dict[Union[Bundle, Item], int]
 
     @property
@@ -47,3 +53,15 @@ class Order(BaseModel):
             total_price += orderable.price * qty
 
         return total_price
+
+    @property
+    def is_paid(self) -> bool:
+        return self.order_state.value >= OrderState.PAID.value
+
+    @property
+    def is_prepared(self) -> bool:
+        return self.order_state.value >= OrderState.PREPARED.value
+
+    @property
+    def is_delivered(self) -> bool:
+        return self.order_state == OrderState.DELIVERED

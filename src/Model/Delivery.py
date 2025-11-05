@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel
@@ -17,4 +18,5 @@ class Delivery(BaseModel):
 
     delivery_order_id: int
     delivery_driver_id: int
+    delivery_created_at: datetime
     delivery_state: Optional[int] = None

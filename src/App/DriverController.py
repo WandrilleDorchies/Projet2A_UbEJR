@@ -3,6 +3,8 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
 
+from src.Model.Order import OrderState
+
 from .init_app import customer_service, driver_service, gm_service, jwt_service, order_service
 from .JWTBearer import DriverBearer
 
@@ -17,6 +19,11 @@ def get_driver_id_from_token(
     token = credentials.credentials
     driver_id = int(jwt_service.validate_user_jwt(token)["user_id"])
     return driver_id
+
+
+def get_current_order_id(driver_id: int = Depends(get_driver_id_from_token)) -> int:
+    order = driver_service.get_driver_current_order(driver_id)
+    return order.order_id
 
 
 # PROFILE
@@ -41,8 +48,6 @@ def update_profile(
     try:
         update_data = locals()
         update_data.pop("driver_id")
-        print(update_data)
-        print(type(update_data))
         updated_driver = driver_service.update_driver(driver_id, update_data)
         return updated_driver
 
@@ -58,7 +63,7 @@ def update_profile(
 )
 def get_available_orders():
     try:
-        return order_service.get_paid_orders()
+        return order_service.get_available_orders_for_drivers()
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching orders: {e}") from e
 
@@ -69,30 +74,19 @@ def get_available_orders():
 def get_order_by_id(order_id: int):
     try:
         order = order_service.get_order_by_id(order_id)
-        if not order.order_is_paid or order.order_state != 0:
-            raise HTTPException(status_code=400, detail="This order cannot isn't available.")
+        if order.order_state != OrderState.PREPARED:
+            raise HTTPException(
+                status_code=400,
+                detail=f"This order cannot isn't available, current state : {order.order_state}",
+            )
+
+        return order
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching orders: {e}") from e
 
 
 # DELIVERIES
-@driver_router.put(
-    "/orders/{order_id}/accept",
-    status_code=status.HTTP_200_OK,
-    dependencies=[Depends(DriverBearer())],
-)
-def accept_order(order_id: int, driver_id: int = Depends(get_driver_id_from_token)):
-    try:
-        order = order_service.get_order_by_id(order_id)
-        if not order.order_is_paid:
-            raise HTTPException(status_code=400, detail="This order isn't paid.")
-
-        return driver_service.accept_order(order_id, driver_id)
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e)) from e
-
-
 @driver_router.put(
     "/orders/{order_id}/start",
     status_code=status.HTTP_200_OK,
@@ -101,9 +95,11 @@ def accept_order(order_id: int, driver_id: int = Depends(get_driver_id_from_toke
 def start_delivery(order_id: int, driver_id: int = Depends(get_driver_id_from_token)):
     try:
         order = order_service.get_order_by_id(order_id)
-        if not order.order_is_prepared:
-            raise HTTPException(status_code=400, detail="This order isn't prepared yet.")
-        return order
+        if order.order_state != OrderState.PREPARED:
+            raise HTTPException(
+                status_code=400,
+                detail=f"This order isn't prepared yet, current state : {order.order_state}",
+            )
         return driver_service.start_delivery(order_id, driver_id)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
@@ -114,7 +110,7 @@ def start_delivery(order_id: int, driver_id: int = Depends(get_driver_id_from_to
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(DriverBearer())],
 )
-def get_path(order_id: int):
+def get_path(order_id: int = Depends(get_current_order_id)):
     order = order_service.get_order_by_id(order_id)
     address = customer_service.get_address_by_customer_id(order.order_customer_id)
 
@@ -126,7 +122,10 @@ def get_path(order_id: int):
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(DriverBearer())],
 )
-def end_delivery(order_id: int, driver_id: int = Depends(get_driver_id_from_token)):
+def end_delivery(
+    order_id: int = Depends(get_current_order_id),
+    driver_id: int = Depends(get_driver_id_from_token),
+):
     try:
         return driver_service.end_delivery(order_id, driver_id)
     except ValueError as e:

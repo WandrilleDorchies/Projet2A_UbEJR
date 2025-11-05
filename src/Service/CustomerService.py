@@ -1,3 +1,4 @@
+import re
 from typing import List, Optional
 
 import phonenumbers as pn
@@ -5,10 +6,8 @@ from validate_email import validate_email
 
 from src.DAO.AddressDAO import AddressDAO
 from src.DAO.CustomerDAO import CustomerDAO
-from src.DAO.OrderDAO import OrderDAO
 from src.Model.Address import Address
 from src.Model.Customer import Customer
-from src.Model.Order import Order
 from src.Service.GoogleMapService import GoogleMapService
 from src.Service.PasswordService import check_password_strength, create_salt, hash_password
 from src.Service.UserService import UserService
@@ -17,7 +16,6 @@ from src.utils.log_decorator import log
 
 class CustomerService:
     customer_dao: CustomerDAO
-    order_dao: OrderDAO
     address_dao: AddressDAO
     gm_service: GoogleMapService
     user_service: UserService
@@ -25,16 +23,15 @@ class CustomerService:
     def __init__(
         self,
         customer_dao: CustomerDAO,
-        order_dao: OrderDAO,
         address_dao: AddressDAO,
         gm_service: GoogleMapService,
         user_service: UserService,
     ):
         self.customer_dao = customer_dao
-        self.order_dao = order_dao
         self.address_dao = address_dao
         self.gm_service = gm_service
         self.user_service = user_service
+        self.pattern = r"^[A-Za-zÀ-ÖØ-öø-ÿ\- ]+$"
 
     @log
     def get_customer_by_id(self, customer_id: int) -> Optional[Customer]:
@@ -77,28 +74,33 @@ class CustomerService:
         password: str,
         address_string: str,
     ) -> Optional[Customer]:
-        existing_user = self.customer_dao.get_customer_by_email(mail.strip())
+        formatted_mail = mail.lower().strip()
+        existing_user = self.customer_dao.get_customer_by_email(formatted_mail)
         if existing_user is not None:
             raise ValueError(
-                f"[CustomerService] Cannot create: customer with email {mail} already exists."
+                f"[CustomerService] Cannot create: customer with email {formatted_mail} "
+                "already exists."
             )
 
-        existing_user = self.customer_dao.get_customer_by_phone(phone.strip())
+        formatted_phone = phone.strip()
+        existing_user = self.customer_dao.get_customer_by_phone(formatted_phone)
         if existing_user is not None:
             raise ValueError(
-                f"[CustomerService] Cannot create: customer with phone {phone} already exists."
+                f"[CustomerService] Cannot create: customer with phone {formatted_phone} "
+                "already exists."
+            )
+        if not re.match(self.pattern, first_name) or not re.match(self.pattern, last_name):
+            raise ValueError(
+                "[Customer Service] Cannot create customer: First name and last name "
+                "must only contains letters"
             )
 
-        check_password_strength(password)
-
-        phone_number = pn.parse(phone, "FR")
+        phone_number = pn.parse(formatted_phone, "FR")
         if not pn.is_valid_number(phone_number) or not pn.is_possible_number(phone_number):
             raise ValueError(f"[CustomerService] Cannot create: The number {phone} is invalid.")
 
-        customer_phone = "0" + str(phone_number.national_number)
-
         is_valid_email = validate_email(
-            mail, check_blacklist=False, check_dns=False, check_smtp=False
+            formatted_mail, check_blacklist=False, check_dns=False, check_smtp=False
         )
 
         if not is_valid_email:
@@ -111,11 +113,24 @@ class CustomerService:
                 "is invalid or outside the delivery zone."
             )
 
+        check_password_strength(password)
+
+        formatted_first_name = first_name.strip().capitalize()
+        formatted_last_name = last_name.strip().upper()
+
+        customer_phone = "0" + str(phone_number.national_number)
+
         salt = create_salt()
         password_hash = hash_password(password, salt)
 
         customer = self.customer_dao.create_customer(
-            first_name, last_name, customer_phone, mail, password_hash, salt, address.address_id
+            formatted_first_name,
+            formatted_last_name,
+            customer_phone,
+            formatted_mail,
+            password_hash,
+            salt,
+            address.address_id,
         )
 
         return customer
@@ -133,6 +148,23 @@ class CustomerService:
 
         update = {key: value for key, value in update.items() if update[key]}
 
+        if update.get("customer_first_name"):
+            if not re.match(self.pattern, update.get("customer_first_name")):
+                raise ValueError(
+                    "[Customer Service] Cannot update customer: First name"
+                    "must only contains letters"
+                )
+            update["customer_first_name"] = update["customer_first_name"].strip().capitalize()
+
+        if update.get("customer_last_name"):
+            if not re.match(self.pattern, update.get("customer_last_name")):
+                raise ValueError(
+                    "[Customer Service] Cannot update customer: Last name "
+                    "must only contains letters"
+                )
+
+            update["customer_last_name"] = update["customer_last_name"].strip().upper()
+
         if update.get("customer_phone"):
             phone_number = pn.parse(update["customer_phone"], "FR")
             if not pn.is_valid_number(phone_number) or not pn.is_possible_number(phone_number):
@@ -142,7 +174,10 @@ class CustomerService:
 
         if update.get("customer_mail"):
             is_valid_email = validate_email(
-                update["customer_mail"], check_blacklist=False, check_dns=False, check_smtp=False
+                update["customer_mail"],
+                check_blacklist=False,
+                check_dns=False,
+                check_smtp=False,
             )
 
             if not is_valid_email:
@@ -185,11 +220,6 @@ class CustomerService:
     #     update = {"customer_phone": customer_phone}
     #     updated_customer = self.update_customer(customer_id, update)
     #     return updated_customer
-
-    @log
-    def order_history(self, customer_id: int) -> Optional[List[Order]]:
-        history = self.order_dao.get_all_orders_by_customer(customer_id)
-        return history
 
     @log
     def delete_customer(self, customer_id: int) -> None:

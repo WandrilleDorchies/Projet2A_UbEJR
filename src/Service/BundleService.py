@@ -65,6 +65,16 @@ class BundleService:
         if all([value is None for value in update.values()]):
             raise ValueError("You must change at least one field.")
 
+        if update.get("bundle_availability_start_date"):
+            update["bundle_availability_start_date"] = datetime.strptime(
+                update.get("bundle_availability_start_date"), "%d/%m/%Y"
+            )
+
+        if update.get("bundle_availability_end_date"):
+            update["bundle_availability_end_date"] = datetime.strptime(
+                update.get("bundle_availability_start_date"), "%d/%m/%Y"
+            )
+
         update = {key: value for key, value in update.items() if update[key]}
         updated_bundle = self.bundle_dao.update_bundle(bundle_id=bundle_id, update=update)
         return updated_bundle

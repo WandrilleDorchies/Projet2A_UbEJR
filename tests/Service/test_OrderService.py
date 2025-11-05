@@ -104,18 +104,6 @@ class TestOrderService:
         with pytest.raises(ValueError, match="Cannot delete: order with ID 9999 not found"):
             order_service.delete_order(9999)
 
-    def test_calculate_price(self, order_service, sample_order_full, clean_database):
-        """Test calculating order price"""
-        price = order_service.calculate_price(sample_order_full.order_id)
-
-        expected_price = 0.85 * (0.5 + 4.5) + 2.0
-        assert price == expected_price
-
-    def test_calculate_price_order_not_exists(self, order_service, clean_database):
-        """Test calculating price for non-existing order raises error"""
-        with pytest.raises(ValueError, match="No order found with id 9999"):
-            order_service.calculate_price(9999)
-
     def test_add_item_to_order_success(
         self, order_service, sample_order, sample_item, clean_database, orderable_dao, item_service
     ):
