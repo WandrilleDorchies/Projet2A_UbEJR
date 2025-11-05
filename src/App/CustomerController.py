@@ -219,11 +219,11 @@ def view_order_history(customer_id: int = Depends(get_customer_id_from_token)):
         orders = order_service.get_all_orders_by_customer(customer_id)
 
         for order in orders:
-            for i, content in enumerate(order.order_orderables):
+            for content in order.order_orderables.keys():
 
                     if isinstance(content, Item):
 
-                        order.order_orderables[i] = APIItem(
+                        order.order_orderables[content] = APIItem(
                             item_id=content.item_id,
                             orderable_id=content.orderable_id,
                             item_name=content.item_name,
@@ -233,8 +233,8 @@ def view_order_history(customer_id: int = Depends(get_customer_id_from_token)):
                         )
 
                     elif isinstance(content, Bundle):
-                        for k, item in enumerate(content.bundle_items):
-                            content.bundle_items[k] = APIItem(
+                        for j, item in enumerate(content.bundle_items):
+                            content.bundle_items[j] = APIItem(
                                 item_id=item.item_id,
                                 orderable_id=item.orderable_id,
                                 item_name=item.item_name,
