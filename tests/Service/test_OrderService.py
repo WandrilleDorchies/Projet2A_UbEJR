@@ -3,6 +3,8 @@ from datetime import datetime
 
 import pytest
 
+from src.Model.Order import OrderState
+
 
 class TestOrderService:
     def test_get_order_exists(self, order_service, sample_order, clean_database):
@@ -15,32 +17,31 @@ class TestOrderService:
 
     def test_get_order_not_exists(self, order_service, clean_database):
         """Test getting order by non-existing id raises error"""
-        with pytest.raises(ValueError, match="Cannot get: order with ID 9999 not found"):
+        with pytest.raises(ValueError, match="Cannot find: order with ID 9999 not found"):
             order_service.get_order_by_id(9999)
 
     def test_get_all_orders_empty(self, order_service, clean_database):
         """Test getting all orders when there are none"""
-        orders = order_service.get_all_orders()
+        orders = order_service.get_all_orders(limit=10)
 
         assert orders == []
 
-    def test_get_all_orders_multiple(self, order_service, sample_customer, clean_database):
+    def test_get_all_orders(self, order_service, sample_customer, clean_database):
         """Test getting all orders"""
         order_service.create_order(sample_customer.id)
-        order_service.update_order(1, {"order_state": 2})
-        order_service.create_order(sample_customer.id)
-        order_service.update_order(2, {"order_state": 2})
-        order_service.create_order(sample_customer.id)
 
-        orders = order_service.get_all_orders()
+        orders = order_service.get_all_orders(limit=5)
 
         assert orders != []
-        assert len(orders) == 3
+        assert len(orders) == 1
 
     def test_get_all_orders_by_customer(self, order_service, sample_customer, clean_database):
         """Test getting all orders by customer"""
         order_service.create_order(sample_customer.id)
-        order_service.update_order(1, {"order_state": 2})
+        order_service.mark_as_paid(1)
+        order_service.mark_as_prepared(1)
+        order_service.update_order_state(1, OrderState.DELIVERING)
+        order_service.update_order_state(1, OrderState.DELIVERED)
         order_service.create_order(sample_customer.id)
 
         orders = order_service.get_all_orders_by_customer(sample_customer.id)
@@ -51,21 +52,15 @@ class TestOrderService:
 
     def test_get_all_orders_prepared(self, order_service, sample_customer, clean_database):
         """Test getting all prepared orders"""
-        order1 = order_service.create_order(sample_customer.id)
-        order_service.update_order(1, {"order_state": 2})
-        order2 = order_service.create_order(sample_customer.id)
-        order_service.update_order(2, {"order_state": 2})
-        order3 = order_service.create_order(sample_customer.id)
+        order_service.create_order(sample_customer.id)
+        order_service.mark_as_paid(1)
+        order_service.mark_as_prepared(1)
 
-        order_service.update_order(order1.order_id, {"order_is_prepared": True})
-        order_service.update_order(order2.order_id, {"order_is_prepared": True})
-        order_service.update_order(order3.order_id, {"order_is_prepared": False})
-
-        prepared_orders = order_service.get_prepared_orders()
+        prepared_orders = order_service.get_available_orders_for_drivers()
 
         assert prepared_orders != []
-        assert len(prepared_orders) == 2
-        assert all(o.order_is_prepared is True for o in prepared_orders)
+        assert len(prepared_orders) == 1
+        assert all(o.is_prepared is True for o in prepared_orders)
 
     def test_create_order(self, order_service, sample_customer, clean_database):
         """Test creating an order"""
@@ -74,34 +69,20 @@ class TestOrderService:
         assert created_order is not None
         assert created_order.order_id > 0
         assert created_order.order_customer_id == sample_customer.id
-        assert created_order.order_state == 0
-        assert created_order.order_is_paid is False
-        assert created_order.order_is_prepared is False
-
-    def test_update_order(self, order_service, sample_order, clean_database):
-        """Test updating an order"""
-        updated_order = order_service.update_order(
-            sample_order.order_id, {"order_is_paid": True, "order_is_prepared": True}
-        )
-
-        assert updated_order.order_is_paid is True
-        assert updated_order.order_is_prepared is True
-
-    def test_update_order_not_exists(self, order_service, clean_database):
-        """Test updating non-existing order raises error"""
-        with pytest.raises(ValueError, match="Cannot update: order with ID 9999 not found"):
-            order_service.update_order(9999, {"order_is_paid": True})
+        assert created_order.order_state == OrderState.PENDING
+        assert created_order.is_paid is False
+        assert created_order.is_prepared is False
 
     def test_delete_order(self, order_service, sample_order, clean_database):
         """Test deleting an order"""
         order_service.delete_order(sample_order.order_id)
 
-        with pytest.raises(ValueError, match="Cannot get: order with ID"):
+        with pytest.raises(ValueError, match="Cannot find: order with ID"):
             order_service.get_order_by_id(sample_order.order_id)
 
     def test_delete_order_not_exists(self, order_service, clean_database):
         """Test deleting non-existing order raises error"""
-        with pytest.raises(ValueError, match="Cannot delete: order with ID 9999 not found"):
+        with pytest.raises(ValueError, match="Cannot find: order with ID 9999 not found"):
             order_service.delete_order(9999)
 
     def test_add_item_to_order_success(
