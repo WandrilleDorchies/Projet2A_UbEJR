@@ -160,7 +160,7 @@ class CustomerService:
 
         update = {key: value for key, value in update.items() if update[key]}
 
-        update["address_id"] = customer.address_id
+        update["address_id"] = customer.customer_address.address_id
         new_address = Address(**update)
         self.gm_service.validate_address(new_address)
 
