@@ -156,7 +156,7 @@ class OrderService:
 
         Parameters
         ----------
-        item_id : int
+        orderable_id : int
             ID of the item to remove.
         order_id : int
             ID of the order
@@ -166,7 +166,11 @@ class OrderService:
         raw_orderable = self.orderable_dao.get_orderable_by_id(orderable_id)
         if raw_orderable is None:
             raise ValueError(f"[OrderService] Orderable with ID {orderable_id} not found.")
-
+        quantity_in_order = self.order_dao.get_quantity_of_orderables(order_id, orderable_id)
+        if quantity_in_order < quantity:
+            raise ValueError(
+                f"[OrderService] Trying to remove {quantity} of orderable {orderable_id} when there is only {quantity_in_order} of it in the order !"
+            )
         if raw_orderable["orderable_type"] == "item":
             orderable = self.item_dao.get_item_by_orderable_id(orderable_id)
 

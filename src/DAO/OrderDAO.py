@@ -201,7 +201,7 @@ class OrderDAO(metaclass=Singleton):
 
     @log
     def add_orderable_to_order(self, order_id: int, orderable_id: int, quantity: int = 1) -> Order:
-        if self._get_quantity_of_orderables(order_id, orderable_id) >= 1:
+        if self.get_quantity_of_orderables(order_id, orderable_id) >= 1:
             self.db_connector.sql_query(
                 """UPDATE Order_contents
                    SET orderable_quantity=orderable_quantity+%(quantity)s
@@ -226,7 +226,8 @@ class OrderDAO(metaclass=Singleton):
     def remove_orderable_from_order(
         self, order_id: int, orderable_id: int, quantity: int = 1
     ) -> Order:
-        if self._get_quantity_of_orderables(order_id, orderable_id) <= quantity:
+        # si getquantity < quantity a delete : balancer une erreur  > fait par le service
+        if self.get_quantity_of_orderables(order_id, orderable_id) == quantity:
             self.db_connector.sql_query(
                 """DELETE FROM Order_contents
                    WHERE order_id=%(order_id)s AND orderable_id=%(orderable_id)s;
@@ -246,7 +247,7 @@ class OrderDAO(metaclass=Singleton):
 
         return self.get_order_by_id(order_id)
 
-    def _get_quantity_of_orderables(self, order_id: int, orderable_id: int) -> int:
+    def get_quantity_of_orderables(self, order_id: int, orderable_id: int) -> int:
         result = self.db_connector.sql_query(
             """SELECT orderable_quantity
                FROM Order_contents

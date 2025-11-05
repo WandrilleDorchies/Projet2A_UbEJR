@@ -208,7 +208,13 @@ def remove_orderable_from_order(
     quantity: int,
     order_id: int = Depends(get_current_order_id),
 ):
-    return order_service.remove_orderable_from_order(orderable_id, order_id, quantity)
+    try:
+        return order_service.remove_orderable_from_order(orderable_id, order_id, quantity)
+    except Exception as e:
+        raise HTTPException(
+            status_code=403,
+            detail=f"[CustomerController]: cannot remove orderable from order - {str(e)}",
+        ) from e
 
 
 @customer_router.get(
@@ -220,36 +226,34 @@ def view_order_history(customer_id: int = Depends(get_customer_id_from_token)):
 
         for order in orders:
             for content in order.order_orderables.keys():
+                if isinstance(content, Item):
+                    order.order_orderables[content] = APIItem(
+                        item_id=content.item_id,
+                        orderable_id=content.orderable_id,
+                        item_name=content.item_name,
+                        item_price=content.item_price,
+                        item_type=content.item_type,
+                        item_description=content.item_description,
+                    )
 
-                    if isinstance(content, Item):
-
-                        order.order_orderables[content] = APIItem(
-                            item_id=content.item_id,
-                            orderable_id=content.orderable_id,
-                            item_name=content.item_name,
-                            item_price=content.item_price,
-                            item_type=content.item_type,
-                            item_description=content.item_description,
+                elif isinstance(content, Bundle):
+                    for j, item in enumerate(content.bundle_items):
+                        content.bundle_items[j] = APIItem(
+                            item_id=item.item_id,
+                            orderable_id=item.orderable_id,
+                            item_name=item.item_name,
+                            item_price=item.item_price,
+                            item_type=item.item_type,
+                            item_description=item.item_description,
                         )
 
-                    elif isinstance(content, Bundle):
-                        for j, item in enumerate(content.bundle_items):
-                            content.bundle_items[j] = APIItem(
-                                item_id=item.item_id,
-                                orderable_id=item.orderable_id,
-                                item_name=item.item_name,
-                                item_price=item.item_price,
-                                item_type=item.item_type,
-                                item_description=item.item_description,
-                            )
-
-                        order.order_orderables[i] = APIBundle(
-                            bundle_id=content.bundle_id,
-                            orderable_id=content.orderable_id,
-                            bundle_name=content.bundle_name,
-                            bundle_description=content.bundle_description,
-                            bundle_items=content.bundle_items,
-                        )
+                    order.order_orderables[i] = APIBundle(
+                        bundle_id=content.bundle_id,
+                        orderable_id=content.orderable_id,
+                        bundle_name=content.bundle_name,
+                        bundle_description=content.bundle_description,
+                        bundle_items=content.bundle_items,
+                    )
         return orders
     except Exception as e:
         raise Exception("[CustomerController] could not get order history") from e
