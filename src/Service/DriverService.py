@@ -115,7 +115,7 @@ class DriverService:
         if update.get("driver_first_name"):
             if not re.match(self.pattern, update.get("driver_first_name")):
                 raise ValueError(
-                    "[driver Service] Cannot update driver: First namemust only contains letters"
+                    "[driver Service] Cannot update driver: First name must only contains letters"
                 )
             update["driver_first_name"] = update["driver_first_name"].strip().capitalize()
 
