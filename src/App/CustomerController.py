@@ -239,7 +239,7 @@ def remove_orderable_from_order(
         raise HTTPException(
             status_code=403,
             detail="[CustomerController] Invalid input: "
-            "cannot remove orderable from order - {str(e)}",
+            f"cannot remove orderable from order - {str(e)}",
         ) from e
 
 
