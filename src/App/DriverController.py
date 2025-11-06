@@ -48,6 +48,12 @@ def update_profile(
     try:
         update_data = locals()
         update_data.pop("driver_id")
+        if update_data.get("driver_phone") and customer_service.get_customer_by_phone(driver_phone):
+            raise HTTPException(
+                status_code=403,
+                detail="[DriverController] Cannot update driver: "
+                "A customer already have this phone number.",
+            )
         updated_driver = driver_service.update_driver(driver_id, update_data)
         return updated_driver
 
