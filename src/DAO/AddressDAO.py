@@ -16,7 +16,12 @@ class AddressDAO(metaclass=Singleton):
     # CREATE
     @log
     def create_address(
-        self, number: int, street: str, city: str, postal_code: int, country: str
+        self,
+        address_number: int,
+        address_street: str,
+        address_city: str,
+        address_postal_code: int,
+        address_country: str,
     ) -> Address:
         """
         Create a new address entry in the database.
@@ -47,11 +52,11 @@ class AddressDAO(metaclass=Singleton):
             RETURNING *;
             """,
             {
-                "number": number,
-                "street": street,
-                "city": city,
-                "postal_code": postal_code,
-                "country": country,
+                "number": address_number,
+                "street": address_street,
+                "city": address_city,
+                "postal_code": address_postal_code,
+                "country": address_country,
             },
             "one",
         )

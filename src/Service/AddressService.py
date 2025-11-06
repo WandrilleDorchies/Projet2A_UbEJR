@@ -17,7 +17,7 @@ class AddressService:
 
     @log
     def get_address_by_id(self, address_id: int) -> Optional[Address]:
-        address = self.address_dao.get_address(address_id)
+        address = self.address_dao.get_address_by_id(address_id)
         if address is None:
             raise ValueError(
                 f"[AddressService]: Cannot find: Addres with ID {address_id} not found."
@@ -39,7 +39,7 @@ class AddressService:
         self,
         address: str,
     ) -> Optional[Address]:
-        self.gm_service.validate_adress(address)
+        self.gm_service.validate_address(address)
 
         components = self.gm_service.extract_components(address)
         return self.address_dao.create_address(**components)
@@ -52,16 +52,16 @@ class AddressService:
             raise ValueError(
                 "[AddressService] Cannot update address: You must change at least one field."
             )
-        update.pop("address_id")
+
         for key, value in update.items():
             if not value:
-                update[key] = current_address[key]
+                update[key] = getattr(current_address, key)
 
         address = (
             f"{update['address_number']} {update['address_street']},"
             f"{update['address_postal_code']} {update['address_city']}, {update['address_country']}"
         )
-        self.gm_service.validate_adress(address)
+        self.gm_service.validate_address(address)
         components = self.gm_service.extract_components(address)
         return self.address_dao.update_address(address_id, components)
 

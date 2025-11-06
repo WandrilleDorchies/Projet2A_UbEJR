@@ -4,7 +4,6 @@ from typing import List, Optional
 import phonenumbers as pn
 from validate_email import validate_email
 
-from src.DAO.AddressDAO import AddressDAO
 from src.DAO.CustomerDAO import CustomerDAO
 from src.Model.Address import Address
 from src.Model.Customer import Customer
@@ -16,19 +15,16 @@ from src.utils.log_decorator import log
 
 class CustomerService:
     customer_dao: CustomerDAO
-    address_dao: AddressDAO
     address_service: AddressService
     user_service: UserService
 
     def __init__(
         self,
         customer_dao: CustomerDAO,
-        address_dao: AddressDAO,
         address_service: AddressService,
         user_service: UserService,
     ):
         self.customer_dao = customer_dao
-        self.address_dao = address_dao
         self.address_service = address_service
         self.user_service = user_service
         self.pattern = r"^(?=.*[A-Za-zÀ-ÖØ-öø-ÿ])[-A-Za-zÀ-ÖØ-öø-ÿ ]+$"
@@ -45,7 +41,7 @@ class CustomerService:
     @log
     def get_address_by_customer_id(self, customer_id: int) -> Address:
         self.get_customer_by_id(customer_id)
-        return self.address_dao.get_address_by_customer_id(customer_id)
+        return self.address_service.get_address_by_customer_id(customer_id)
 
     @log
     def get_customer_by_email(self, customer_email: str) -> Optional[Customer]:
@@ -188,11 +184,8 @@ class CustomerService:
         if all([value is None for value in update.values()]):
             raise ValueError("You must change at least one field.")
 
-        update = {key: value for key, value in update.items() if update[key]}
-
-        update["address_id"] = customer.customer_address.address_id
-        new_address = Address(**update)
-        self.gm_service.validate_address(new_address)
+        address_id = customer.customer_address.address_id
+        self.address_service.update_address(address_id, update)
 
         return self.get_customer_by_id(customer_id)
 
