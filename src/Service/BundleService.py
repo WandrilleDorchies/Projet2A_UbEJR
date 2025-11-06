@@ -51,6 +51,18 @@ class BundleService:
                 "[BundleService] Cannot create bundle: Bundle reduction must be between 0 and 100."
             )
 
+        if bundle_availability_start_date > bundle_availability_end_date:
+            raise ValueError(
+                "[BundleService] Cannot create bundle: Bundle end date must "
+                "later than the start date"
+            )
+
+        today = datetime.now()
+        if bundle_availability_end_date < today:
+            raise ValueError(
+                "[BundleService] Cannot update bundle: Start date cannot be in the past."
+            )
+
         create_bundle = self.bundle_dao.create_bundle(
             bundle_name=bundle_name,
             bundle_reduction=bundle_reduction,
@@ -65,19 +77,54 @@ class BundleService:
 
     @log
     def update_bundle(self, bundle_id: int, update: dict) -> Optional[Bundle]:
-        self.get_bundle_by_id(bundle_id)
+        current_bundle = self.get_bundle_by_id(bundle_id)
 
         if all([value is None for value in update.values()]):
-            raise ValueError("You must change at least one field.")
-
-        if update.get("bundle_availability_start_date"):
-            update["bundle_availability_start_date"] = datetime.strptime(
-                update.get("bundle_availability_start_date"), "%d/%m/%Y"
+            raise ValueError(
+                "[BundleService] Cannot update bundle: You must change at least one field."
             )
 
+        start_date = None
+        end_date = None
+
+        if update.get("bundle_availability_start_date"):
+            try:
+                start_date = datetime.strptime(
+                    update.get("bundle_availability_start_date"), "%d/%m/%Y"
+                )
+                update["bundle_availability_start_date"] = start_date
+            except ValueError as e:
+                raise ValueError(
+                    "[BundleService] Cannot update bundle: Invalid start date format. "
+                    "Expected format: DD/MM/YYYY"
+                ) from e
+
         if update.get("bundle_availability_end_date"):
-            update["bundle_availability_end_date"] = datetime.strptime(
-                update.get("bundle_availability_start_date"), "%d/%m/%Y"
+            try:
+                end_date = datetime.strptime(update.get("bundle_availability_end_date"), "%d/%m/%Y")
+                update["bundle_availability_end_date"] = end_date
+            except (ValueError, TypeError) as e:
+                raise ValueError(
+                    "[BundleService] Cannot update bundle: Invalid end date format. "
+                    "Expected format: DD/MM/YYYY"
+                ) from e
+
+        final_start_date = (
+            start_date if start_date else current_bundle.bundle_availability_start_date
+        )
+        final_end_date = end_date if end_date else current_bundle.bundle_availability_end_date
+
+        if final_end_date <= final_start_date:
+            raise ValueError(
+                "[BundleService] Cannot update bundle: End date "
+                f"({final_end_date.strftime('%d/%m/%Y')}) must be after start date "
+                f"({final_start_date.strftime('%d/%m/%Y')})."
+            )
+
+        today = datetime.now()
+        if final_end_date < today:
+            raise ValueError(
+                "[BundleService] Cannot update bundle: Start date cannot be in the past."
             )
 
         if update.get("bundle_reduction") and not (0 <= update.get("bundle_reduction") <= 100):

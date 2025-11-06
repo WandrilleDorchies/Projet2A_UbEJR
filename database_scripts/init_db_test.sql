@@ -55,7 +55,7 @@ CREATE TABLE test.Orders (
     order_state INTEGER,
     order_created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     order_paid_at TIMESTAMP DEFAULT NULL,
-    FOREIGN KEY (order_customer_id) REFERENCES test.Customers(customer_id)
+    FOREIGN KEY (order_customer_id) REFERENCES test.Customers(customer_id) ON DELETE SET NULL
 );
 
 -- Table: Items
