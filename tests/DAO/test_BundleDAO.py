@@ -90,6 +90,11 @@ class TestBundleDAO:
         assert retrieved_bundle.bundle_id == created_bundle.bundle_id
         assert retrieved_bundle.orderable_id == created_bundle.orderable_id
 
+    def test_get_bundle_by_orderable_id_not_exist(self, bundle_dao, clean_database):
+        """test getting None when orderable id does not exist"""
+        retrieved_bundle = bundle_dao.get_bundle_by_orderable_id(42316253)
+        assert retrieved_bundle is None
+
     def test_get_all_bundles_empty(self, bundle_dao, clean_database):
         bundles = bundle_dao.get_all_bundle()
 
