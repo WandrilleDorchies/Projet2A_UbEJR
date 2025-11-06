@@ -30,6 +30,42 @@ class TestDeliveryDAO:
 
         assert retrieved_delivery is None
 
+    def test_get_driver_current_delivery_exist(
+        self, delivery_dao, sample_order, sample_driver, clean_database
+    ):
+        """Should return a Delivery when at least one exists"""
+        delivery_dao.create_delivery(order_id=sample_order.order_id, driver_id=sample_driver.id)
+
+        retrieved = delivery_dao.get_driver_current_delivery(sample_driver.id)
+
+        assert retrieved is not None
+        assert retrieved.delivery_driver_id == sample_driver.id
+
+    def test_get_driver_current_delivery_returns_most_recent(
+        self, delivery_dao, order_dao, sample_customer, sample_driver, clean_database, sample_order
+    ):
+        """Should return the most recently created delivery for the driver"""
+
+        # first delivery
+        d1 = delivery_dao.create_delivery(
+            order_id=sample_order.order_id, driver_id=sample_driver.id
+        )
+        new_order = order_dao.create_order(customer_id=sample_customer.id)
+        # second delivery
+        d2 = delivery_dao.create_delivery(order_id=new_order.order_id, driver_id=sample_driver.id)
+
+        retrieved = delivery_dao.get_driver_current_delivery(sample_driver.id)
+
+        assert retrieved is not None
+        assert retrieved.delivery_order_id == d2.delivery_order_id
+        assert retrieved.delivery_order_id != d1.delivery_order_id
+
+    def test_get_driver_current_delivery_not_exist(self, delivery_dao, clean_database):
+        """Test getting delivery by non-existant driver id"""
+        retrieved_delivery = delivery_dao.get_driver_current_delivery(9999)
+
+        assert retrieved_delivery is None
+
     def test_get_delivery_by_user(
         self, delivery_dao, sample_order, sample_driver, sample_customer, clean_database
     ):
@@ -39,6 +75,21 @@ class TestDeliveryDAO:
         retrieved_delivery = delivery_dao.get_delivery_by_user(sample_customer.id)
 
         assert retrieved_delivery is not None
+
+    def test_get_delivery_by_order_id_exist(
+        self, delivery_dao, sample_order, sample_driver, clean_database
+    ):
+        """Test getting delivery by order id"""
+        delivery_dao.create_delivery(order_id=sample_order.order_id, driver_id=sample_driver.id)
+        retrieved_delivery = delivery_dao.get_delivery_by_order_id(sample_order.order_id)
+        assert retrieved_delivery is not None
+        assert retrieved_delivery.delivery_driver_id == sample_driver.id
+        assert retrieved_delivery.delivery_order_id == sample_order.order_id
+
+    def test_get_delivery_by_order_id_not_exist(self, delivery_dao, clean_database):
+        retrieved_delivery = delivery_dao.get_delivery_by_order_id(9999)
+
+        assert retrieved_delivery is None
 
     def test_update_delivery_state(self, delivery_dao, sample_order, sample_driver, clean_database):
         """Test updating delivery state"""

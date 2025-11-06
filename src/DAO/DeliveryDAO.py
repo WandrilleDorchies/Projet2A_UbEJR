@@ -1,7 +1,6 @@
 from typing import Optional
 
 from src.Model.Delivery import Delivery
-from src.Model.Order import Order
 from src.utils.log_decorator import log
 from src.utils.singleton import Singleton
 
@@ -37,7 +36,7 @@ class DeliveryDAO(metaclass=Singleton):
         return Delivery(**raw_delivery)
 
     @log
-    def get_driver_current_delivery(self, delivery_id_driver: int) -> Optional[Order]:
+    def get_driver_current_delivery(self, delivery_id_driver: int) -> Optional[Delivery]:
         raw_delivery = self.db_connector.sql_query(
             """SELECT * from Deliveries
                 WHERE delivery_driver_id=%s
