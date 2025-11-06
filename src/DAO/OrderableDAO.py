@@ -61,7 +61,13 @@ class OrderableDAO(metaclass=Singleton):
 
     @log
     def get_all_orderables(self) -> List[Dict]:
-        raw_orderables = self.db_connector.sql_query("SELECT * FROM Orderables", return_type="all")
+        raw_orderables = self.db_connector.sql_query(
+            """SELECT *
+            FROM Orderables
+            ORDER BY (is_in_menu is True) DESC
+            """,
+            return_type="all",
+        )
         if not raw_orderables:
             return []
 
