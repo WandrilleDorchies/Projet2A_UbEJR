@@ -126,13 +126,13 @@ def driver_service(delivery_dao, driver_dao, user_service, order_dao):
 
 
 @pytest.fixture
-def google_map_service(address_dao):
-    return GoogleMapService(address_dao)
+def google_map_service():
+    return GoogleMapService()
 
 
 @pytest.fixture
-def address_service(address_dao):
-    return AddressService(address_dao)
+def address_service(address_dao, google_map_service):
+    return AddressService(address_dao, google_map_service)
 
 
 @pytest.fixture
@@ -141,18 +141,18 @@ def menu_service(orderable_dao, item_dao, bundle_dao):
 
 
 @pytest.fixture
-def customer_service(customer_dao, address_dao, google_map_service, user_service):
-    return CustomerService(customer_dao, address_dao, google_map_service, user_service)
+def customer_service(customer_dao, address_service, user_service):
+    return CustomerService(customer_dao, address_service, user_service)
 
 
 @pytest.fixture
 def sample_address(address_dao, clean_database):
     address = address_dao.create_address(
-        number=7,
-        street="Contour Antoine de Saint-Exupéry",
-        city="Bruz",
-        postal_code=35170,
-        country="France",
+        7,
+        "Contour Antoine de Saint-Exupéry",
+        "Bruz",
+        35170,
+        "France",
     )
     return address
 
@@ -187,7 +187,7 @@ def sample_item_data():
     return {
         "item_name": "Galette-Saucisse",
         "item_price": 4.5,
-        "item_type": "Plat",
+        "item_type": "Main course",
         "item_description": "La fameuse galette-saucisse de l'EJR",
         "item_stock": 50,
         "is_in_menu": True,
@@ -206,7 +206,7 @@ def multiple_items(item_dao, clean_database):
     item1 = item_dao.create_item(
         item_name="Galette-Saucisse",
         item_price=4.5,
-        item_type="Plat",
+        item_type="Main course",
         item_description="La fameuse galette-saucisse de l'EJR",
         item_stock=50,
         is_in_menu=True,
@@ -216,7 +216,7 @@ def multiple_items(item_dao, clean_database):
     item2 = item_dao.create_item(
         item_name="Coca-Cola 33cl",
         item_price=0.5,
-        item_type="Boisson",
+        item_type="Drink",
         item_description="Canette de Coca-Cola",
         item_stock=100,
         is_in_menu=True,

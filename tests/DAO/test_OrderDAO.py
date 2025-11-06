@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import datetime, timedelta
 
 from src.Model.Order import OrderState
 
@@ -12,7 +12,7 @@ class TestOrderDAO:
         assert order.order_id > 0
         assert order.order_customer_id == sample_customer.id
         assert order.order_state == OrderState.PENDING
-        assert order.order_date == date.today()
+        assert datetime.now() - timedelta(seconds=1) < order.order_created_at < datetime.now()
         assert order.order_orderables == {} or order.order_orderables is None
 
     def test_get_order_by_id_exists(self, order_dao, sample_customer, clean_database):
@@ -132,7 +132,7 @@ class TestOrderDAO:
         item = item_dao.create_item(
             item_name="Test Item",
             item_price=5.0,
-            item_type="Test",
+            item_type="Drink",
             item_description="Item de test",
             item_stock=10,
         )
@@ -141,7 +141,7 @@ class TestOrderDAO:
         bundle = bundle_dao.create_bundle(
             bundle_name="Test Bundle",
             bundle_reduction=5,
-            bundle_description="Test",
+            bundle_description="Drink",
             bundle_availability_start_date=datetime(2025, 10, 9),
             bundle_availability_end_date=datetime(2026, 10, 9),
             bundle_items={item: 2},
@@ -163,7 +163,7 @@ class TestOrderDAO:
         item = item_dao.create_item(
             item_name="Test Item",
             item_price=5.0,
-            item_type="Test",
+            item_type="Drink",
             item_description="Item de test",
             item_stock=10,
         )
@@ -182,7 +182,7 @@ class TestOrderDAO:
         item = item_dao.create_item(
             item_name="Test Item",
             item_price=5.0,
-            item_type="Test",
+            item_type="Drink",
             item_description="Item de test",
             item_stock=10,
         )
@@ -203,7 +203,7 @@ class TestOrderDAO:
         item = item_dao.create_item(
             item_name="Test Item",
             item_price=5.0,
-            item_type="Test",
+            item_type="Drink",
             item_description="Item de test",
             item_stock=10,
         )
@@ -224,7 +224,7 @@ class TestOrderDAO:
         item = item_dao.create_item(
             item_name="Test Item",
             item_price=5.0,
-            item_type="Test",
+            item_type="Drink",
             item_description="Item de test",
             item_stock=10,
         )

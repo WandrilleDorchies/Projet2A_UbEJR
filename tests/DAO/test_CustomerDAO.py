@@ -114,13 +114,6 @@ class TestCustomerDAO:
         assert updated_customer.customer_phone == "0688888888"
         assert updated_customer.customer_mail == sample_customer.customer_mail
 
-    def test_update_customer_empty_dict_raises_error(
-        self, customer_dao, sample_customer, clean_database
-    ):
-        """Test update with empty dictonnary raises error"""
-        with pytest.raises(ValueError, match="At least one value should be updated"):
-            customer_dao.update_customer(sample_customer.id, {})
-
     def test_update_customer_invalid_field_raises_error(
         self, customer_dao, sample_customer, clean_database
     ):

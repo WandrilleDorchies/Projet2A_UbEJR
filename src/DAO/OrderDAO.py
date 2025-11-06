@@ -127,14 +127,24 @@ class OrderDAO(metaclass=Singleton):
     def get_orders_by_state(
         self, state: int, order_by: Literal["DESC", "ASC"] = "DESC"
     ) -> List[Order]:
-        raw_orders = self.db_connector.sql_query(
-            """SELECT * FROM Orders
-                WHERE order_state = %(order_state)s
-                ORDER BY order_created_at %(order_by)s;
-            """,
-            {"order_state": state, "order_by": order_by},
-            "all",
-        )
+        if order_by == "DESC":
+            raw_orders = self.db_connector.sql_query(
+                """SELECT * FROM Orders
+                    WHERE order_state = %s
+                    ORDER BY order_created_at DESC;
+                """,
+                [state],
+                "all",
+            )
+        if order_by == "ASC":
+            raw_orders = self.db_connector.sql_query(
+                """SELECT * FROM Orders
+                    WHERE order_state = %s
+                    ORDER BY order_created_at ASC;
+                """,
+                [state],
+                "all",
+            )
 
         if not raw_orders:
             return []

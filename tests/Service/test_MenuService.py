@@ -36,7 +36,7 @@ class TestMenuService:
         item = item_dao.create_item(
             item_name="Test Item",
             item_price=5.0,
-            item_type="Test",
+            item_type="Drink",
             item_description="Item de test",
             item_stock=10,
             is_in_menu=False,
@@ -105,7 +105,7 @@ class TestMenuService:
         item = item_dao.create_item(
             item_name="Test Item",
             item_price=5.0,
-            item_type="Test",
+            item_type="Drink",
             item_description="Item de test",
             item_stock=10,
             is_in_menu=False,
@@ -124,7 +124,7 @@ class TestMenuService:
         item = item_dao.create_item(
             item_name="Test Item",
             item_price=5.0,
-            item_type="Test",
+            item_type="Drink",
             item_description="Item de test",
             item_stock=10,
             is_in_menu=False,

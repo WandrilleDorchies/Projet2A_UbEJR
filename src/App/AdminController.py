@@ -120,6 +120,7 @@ async def update_item(
             image_data = await item_image.read()
             update["item_image"] = image_data
 
+        update.pop("item_id")
         updated_item = item_service.update_item(item_id, update)
         return updated_item
     except Exception as e:

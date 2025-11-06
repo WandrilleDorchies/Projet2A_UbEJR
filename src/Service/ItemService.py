@@ -70,7 +70,6 @@ class ItemService:
             raise ValueError("[ItemService] Cannot update item: Stock must be positive")
 
         update = {key: value for key, value in update.items() if update[key]}
-        update.pop("item_id")
 
         item = self.item_dao.update_item(item_id, update=update)
         return item

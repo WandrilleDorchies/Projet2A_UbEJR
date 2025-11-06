@@ -1,4 +1,4 @@
-from datetime import date, time
+from datetime import datetime
 from unittest.mock import Mock
 
 import pytest
@@ -14,8 +14,7 @@ def test_order_constructor_ok():
     order_test = Order(
         order_id=1,
         order_customer_id=1,
-        order_date=date(2025, 5, 5),
-        order_time=time(12, 30),
+        order_created_at=datetime(2025, 5, 5),
         order_orderables={mock_item: 1},
     )
 
@@ -23,8 +22,7 @@ def test_order_constructor_ok():
     assert order_test.order_id == 1
     assert order_test.order_customer_id == 1
     assert order_test.order_state == OrderState.PENDING
-    assert order_test.order_date == date(2025, 5, 5)
-    assert order_test.order_time == time(12, 30)
+    assert order_test.order_created_at == datetime(2025, 5, 5)
     assert list(order_test.order_orderables)[0] == mock_item
     assert list(order_test.order_orderables.values())[0] == 1
     assert order_test.is_paid is False
@@ -38,8 +36,7 @@ def test_order_constructor_throws_on_incorrect_input():
         Order(
             order_id="one",
             order_customer_id=1,
-            order_date=date(2025, 5, 5),
-            order_time=time(12, 30),
+            order_created_at=datetime.now(),
             order_orderables=[mock_item],
         )
     assert "order_id" in str(

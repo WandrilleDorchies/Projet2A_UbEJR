@@ -1,3 +1,5 @@
+import re
+
 import pytest
 
 
@@ -152,7 +154,7 @@ class TestCustomerService:
 
     def test_create_customer_invalid_address_raises_error(self, customer_service, clean_database):
         """Test creating customer with invalid address raises error"""
-        with pytest.raises(ValueError, match="invalid or outside the delivery zone"):
+        with pytest.raises(ValueError, match=re.escape("[GoogleMapService]: Address not found.")):
             customer_service.create_customer(
                 first_name="Test",
                 last_name="User",
@@ -166,7 +168,7 @@ class TestCustomerService:
         """Test creating customer with address too far raises error"""
         with pytest.raises(
             ValueError,
-            match="invalid or outside the delivery zone.",
+            match=re.escape("[GoogleMapService]: Destination is too far away."),
         ):
             customer_service.create_customer(
                 first_name="Test",

@@ -11,7 +11,7 @@ def test_item_constructor_ok():
         orderable_id=1,
         item_name="Coca",
         item_price=1.5,
-        item_type="Boisson",
+        item_type="Drink",
         item_description="canette 33cl",
         item_stock=10,
     )
@@ -21,7 +21,7 @@ def test_item_constructor_ok():
     assert item_test.orderable_id == 1
     assert item_test.item_name == "Coca"
     assert item_test.item_price == 1.5
-    assert item_test.item_type == "Boisson"
+    assert item_test.item_type == "Drink"
     assert item_test.item_description == "canette 33cl"
     assert item_test.item_stock == 10
     assert item_test.is_in_menu is False
@@ -34,7 +34,7 @@ def test_item_constructor_throws_on_incorrect_input():
             orderable_id=1,
             item_name="Coca",
             item_price=1.5,
-            item_type="Boisson",
+            item_type="Drink",
             item_description="canette 33cl",
             item_stock=10,
         )
@@ -55,7 +55,7 @@ def test_item_constructor_throws_on_incorrect_input():
             orderable_id=2,
             item_name="Coca",
             item_price=1.5,
-            item_type="Boisson",
+            item_type="Drink",
             item_description="canette 33cl",
             item_stock=10,
         ),
@@ -67,7 +67,7 @@ def test_item_not_equal(test):
         orderable_id=1,
         item_name="Coca",
         item_price=1.5,
-        item_type="Boisson",
+        item_type="Drink",
         item_description="canette 33cl",
         item_stock=10,
     )
@@ -81,7 +81,7 @@ def test_items_equal():
         orderable_id=1,
         item_name="Coca",
         item_price=1.5,
-        item_type="Boisson",
+        item_type="Drink",
         item_description="canette 33cl",
         item_stock=10,
     )
@@ -90,7 +90,7 @@ def test_items_equal():
         orderable_id=1,
         item_name="Coca",
         item_price=1.5,
-        item_type="Boisson",
+        item_type="Drink",
         item_description="canette 33cl",
         item_stock=10,
     )
