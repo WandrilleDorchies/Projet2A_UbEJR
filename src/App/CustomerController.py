@@ -1,8 +1,9 @@
-from typing import Annotated
+from typing import Annotated, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
 
+# from traitlets.traitlets import isidentifier
 from src.Model.APIBundle import APIBundle
 from src.Model.APICustomer import APICustomer
 from src.Model.APIItem import APIItem
@@ -287,6 +288,29 @@ def view_order_history(customer_id: int = Depends(get_customer_id_from_token)):
         return orders
     except Exception as e:
         raise Exception("[CustomerController] Could not get order history") from e
+
+
+@customer_router.delete(
+    "/delete_account", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(CustomerBearer())]
+)
+def delete_account(identifier: Optional[str], password: str):
+    try:
+        customer_service.login_customer(identifier, password)
+
+        if isinstance(identifier, str):
+            customer = customer_service.get_customer_by_email(identifier)
+        elif isinstance(identifier, int):
+            customer = customer_service.get_customer_by_phone(identifier)
+
+        return customer_service.delete_customer(customer.id)
+
+    except ValueError as e:
+        raise HTTPException(status_code=401, detail=f"Invalid credentials: {e}") from e
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Login failed: {e}") from e
+
 
 
 # PROBLEME : Les objets custom comme clé de dict ne sont jamais automatiquement convertis en JSON.
