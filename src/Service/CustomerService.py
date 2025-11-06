@@ -3,8 +3,8 @@ from typing import List, Optional
 
 import phonenumbers as pn
 
-# from validate_email import validate_email
-from email_validator import validate_email
+from validate_email import validate_email
+#from email_validator import validate_email
 
 from src.DAO.CustomerDAO import CustomerDAO
 from src.Model.Address import Address

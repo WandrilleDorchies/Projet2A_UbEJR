@@ -161,7 +161,32 @@ def update_password(
 )
 def get_menu():
     try:
-        return menu_service.get_all_orderables()
+        menu = menu_service.get_all_orderables()
+        for i, content in enumerate(menu):
+            if isinstance(content, Item):
+                menu[i]= APIItem(item_name=content.item_name,
+                                item_price=content.item_price,
+                                item_type=content.item_type,
+                                item_description=content.item_description)
+
+            elif isinstance(content, Bundle):
+                for key, value in content.bundle_items.items():
+                    items = {}
+                    items[
+                        APIItem(
+                            item_name=key.item_name,
+                            item_price=key.item_price,
+                            item_type=key.item_type,
+                            item_description=key.item_description,
+                        )
+                        ] = value
+
+                menu[i]=APIBundle(
+                        bundle_name=content.bundle_name,
+                        bundle_description=content.bundle_description,
+                        bundle_items=items)
+        return menu
+
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:
