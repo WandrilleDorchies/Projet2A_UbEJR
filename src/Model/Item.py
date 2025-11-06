@@ -23,10 +23,10 @@ class Item(Orderable):
     item_id: int
     orderable_id: int
     item_name: str
-    item_price: float = Field(gt=0, description = "[Item] Price must be > 0.")
+    item_price: float = Field(gt=0, description="[Item] Price must be > 0.")
     item_type: Literal["Starter", "Main course", "Dessert", "Side dish", "Drink"]
     item_description: str
-    item_stock: int = Field(ge=0, description = "[Item] Stock must be >= 0.")
+    item_stock: int = Field(ge=0, description="[Item] Stock must be >= 0.")
 
     def __init__(self, **args):
         args["orderable_type"] = "item"

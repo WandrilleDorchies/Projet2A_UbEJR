@@ -47,8 +47,12 @@ def add_orderable_to_menu(orderable_id: int):
     try:
         menu_service.add_orderable_to_menu(orderable_id)
         return f"The item with Orderable ID {orderable_id} has been added to the menu."
+    except ValueError as e:
+        raise HTTPException(
+            status_code=400, detail=f"[AdminController] Cannot add orderable to menu : {str(e)}"
+        ) from e
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching orderables: {e}") from e
+        raise HTTPException(status_code=500, detail=f"Error fetching orderables: {str(e)}") from e
 
 
 @admin_router.delete(
@@ -62,6 +66,11 @@ def remove_orderable_from_menu(orderable_id: int):
         return f"The item with Orderable ID {orderable_id} has been removed from the menu."
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching orderables: {e}") from e
+    except ValueError as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"[AdminController] Cannot remove orderable from menu : {str(e)}",
+        ) from e
 
 
 # ITEMS

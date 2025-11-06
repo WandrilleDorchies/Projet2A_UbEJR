@@ -18,7 +18,7 @@ class Bundle(Orderable):
     def __init__(self, **args):
         args["orderable_type"] = "bundle"
         super().__init__(**args)
-        self.is_in_menu = self.check_availability()
+        self.is_in_menu = self.check_availability() if self.is_in_menu else False
 
     def __eq__(self, other) -> bool:
         if not isinstance(other, Bundle):
@@ -58,7 +58,7 @@ class Bundle(Orderable):
             item.check_availability() and item.item_stock >= nb
             for item, nb in self.bundle_items.items()
         )
-        return is_in_period and all_items_available and self.is_in_menu
+        return is_in_period and all_items_available
 
     def check_stock(self, quantity) -> bool:
         sufficient_stock = all(
