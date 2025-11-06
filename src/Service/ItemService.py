@@ -16,6 +16,24 @@ class ItemService:
 
     @log
     def get_item_by_id(self, item_id: int) -> Optional[Item]:
+        """
+        Retrieves an item from the DB by its id.
+
+        Parameters
+        ----------
+        item_id : int
+            id of the item to be retrieved
+
+        Returns
+        -------
+        Optional[Item]
+            The item with the id provided as input
+
+        Raises
+        ------
+        ValueError
+            raised if item id is invalid
+        """
         item = self.item_dao.get_item_by_id(item_id)
         if item is None:
             raise ValueError(f"[ItemService] Cannot find: item with ID {item_id} not found.")
@@ -23,6 +41,14 @@ class ItemService:
 
     @log
     def get_all_items(self) -> Optional[List[Item]]:
+        """
+        Retrieves all the items in the DB
+
+        Returns
+        -------
+        Optional[List[Item]]
+            A list of all items in the DB
+        """
         items = self.item_dao.get_all_items()
         return items
 
@@ -56,6 +82,30 @@ class ItemService:
 
     @log
     def update_item(self, item_id: int, update: dict) -> Optional[Item]:
+        """
+        Allows to update one, multiple or all fields of an item
+
+        Parameters
+        ----------
+        item_id : int
+            id of the item to be modified
+        update : dict
+            a dictionary with the field names as keys and the updated field values as values
+
+        Returns
+        -------
+        Optional[Item]
+            the modified item
+
+        Raises
+        ------
+        ValueError
+            raised if no fields are modified
+        ValueError
+            raised if trying to set a null or negative price
+        ValueError
+            raised if trying to set a negative stock
+        """
         self.get_item_by_id(item_id)
 
         if all([value is None for value in update.values()]):

@@ -56,6 +56,9 @@ class GoogleMapService:
 
         result = self.__gmaps.geocode(address)
 
+        if len(result) == 0:
+            raise ValueError("[GoogleMapService]: Invalid address.")
+
         fields = ["route", "street_number", "locality", "postal_code", "country"]
         components_types = [component["types"] for component in result[0]["address_components"]]
         components_types_flat = [

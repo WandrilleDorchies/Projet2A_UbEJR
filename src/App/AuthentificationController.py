@@ -73,7 +73,8 @@ def register(
             value=jwt_token.access_token,
             httponly=True,
             max_age=600,
-            samesite="lax",
+            samesite="strict",
+            secure=True,
         )
 
         order_service.create_order(customer.id)
@@ -151,7 +152,8 @@ def login(
             value=token.access_token,
             httponly=True,
             max_age=600,
-            samesite="lax",
+            samesite="strict",
+            secure=True,
         )
 
         return token
