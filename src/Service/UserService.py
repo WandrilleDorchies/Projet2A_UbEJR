@@ -1,5 +1,7 @@
 from typing import Literal, Union
 
+import phonenumbers as pn
+
 from src.DAO.AdminDAO import AdminDAO
 from src.DAO.CustomerDAO import CustomerDAO
 from src.DAO.DriverDAO import DriverDAO
@@ -29,9 +31,29 @@ class UserService:
         if user_type == "customer":
             user = self.customer_dao.get_customer_by_email(identifier)
             if not user:
+                try:
+                    identifier = pn.parse(identifier, "FR")
+                except Exception:
+                    try:
+                        identifier = pn.parse(identifier)
+                    except Exception as e:
+                        raise ValueError(
+                            "[UserService] Can't parse as FR number or foreign number"
+                        ) from e
+                identifier = pn.format_number(identifier, pn.PhoneNumberFormat.E164)
                 user = self.customer_dao.get_customer_by_phone(identifier)
 
         elif user_type == "driver":
+            try:
+                identifier = pn.parse(identifier, "FR")
+            except Exception:
+                try:
+                    identifier = pn.parse(identifier)
+                except Exception as e:
+                    raise ValueError(
+                        "[UserService] Can't parse as FR number or foreign number"
+                    ) from e
+            identifier = pn.format_number(identifier, pn.PhoneNumberFormat.E164)
             user = self.driver_dao.get_driver_by_phone(identifier)
 
         elif user_type == "admin" and identifier == "adminsee":
