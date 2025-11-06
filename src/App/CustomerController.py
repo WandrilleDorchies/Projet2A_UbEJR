@@ -291,7 +291,7 @@ def view_order_history(customer_id: int = Depends(get_customer_id_from_token)):
 
 
 @customer_router.delete(
-    "/me", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(CustomerBearer())]
+    "/delete_account", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(CustomerBearer())]
 )
 def delete_account(identifier: Optional[str], password: str):
     try:
