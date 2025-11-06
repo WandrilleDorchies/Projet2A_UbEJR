@@ -48,6 +48,12 @@ def update_profile(
     try:
         update_data = locals()
         update_data.pop("driver_id")
+        if update_data.get("driver_phone") and customer_service.get_customer_by_phone(driver_phone):
+            raise HTTPException(
+                status_code=403,
+                detail="[DriverController] Cannot update driver: "
+                "A customer already have this phone number.",
+            )
         updated_driver = driver_service.update_driver(driver_id, update_data)
         return updated_driver
 
@@ -101,7 +107,7 @@ def start_delivery(order_id: int, driver_id: int = Depends(get_driver_id_from_to
         if order.order_state != OrderState.PREPARED:
             raise HTTPException(
                 status_code=400,
-                detail=f"This order isn't prepared yet, current state : {order.order_state}",
+                detail=f"This order isn't available, current state : {order.order_state}",
             )
         return driver_service.start_delivery(order_id, driver_id)
     except ValueError as e:
@@ -118,6 +124,11 @@ def start_delivery(order_id: int, driver_id: int = Depends(get_driver_id_from_to
 def get_path(order_id: int = Depends(get_current_order_id)):
     try:
         order = order_service.get_order_by_id(order_id)
+        if order.order_state != OrderState.DELIVERING:
+            raise HTTPException(
+                status_code=400,
+                detail=f"This order isn't in delivery, current state : {order.order_state}",
+            )
         address = customer_service.get_address_by_customer_id(order.order_customer_id)
         return gm_service.get_path(str(address))
     except ValueError as e:
@@ -136,6 +147,12 @@ def end_delivery(
     driver_id: int = Depends(get_driver_id_from_token),
 ):
     try:
+        order = order_service.get_order_by_id(order_id)
+        if order.order_state != OrderState.DELIVERING:
+            raise HTTPException(
+                status_code=400,
+                detail=f"This order isn't in delivery, current state : {order.order_state}",
+            )
         return driver_service.end_delivery(order_id, driver_id)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e

@@ -239,7 +239,7 @@ def remove_orderable_from_order(
         raise HTTPException(
             status_code=403,
             detail="[CustomerController] Invalid input: "
-            "cannot remove orderable from order - {str(e)}",
+            f"cannot remove orderable from order - {str(e)}",
         ) from e
 
 
@@ -329,7 +329,7 @@ def create_checkout_session(
     "/payment/succes", status_code=status.HTTP_200_OK, dependencies=[Depends(CustomerBearer())]
 )
 def succesful_payment(
-    session_id: int,
+    session_id,
     customer_id: int = Depends(get_customer_id_from_token),
     order_id: int = Depends(get_current_order_id),
 ):

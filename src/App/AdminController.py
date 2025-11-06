@@ -30,9 +30,9 @@ def get_admin_id_from_token(
 @admin_router.get(
     "/orderables", status_code=status.HTTP_200_OK, dependencies=[Depends(AdminBearer())]
 )
-def get_all_orderables():
+def get_all_orderables(in_menu: bool = False):
     try:
-        return menu_service.get_all_orderables(in_menu=False)
+        return menu_service.get_all_orderables(in_menu=in_menu)
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching orderables: {e}") from e
@@ -346,6 +346,12 @@ def create_driver(
     try:
         if confirm_password != password:
             raise HTTPException(status_code=400, detail="The two password don't match.")
+        if customer_service.get_customer_by_phone(phone):
+            raise HTTPException(
+                status_code=403,
+                detail="[AdminController] Cannot update driver: "
+                "A customer already have this phone number.",
+            )
         return driver_service.create_driver(first_name, last_name, phone, password)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
@@ -402,11 +408,17 @@ def update_driver(
     try:
         update_data = locals()
         update_data.pop("driver_id")
+        if update_data.get("driver_phone") and customer_service.get_customer_by_phone(driver_phone):
+            raise HTTPException(
+                status_code=403,
+                detail="[AdminController] Cannot update driver: "
+                "A customer already have this phone number.",
+            )
         updated_driver = driver_service.update_driver(driver_id, update_data)
         return updated_driver
 
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e)) from e
+        raise HTTPException(status_code=400, detail=str(e)) from e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error updating profile: {e}") from e
 

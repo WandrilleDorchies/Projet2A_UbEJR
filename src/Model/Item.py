@@ -68,7 +68,7 @@ class Item(Orderable):
             the quanity to be ordered is <= to the stock,
             False otherwise
         """
-        return self.check_availability() and self.item_stock - quantity >= 0
+        return self.item_stock - quantity >= 0
 
     @property
     def price(self) -> float:
