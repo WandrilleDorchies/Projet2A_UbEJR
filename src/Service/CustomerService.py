@@ -127,7 +127,7 @@ class CustomerService:
         return customer
 
     @log
-    def login_customer(self, identifier: Optional[str], password: str) -> Optional[Customer]:
+    def login_customer(self, identifier: str, password: str) -> Optional[Customer]:
         return self.user_service.login(identifier, password, "customer")
 
     @log

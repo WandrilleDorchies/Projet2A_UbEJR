@@ -1,4 +1,4 @@
-from typing import Annotated, Optional
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
@@ -293,21 +293,13 @@ def view_order_history(customer_id: int = Depends(get_customer_id_from_token)):
 @customer_router.delete(
     "/delete_account", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(CustomerBearer())]
 )
-def delete_account(identifier: Optional[str], password: str):
+def delete_account(identifier: str, password: str):
     try:
-        customer_service.login_customer(identifier, password)
-
-        if isinstance(identifier, str):
-            customer = customer_service.get_customer_by_email(identifier)
-        elif isinstance(identifier, int):
-            customer = customer_service.get_customer_by_phone(identifier)
-
+        customer = customer_service.login_customer(identifier, password)
         return customer_service.delete_customer(customer.id)
 
     except ValueError as e:
         raise HTTPException(status_code=401, detail=f"Invalid credentials: {e}") from e
-    except HTTPException:
-        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Login failed: {e}") from e
 
