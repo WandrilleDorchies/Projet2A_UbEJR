@@ -37,8 +37,8 @@ class ItemService:
         item_image: Optional[bytes] = None,
         is_in_menu: bool = False,
     ) -> Optional[Item]:
-        if item_price < 0:
-            raise ValueError("[ItemService] Cannot create item: Price must be positive")
+        if item_price <= 0:
+            raise ValueError("[ItemService] Cannot create item: Price must be strictly positive")
 
         if item_stock < 0:
             raise ValueError("[ItemService] Cannot create item: Stock must be positive")
@@ -63,8 +63,8 @@ class ItemService:
                 "[ItemService] Cannot update item: You must change at least one field."
             )
 
-        if update.get("item_price") and update.get("item_price") < 0:
-            raise ValueError("[ItemService] Cannot update item: Price must be positive")
+        if update.get("item_price") and update.get("item_price") <= 0:
+            raise ValueError("[ItemService] Cannot update item: Price must be strictly positive")
 
         if update.get("item_stock") and update.get("item_stock") < 0:
             raise ValueError("[ItemService] Cannot update item: Stock must be positive")

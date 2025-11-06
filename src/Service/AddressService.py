@@ -20,18 +20,24 @@ class AddressService:
         address = self.address_dao.get_address_by_id(address_id)
         if address is None:
             raise ValueError(
-                f"[AddressService]: Cannot find: Addres with ID {address_id} not found."
+                f"[AddressService] Cannot find: Address with ID {address_id} not found."
             )
         return address
 
     @log
     def get_address_by_customer_id(self, customer_id: int) -> Optional[Address]:
         address = self.address_dao.get_address_by_customer_id(customer_id)
+        if address is None:
+            raise ValueError(
+                f"[AddressService] Cannot find Address for customer ID {customer_id} not found."
+            )
         return address
 
     @log
     def get_all_address(self) -> Optional[List[Address]]:
         addresses = self.address_dao.get_all_address()
+        if addresses is None:
+            raise ValueError("[AddressService] No adresses in the database.")
         return addresses
 
     @log

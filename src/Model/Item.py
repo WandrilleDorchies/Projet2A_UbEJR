@@ -1,5 +1,7 @@
 from typing import Literal
 
+from pydantic import Field
+
 from .Orderable import Orderable
 
 
@@ -21,10 +23,10 @@ class Item(Orderable):
     item_id: int
     orderable_id: int
     item_name: str
-    item_price: float
+    item_price: float = Field(gt=0, description = "[Item] Price must be > 0.")
     item_type: Literal["Starter", "Main course", "Dessert", "Side dish", "Drink"]
     item_description: str
-    item_stock: int
+    item_stock: int = Field(ge=0, description = "[Item] Stock must be >= 0.")
 
     def __init__(self, **args):
         args["orderable_type"] = "item"
@@ -49,7 +51,23 @@ class Item(Orderable):
         """
         return self.item_stock > 0 and self.is_in_menu
 
-    def check_stock(self, quantity) -> bool:
+    def check_stock(self, quantity: int) -> bool:
+        """
+        Checks if an item is available and if there is enough of it to be added
+        to an order
+
+        Parameters
+        ----------
+        quantity : int
+            Quantity to be added to the order
+
+        Returns
+        -------
+        bool
+            True if the item is avaliable (both in stock and stock>0) and
+            the quanity to be ordered is <= to the stock,
+            False otherwise
+        """
         return self.item_stock - quantity >= 0
 
     @property
