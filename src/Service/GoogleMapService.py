@@ -55,9 +55,13 @@ class GoogleMapService:
         """
 
         result = self.__gmaps.geocode(address)
+        print(result)
 
-        if not result:
-            raise ValueError("[GoogleMapService]: Address not found.")
+        fields = ["route", "street_number", "locality", "postal_code", "country"]
+        components_types = [component["types"] for component in result[0]["address_components"]]
+        for field in fields:
+            if field not in components_types:
+                raise ValueError("[GoogleMapService]: Address not found.")
 
         coord_address = result[0]["geometry"]["location"]
 
