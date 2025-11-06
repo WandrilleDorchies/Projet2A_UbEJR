@@ -81,7 +81,7 @@ class OrderService:
 
     @log
     def update_order_state(self, order_id: int, new_state: OrderState) -> Optional[Order]:
-        order = self.order_dao.get_order_by_id(order_id)
+        order = self.get_order_by_id(order_id)
 
         if new_state not in self.valid_transition[order.order_state]:
             raise ValueError(
