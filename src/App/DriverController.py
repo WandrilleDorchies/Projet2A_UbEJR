@@ -107,7 +107,7 @@ def start_delivery(order_id: int, driver_id: int = Depends(get_driver_id_from_to
         if order.order_state != OrderState.PREPARED:
             raise HTTPException(
                 status_code=400,
-                detail=f"This order isn't prepared yet, current state : {order.order_state}",
+                detail=f"This order isn't available, current state : {order.order_state}",
             )
         return driver_service.start_delivery(order_id, driver_id)
     except ValueError as e:

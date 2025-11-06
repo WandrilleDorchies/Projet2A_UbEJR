@@ -126,6 +126,8 @@ class OrderService:
 
         if raw_orderable["orderable_type"] == "item":
             orderable = self.item_dao.get_item_by_orderable_id(orderable_id)
+            if not orderable.check_availability():
+                raise ValueError("[OrderService] The item isn't available.")
             if not orderable.check_stock(quantity):
                 raise ValueError(
                     f"[OrderService] Not enough stock for {orderable.item_name}"
@@ -136,6 +138,8 @@ class OrderService:
 
         if raw_orderable["orderable_type"] == "bundle":
             orderable = self.bundle_dao.get_bundle_by_orderable_id(orderable_id)
+            if not orderable.check_availability():
+                raise ValueError("[OrderService] The item isn't available.")
             if not orderable.check_stock(quantity):
                 raise ValueError(
                     f"[OrderService] Not enough stock for {orderable.bundle_name}"
