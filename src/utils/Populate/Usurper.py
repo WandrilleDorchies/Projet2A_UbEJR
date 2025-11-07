@@ -36,7 +36,6 @@ class Usurper:
     def create_addresses_data(self) -> Dict[str, List[str]]:
         n = range(1, self.n_customers + 1)
         data = {}
-        data["address_id"] = [str(i) for i in n]
         data["address_number"] = [str(randint(1, 50)) for _ in n]
         data["address_street"] = [f"'{self.fake.street_name()}'" for _ in n]
         data["address_city"] = [f"'{self.fake.city()}'" for _ in n]
@@ -69,7 +68,6 @@ class Usurper:
         n_total = self.n_items + self.n_bundles
         n = range(1, n_total + 1)
         data = {}
-        data["orderable_id"] = [str(i) for i in n]
         orderable_types = ["'item'" for _ in range(self.n_items)] + [
             "'bundle'" for _ in range(self.n_bundles)
         ]
@@ -84,7 +82,6 @@ class Usurper:
     def create_items_data(self) -> Dict[str, List[str]]:
         n = range(1, self.n_items + 1)
         data = {}
-        data["item_id"] = [str(i) for i in n]
         data["orderable_id"] = [str(i) for i in n]
 
         data["item_name"] = [
@@ -100,7 +97,6 @@ class Usurper:
     def create_bundles_data(self) -> Dict[str, List[str]]:
         n = range(1, self.n_bundles + 1)
         data = {}
-        data["bundle_id"] = [str(i) for i in n]
         data["orderable_id"] = [str(self.n_items + i) for i in n]
 
         data["bundle_name"] = [
@@ -146,7 +142,6 @@ class Usurper:
         n = range(1, self.n_drivers + 1)
         data = {}
 
-        data["driver_id"] = [str(i) for i in n]
         first_names = [self.fake.first_name() for _ in n]
         data["driver_first_name"] = [f"'{name}'" for name in first_names]
         data["driver_last_name"] = [f"'{self.fake.last_name()}'" for _ in n]
@@ -166,7 +161,6 @@ class Usurper:
     def create_orders_data(self) -> Dict[str, List[str]]:
         n = range(1, self.n_orders + 1)
         data = {}
-        data["order_id"] = [str(i) for i in n]
         data["order_customer_id"] = [str(randint(1, self.n_customers)) for _ in n]
         data["order_state"] = [str(randint(0, 5)) for _ in n]
 
@@ -209,14 +203,13 @@ class Usurper:
 
     def create_deliveries_data(self) -> Dict[str, List[str]]:
         n = range(1, self.n_deliveries + 1)
-        n_drivers = max(self.n_deliveries // 3, 5)
 
         data = {}
         order_ids = list(set([randint(1, self.n_orders) for _ in range(self.n_deliveries * 2)]))[
             : self.n_deliveries
         ]
         data["delivery_order_id"] = [str(order_id) for order_id in order_ids]
-        data["delivery_driver_id"] = [str(randint(1, n_drivers)) for _ in n]
+        data["delivery_driver_id"] = [str(randint(1, self.n_drivers)) for _ in n]
         data["delivery_created_at"] = [
             f"'{self.fake.date_time_between(start_date='-3m', end_date='now')}'" for _ in n
         ]
@@ -236,27 +229,6 @@ class Usurper:
 
         return query
 
-    def create_admins_data(self) -> Dict[str, List[str]]:
-        n = range(1, 6)
-        data = {}
-        data["admin_id"] = [str(i) for i in n]
-        data["username"] = [f"'{self.fake.user_name()}'" for _ in n]
-
-        first_names = [self.fake.first_name() for _ in n]
-        data["admin_first_name"] = [f"'{name}'" for name in first_names]
-        data["admin_last_name"] = [f"'{self.fake.last_name()}'" for _ in n]
-        data["admin_created_at"] = [
-            f"'{self.fake.date_time_between(start_date='-2y', end_date='now')}'" for _ in n
-        ]
-
-        salts, pws = zip(
-            *[self.fake.create_hash_password(name) for name in first_names], strict=False
-        )
-        data["admin_password_hash"] = [f"'{pw}'" for pw in pws]
-        data["admin_salt"] = [f"'{salt}'" for salt in salts]
-
-        return data
-
     def populate_database(self) -> bool:
         try:
             print("Creating Addresses...")
@@ -268,11 +240,6 @@ class Usurper:
             customers_data = self.create_customers_data()
             customers_query = self.dict_to_query(customers_data, "Customers")
             self.db_connector.sql_query(customers_query, return_type="none")
-
-            print("Creating Admins...")
-            admins_data = self.create_admins_data()
-            admins_query = self.dict_to_query(admins_data, "Admins")
-            self.db_connector.sql_query(admins_query, return_type="none")
 
             print("Creating Drivers...")
             drivers_data = self.create_drivers_data()

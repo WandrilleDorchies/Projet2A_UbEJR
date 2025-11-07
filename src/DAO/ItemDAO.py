@@ -69,6 +69,7 @@ class ItemDAO(metaclass=Singleton):
         raw_item = self.db_connector.sql_query(
             "SELECT * FROM Items WHERE orderable_id=%s", [orderable_id], "one"
         )
+        print(raw_item)
         if raw_item is None:
             return None
 

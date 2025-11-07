@@ -335,7 +335,6 @@ def update_profile(
     try:
         update_data = locals()
         update_data.pop("customer_id")
-        print(update_data)
         updated_customer = customer_service.update_customer(customer_id, update_data)
         return updated_customer
 
