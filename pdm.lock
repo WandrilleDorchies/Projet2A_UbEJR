@@ -5,7 +5,7 @@
 groups = ["default", "lint", "test", "typing"]
 strategy = []
 lock_version = "4.5.0"
-content_hash = "sha256:12f5932b7ac156ecc76bb74532c15cad8fcee9b58a4beeb1f828f9c52bdeb6f7"
+content_hash = "sha256:5ddbd59831bc60bd58f38ce45ec9dfc04cfcd5bb20cf7fc7ec44a1b25fe5a0be"
 
 [[metadata.targets]]
 requires_python = "==3.12.*"
@@ -110,6 +110,19 @@ summary = ""
 files = [
     {file = "dnspython-2.8.0-py3-none-any.whl", hash = "sha256:01d9bbc4a2d76bf0db7c1f729812ded6d912bd318d3b1cf81d30c0f845dbf3af"},
     {file = "dnspython-2.8.0.tar.gz", hash = "sha256:181d3c6996452cb1189c4046c61599b84a5a86e099562ffde77d26984ff26d0f"},
+]
+
+[[package]]
+name = "faker"
+version = "37.12.0"
+requires_python = ">=3.9"
+summary = "Faker is a Python package that generates fake data for you."
+dependencies = [
+    "tzdata",
+]
+files = [
+    {file = "faker-37.12.0-py3-none-any.whl", hash = "sha256:afe7ccc038da92f2fbae30d8e16d19d91e92e242f8401ce9caf44de892bab4c4"},
+    {file = "faker-37.12.0.tar.gz", hash = "sha256:7505e59a7e02fa9010f06c3e1e92f8250d4cfbb30632296140c2d6dbef09b0fa"},
 ]
 
 [[package]]
