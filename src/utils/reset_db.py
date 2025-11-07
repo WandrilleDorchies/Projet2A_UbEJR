@@ -31,11 +31,15 @@ class ResetDatabase(metaclass=Singleton):
 
         init_db = open("database_scripts/init_db.sql", encoding="utf-8")
         init_db_as_string = init_db.read()
+        populate_db = open("database_scripts/populate_db.sql", encoding="utf-8")
+        populate_db_as_string = populate_db.read()
 
         try:
             dbconnector.sql_query(query=init_db_as_string, return_type="none")
             usurper = Usurper(fake, dbconnector)
             usurper.populate_database()
+            dbconnector.sql_query(query=populate_db_as_string, return_type="none")
+
         except Exception as e:
             print(e)
             raise

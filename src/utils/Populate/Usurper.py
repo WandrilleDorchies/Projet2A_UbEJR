@@ -236,8 +236,8 @@ class Usurper:
 
         return query
 
-    def create_admins_data(self, n_admins: int = 5) -> Dict[str, List[str]]:
-        n = range(1, n_admins + 1)
+    def create_admins_data(self) -> Dict[str, List[str]]:
+        n = range(1, 6)
         data = {}
         data["admin_id"] = [str(i) for i in n]
         data["username"] = [f"'{self.fake.user_name()}'" for _ in n]
