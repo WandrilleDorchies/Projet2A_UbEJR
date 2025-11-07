@@ -145,3 +145,60 @@ def test_bundles_equal(sample_item):
         bundle_items={sample_item: 1},
     )
     assert bundle1 == bundle2
+
+def test_bundle_hash(sample_item):
+    bundle = Bundle(
+        bundle_id=1,
+        orderable_id=1,
+        bundle_name="Menu",
+        bundle_reduction=25,
+        bundle_description="Menu classique",
+        bundle_availability_start_date=datetime(2025, 10, 9, 12, 30, 0),
+        bundle_availability_end_date=datetime(2025, 10, 9, 13, 0, 0),
+        bundle_items={sample_item: 1},
+    )
+
+    assert hash(bundle) == hash(1)
+    assert isinstance(hash(bundle), int)
+
+
+def test_bundle_check_stock():
+    # Create a fully configured mock item
+    mock_item = Mock(spec=Item)
+    mock_item.check_stock.return_value = True
+    mock_item.check_availability.return_value = True
+    mock_item.item_stock = 10  # Add the missing attribute
+
+    bundle = Bundle(
+        bundle_id=1,
+        orderable_id=1,
+        bundle_name="Menu",
+        bundle_reduction=25,
+        bundle_description="Menu classique",
+        bundle_availability_start_date=datetime(2025, 10, 9, 12, 30, 0),
+        bundle_availability_end_date=datetime(2025, 10, 9, 13, 0, 0),
+        bundle_items={mock_item: 2},
+    )
+
+    assert bundle.check_stock(1) is True
+    mock_item.check_stock.assert_called_once_with(2)  # 1 * 2 = 2
+
+
+
+def test_bundle_get_stock(sample_item):
+    # Configure the item to have a specific stock
+    sample_item.item_stock = 10
+
+    bundle = Bundle(
+        bundle_id=1,
+        orderable_id=1,
+        bundle_name="Menu",
+        bundle_reduction=25,
+        bundle_description="Menu classique",
+        bundle_availability_start_date=datetime(2025, 10, 9, 12, 30, 0),
+        bundle_availability_end_date=datetime(2025, 10, 9, 13, 0, 0),
+        bundle_items={sample_item: 3},  # Each bundle requires 3 of this item
+    )
+
+    # 10 / 3 = 3.33, so bottleneck should be 3
+    assert bundle.get_stock() == 3

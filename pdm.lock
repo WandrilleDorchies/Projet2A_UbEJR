@@ -5,7 +5,7 @@
 groups = ["default", "lint", "test", "typing"]
 strategy = []
 lock_version = "4.5.0"
-content_hash = "sha256:5ddbd59831bc60bd58f38ce45ec9dfc04cfcd5bb20cf7fc7ec44a1b25fe5a0be"
+content_hash = "sha256:12f5932b7ac156ecc76bb74532c15cad8fcee9b58a4beeb1f828f9c52bdeb6f7"
 
 [[metadata.targets]]
 requires_python = "==3.12.*"
@@ -36,8 +36,7 @@ files = [
 [[package]]
 name = "certifi"
 version = "2025.8.3"
-requires_python = ">=3.7"
-summary = "Python package for providing Mozilla's CA Bundle."
+summary = ""
 files = [
     {file = "certifi-2025.8.3-py3-none-any.whl", hash = "sha256:f6c12493cfb1b06ba2ff328595af9350c65d6644968e5d3a2ffd78699af217a5"},
     {file = "certifi-2025.8.3.tar.gz", hash = "sha256:e564105f78ded564e3ae7c923924435e1daa7463faeab5bb932bc53ffae63407"},
@@ -46,8 +45,7 @@ files = [
 [[package]]
 name = "charset-normalizer"
 version = "3.4.3"
-requires_python = ">=3.7"
-summary = "The Real First Universal Charset Detector. Open, modern and actively maintained alternative to Chardet."
+summary = ""
 files = [
     {file = "charset_normalizer-3.4.3-cp312-cp312-macosx_10_13_universal2.whl", hash = "sha256:e28e334d3ff134e88989d90ba04b47d84382a828c061d0d1027b1b12a62b39b1"},
     {file = "charset_normalizer-3.4.3-cp312-cp312-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:0cacf8f7297b0c4fcb74227692ca46b4a5852f8f4f24b3c766dd94a1075c4884"},
@@ -108,24 +106,10 @@ files = [
 [[package]]
 name = "dnspython"
 version = "2.8.0"
-requires_python = ">=3.10"
-summary = "DNS toolkit"
+summary = ""
 files = [
     {file = "dnspython-2.8.0-py3-none-any.whl", hash = "sha256:01d9bbc4a2d76bf0db7c1f729812ded6d912bd318d3b1cf81d30c0f845dbf3af"},
     {file = "dnspython-2.8.0.tar.gz", hash = "sha256:181d3c6996452cb1189c4046c61599b84a5a86e099562ffde77d26984ff26d0f"},
-]
-
-[[package]]
-name = "faker"
-version = "37.12.0"
-requires_python = ">=3.9"
-summary = "Faker is a Python package that generates fake data for you."
-dependencies = [
-    "tzdata",
-]
-files = [
-    {file = "faker-37.12.0-py3-none-any.whl", hash = "sha256:afe7ccc038da92f2fbae30d8e16d19d91e92e242f8401ce9caf44de892bab4c4"},
-    {file = "faker-37.12.0.tar.gz", hash = "sha256:7505e59a7e02fa9010f06c3e1e92f8250d4cfbb30632296140c2d6dbef09b0fa"},
 ]
 
 [[package]]
@@ -145,8 +129,7 @@ files = [
 [[package]]
 name = "filelock"
 version = "3.20.0"
-requires_python = ">=3.10"
-summary = "A platform independent file lock."
+summary = ""
 files = [
     {file = "filelock-3.20.0-py3-none-any.whl", hash = "sha256:339b4732ffda5cd79b13f4e2711a31b0365ce445d95d243bb996273d072546a2"},
     {file = "filelock-3.20.0.tar.gz", hash = "sha256:711e943b4ec6be42e1d4e6690b48dc175c822967466bb31c0c293f34334c13f4"},
@@ -167,10 +150,9 @@ files = [
 [[package]]
 name = "googlemaps"
 version = "4.10.0"
-requires_python = ">=3.5"
-summary = "Python client library for Google Maps Platform"
+summary = ""
 dependencies = [
-    "requests<3.0,>=2.20.0",
+    "requests",
 ]
 files = [
     {file = "googlemaps-4.10.0.tar.gz", hash = "sha256:3055fcbb1aa262a9159b589b5e6af762b10e80634ae11c59495bd44867e47d88"},
@@ -206,10 +188,9 @@ files = [
 [[package]]
 name = "jinja2"
 version = "3.1.6"
-requires_python = ">=3.7"
-summary = "A very fast and expressive template engine."
+summary = ""
 dependencies = [
-    "MarkupSafe>=2.0",
+    "markupsafe",
 ]
 files = [
     {file = "jinja2-3.1.6-py3-none-any.whl", hash = "sha256:85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67"},
@@ -219,8 +200,7 @@ files = [
 [[package]]
 name = "markupsafe"
 version = "3.0.3"
-requires_python = ">=3.9"
-summary = "Safely add untrusted strings to HTML/XML markup."
+summary = ""
 files = [
     {file = "markupsafe-3.0.3-cp312-cp312-macosx_10_13_x86_64.whl", hash = "sha256:d53197da72cc091b024dd97249dfc7794d6a56530370992a5e1a08983ad9230e"},
     {file = "markupsafe-3.0.3-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:1872df69a4de6aead3491198eaf13810b565bdbeec3ae2dc8780f14458ec73ce"},
@@ -248,7 +228,7 @@ files = [
 [[package]]
 name = "phonenumbers"
 version = "9.0.17"
-summary = "Python version of Google's common library for parsing, formatting, storing and validating international phone numbers."
+summary = ""
 files = [
     {file = "phonenumbers-9.0.17-py2.py3-none-any.whl", hash = "sha256:180e4ec2e05f6d3150cbd63b1b6f26996f8738cd0657bcc8747fbd10184721ae"},
     {file = "phonenumbers-9.0.17.tar.gz", hash = "sha256:4f7e06b2111640cd6b2a8e36d1c2dc3c1af0f5d6ab734a2bcf4c9aec2ad80b53"},
@@ -286,11 +266,11 @@ files = [
 [[package]]
 name = "py3-validate-email"
 version = "1.0.5.post2"
-summary = "Email validator with regex, blacklisted domains and SMTP checking."
+summary = ""
 dependencies = [
-    "dnspython~=2.1",
-    "filelock~=3.0",
-    "idna~=3.0",
+    "dnspython",
+    "filelock",
+    "idna",
 ]
 files = [
     {file = "py3_validate_email-1.0.5.post2-py3-none-any.whl", hash = "sha256:5305f657451d4719471439fa153918b47fd8c350bba0828ebbbe6c4e8207ad48"},
@@ -424,8 +404,7 @@ files = [
 [[package]]
 name = "python-multipart"
 version = "0.0.20"
-requires_python = ">=3.8"
-summary = "A streaming multipart parser for Python"
+summary = ""
 files = [
     {file = "python_multipart-0.0.20-py3-none-any.whl", hash = "sha256:8a62d3a8335e06589fe01f2a3e178cdcc632f3fbe0d492ad9ee0ec35aab1f104"},
     {file = "python_multipart-0.0.20.tar.gz", hash = "sha256:8dd0cab45b8e23064ae09147625994d090fa46f5b0d1e13af944c331a7fa9d13"},
@@ -434,8 +413,7 @@ files = [
 [[package]]
 name = "pyyaml"
 version = "6.0.3"
-requires_python = ">=3.8"
-summary = "YAML parser and emitter for Python"
+summary = ""
 files = [
     {file = "pyyaml-6.0.3-cp312-cp312-macosx_10_13_x86_64.whl", hash = "sha256:7f047e29dcae44602496db43be01ad42fc6f1cc0d8cd6c83d342306c32270196"},
     {file = "pyyaml-6.0.3-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:fc09d0aa354569bc501d4e787133afc08552722d3ab34836a80547331bb5d4a0"},
@@ -453,13 +431,12 @@ files = [
 [[package]]
 name = "requests"
 version = "2.32.5"
-requires_python = ">=3.9"
-summary = "Python HTTP for Humans."
+summary = ""
 dependencies = [
-    "certifi>=2017.4.17",
-    "charset-normalizer<4,>=2",
-    "idna<4,>=2.5",
-    "urllib3<3,>=1.21.1",
+    "certifi",
+    "charset-normalizer",
+    "idna",
+    "urllib3",
 ]
 files = [
     {file = "requests-2.32.5-py3-none-any.whl", hash = "sha256:2462f94637a34fd532264295e186976db0f5d453d1cdd31473c85a6a161affb6"},
@@ -526,12 +503,10 @@ files = [
 [[package]]
 name = "stripe"
 version = "13.1.1"
-requires_python = ">=3.7"
-summary = "Python bindings for the Stripe API"
+summary = ""
 dependencies = [
-    "requests>=2.20; python_version >= \"3.0\"",
-    "typing-extensions<=4.2.0,>3.7.2; python_version < \"3.7\"",
-    "typing-extensions>=4.5.0; python_version >= \"3.7\"",
+    "requests",
+    "typing-extensions",
 ]
 files = [
     {file = "stripe-13.1.1-py3-none-any.whl", hash = "sha256:2a74981ba559f6e518e657b808c6339a397c3862f3e5dd10ec7603c3829addba"},

@@ -51,6 +51,11 @@ class TestAddressDAO:
         assert retrieved_address is not None
         assert retrieved_address.address_id == address.address_id
 
+    def test_get_address_by_customer_id_not_exist(self, address_dao, clean_database):
+        """test getting None when the customer id does'nt exist"""
+        retrieved_address = address_dao.get_address_by_customer_id(99999)
+        assert retrieved_address is None
+
     def test_get_all_addresses_empty(self, address_dao, clean_database):
         """Test getting all addresses (empty)"""
         addresses = address_dao.get_all_addresses()

@@ -2,7 +2,9 @@ import re
 from typing import List, Optional
 
 import phonenumbers as pn
+
 from validate_email import validate_email
+#from email_validator import validate_email
 
 from src.DAO.CustomerDAO import CustomerDAO
 from src.Model.Address import Address
@@ -71,45 +73,52 @@ class CustomerService:
         password: str,
         address_string: str,
     ) -> Optional[Customer]:
-        formatted_mail = mail.lower().strip()
-        existing_user = self.customer_dao.get_customer_by_email(formatted_mail)
-        if existing_user is not None:
-            raise ValueError(
-                f"[CustomerService] Cannot create: customer with email {formatted_mail} "
-                "already exists."
-            )
-
-        formatted_phone = phone.strip()
-        existing_user = self.customer_dao.get_customer_by_phone(formatted_phone)
-        if existing_user is not None:
-            raise ValueError(
-                f"[CustomerService] Cannot create: customer with phone {formatted_phone} "
-                "already exists."
-            )
+        # Check on first and last name
         if not re.match(self.pattern, first_name) or not re.match(self.pattern, last_name):
             raise ValueError(
                 "[Customer Service] Cannot create customer: First name and last name "
                 "must only contains letters"
             )
-
-        phone_number = pn.parse(formatted_phone, "FR")
+        # Check that phone number is valid
+        try:
+            phone_number = pn.parse(phone, "FR")
+        except Exception:
+            try:
+                phone_number = pn.parse(phone)
+            except Exception as e:
+                raise ValueError(
+                    "[CustomerService] Can't parse as FR number or foreign number"
+                ) from e
         if not pn.is_valid_number(phone_number) or not pn.is_possible_number(phone_number):
             raise ValueError(f"[CustomerService] Cannot create: The number {phone} is invalid.")
 
-        is_valid_email = validate_email(
-            formatted_mail, check_blacklist=False, check_dns=False, check_smtp=False
-        )
-
-        if not is_valid_email:
-            raise ValueError("[CustomerService] Cannot create: The email is not valid.")
-
+        # normal  > E164 format : 06 12 12 12 12 > +33612121212
+        valid_formatted_phone = pn.format_number(phone_number, pn.PhoneNumberFormat.E164)
+        # Check that phone number is not already used
+        existing_user = self.customer_dao.get_customer_by_phone(valid_formatted_phone)
+        if existing_user is not None:
+            raise ValueError(
+                f"[CustomerService] Cannot create: customer with phone {valid_formatted_phone} "
+                "already exists."
+            )
+        # Check that email is valid
+        try:
+            emailinfo = validate_email(mail, check_deliverability=True)
+            validated_email = emailinfo.normalized
+        except Exception as e:
+            raise ValueError("[CustomerService] Cannot create: The email is invalid.") from e
+        # check that email is not already used
+        existing_user = self.customer_dao.get_customer_by_email(validated_email)
+        if existing_user is not None:
+            raise ValueError(
+                f"[CustomerService] Cannot create: customer with email {validated_email} "
+                "already exists."
+            )
         check_password_strength(password)
 
         address = self.address_service.create_address(address_string)
         formatted_first_name = first_name.strip().capitalize()
         formatted_last_name = last_name.strip().upper()
-
-        customer_phone = "0" + str(phone_number.national_number)
 
         salt = create_salt()
         password_hash = hash_password(password, salt)
@@ -117,8 +126,8 @@ class CustomerService:
         customer = self.customer_dao.create_customer(
             formatted_first_name,
             formatted_last_name,
-            customer_phone,
-            formatted_mail,
+            valid_formatted_phone,
+            validated_email,
             password_hash,
             salt,
             address.address_id,
@@ -164,15 +173,12 @@ class CustomerService:
             update["customer_phone"] = "0" + str(phone_number.national_number)
 
         if update.get("customer_mail"):
-            is_valid_email = validate_email(
-                update["customer_mail"],
-                check_blacklist=False,
-                check_dns=False,
-                check_smtp=False,
-            )
-
-            if not is_valid_email:
-                raise ValueError("[CustomerService] Cannot create: The email is not valid.")
+            customer_mail = update["customer_mail"]
+            try:
+                emailinfo = validate_email(customer_mail, check_deliverability=True)
+                update["customer_mail"] = emailinfo.normalized
+            except Exception as e:
+                raise ValueError("[CustomerService] Cannot update: The email is invalid.") from e
 
         updated_customer = self.customer_dao.update_customer(customer_id=customer_id, update=update)
         return updated_customer

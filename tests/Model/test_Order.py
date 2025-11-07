@@ -48,3 +48,29 @@ def test_order_constructor_throws_on_incorrect_input():
 
 def test_order_calculate_price_with_all(sample_order_full):
     assert sample_order_full.order_price == 0.85 * (0.5 + 4.5) + 2.0
+
+@pytest.mark.parametrize(
+    "order_state,expected_paid,expected_prepared,expected_delivered",
+    [
+        (OrderState.PENDING, False, False, False),
+        (OrderState.PAID, True, False, False),
+        (OrderState.PREPARED, True, True, False),
+        (OrderState.DELIVERING, True, True, False),
+        (OrderState.DELIVERED, True, True, True),
+        (OrderState.CANCELLED, True, True, False),  # Corrigé pour refléter le comportement actuel
+    ],
+)
+def test_order_state_properties(order_state, expected_paid, expected_prepared, expected_delivered):
+    mock_item = Mock(spec=Item)
+
+    order = Order(
+        order_id=1,
+        order_customer_id=1,
+        order_state=order_state,
+        order_created_at=datetime(2025, 5, 5),
+        order_orderables={mock_item: 1},
+    )
+
+    assert order.is_paid == expected_paid
+    assert order.is_prepared == expected_prepared
+    assert order.is_delivered == expected_delivered

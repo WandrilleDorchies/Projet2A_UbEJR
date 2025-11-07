@@ -37,3 +37,43 @@ def test_address_constructor_throws_on_incorrect_input():
     ) and "Input should be a valid integer, unable to parse string as an integer" in str(
         exception_info.value
     )
+
+def test_get_attributes():
+    ensai = Address(
+        address_id=1,
+        address_number=51,
+        address_street="Rue Blaise Pascal",
+        address_city="Bruz",
+        address_postal_code=35170,
+        address_country="France",
+    )
+
+    attributes = ensai.get_attributes()
+
+    expected_attributes = {
+        "address_id": 1,
+        "address_number": 51,
+        "address_street": "Rue Blaise Pascal",
+        "address_city": "Bruz",
+        "address_postal_code": 35170,
+        "address_country": "France"
+    }
+
+    assert attributes == expected_attributes
+    assert isinstance(attributes, dict)
+
+
+def test_str_representation():
+    ensai = Address(
+        address_id=1,
+        address_number=51,
+        address_street="Rue Blaise Pascal",
+        address_city="Bruz",
+        address_postal_code=35170,
+        address_country="France",
+    )
+
+    str_repr = str(ensai)
+    expected_str = "51 Rue Blaise Pascal, 35170 Bruz, France"
+
+    assert str_repr == expected_str
