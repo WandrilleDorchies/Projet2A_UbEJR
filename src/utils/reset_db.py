@@ -4,12 +4,11 @@ from dotenv import load_dotenv
 
 from src.DAO.DBConnector import DBConnector
 
+from .Populate.Faker import fake
+from .Populate.Usurper import Usurper
 from .singleton import Singleton
 
 load_dotenv()
-
-# TODO: handle resetting either prod or test, or both
-# TODO: option to opopulate database with sample
 
 
 class ResetDatabase(metaclass=Singleton):
@@ -32,13 +31,11 @@ class ResetDatabase(metaclass=Singleton):
 
         init_db = open("database_scripts/init_db.sql", encoding="utf-8")
         init_db_as_string = init_db.read()
-        print("Project DB reset - Database structure created ")
-        # print(init_db_as_string[:7])
-        # pop_db = open("database_scripts/pop_db.sql", encoding="utf-8")
-        # pop_db_as_string = pop_db.read()
 
         try:
             dbconnector.sql_query(query=init_db_as_string, return_type="none")
+            usurper = Usurper(fake, dbconnector)
+            usurper.populate_database()
         except Exception as e:
             print(e)
             raise
