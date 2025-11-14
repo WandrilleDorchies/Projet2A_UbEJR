@@ -193,6 +193,9 @@ class BundleDAO(metaclass=Singleton):
                 )
             update.pop("bundle_items")
 
+        if len(update) == 0:
+            return self.get_bundle_by_id(bundle_id)
+
         updated_fields = [f"{field} = %({field})s" for field in update.keys()]
         set_field = ", ".join(updated_fields)
         params = {**update, "bundle_id": bundle_id}

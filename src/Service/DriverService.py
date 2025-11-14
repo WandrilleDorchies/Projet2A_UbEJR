@@ -76,15 +76,25 @@ class DriverService:
     def create_driver(
         self, first_name: str, last_name: str, phone: str, password: str
     ) -> Optional[Driver]:
-        phone_number = pn.parse(phone, "FR")
+        try:
+            phone_number = pn.parse(phone, "FR")
+        except Exception:
+            try:
+                phone_number = pn.parse(phone)
+            except Exception as e:
+                raise ValueError(
+                    "[DriverService] Can't parse as FR number or foreign number"
+                ) from e
         if not pn.is_valid_number(phone_number) or not pn.is_possible_number(phone_number):
-            raise ValueError(f"The number {phone} is invalid.")
-        driver_phone = "0" + str(phone_number.national_number)
+            raise ValueError(f"[DriverService] Cannot create: The number {phone} is invalid.")
 
-        existing_driver = self.driver_dao.get_driver_by_phone(driver_phone)
+        # normal  > E164 format : 06 12 12 12 12 > +33612121212
+        valid_formatted_phone = pn.format_number(phone_number, pn.PhoneNumberFormat.E164)
+        # Check that phone number is not already used
+        existing_driver = self.driver_dao.get_driver_by_phone(valid_formatted_phone)
         if existing_driver is not None:
             raise ValueError(
-                f"[DriverService] Cannot create: customer with phone {driver_phone} already exists."
+                f"[DriverService] Cannot create: customer with phone {valid_formatted_phone} already exists."
             )
         if not re.match(self.pattern, first_name) or not re.match(self.pattern, last_name):
             raise ValueError(

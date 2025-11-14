@@ -21,6 +21,19 @@ class TestOrderableDAO:
         assert id1 != id2 != id3
         assert id1 < id2 < id3
 
+    def test_create_orderables_with_image(self, orderable_dao, clean_database):
+        orderable_id = orderable_dao.create_orderable("bundle", "test", "")
+        # Todo
+
+    def test_get_orderable_by_id_exist(
+        self, orderable_dao, sample_bundle, sample_item, clean_database
+    ):
+        bundle_id = orderable_dao.get_orderable_by_id(sample_bundle.bundle_id)
+        item_id = orderable_dao.get_orderable_by_id(sample_item.item_id)
+
+        assert bundle_id is not None
+        assert item_id is not None
+
     def test_get_all_orderables_empty(self, orderable_dao, clean_database):
         """Test getting all orderables when there are none"""
         orderables = orderable_dao.get_all_orderables()

@@ -115,10 +115,11 @@ files = [
 [[package]]
 name = "email-validator"
 version = "2.3.0"
-summary = ""
+requires_python = ">=3.8"
+summary = "A robust email address syntax and deliverability validation library."
 dependencies = [
-    "dnspython",
-    "idna",
+    "dnspython>=2.0.0",
+    "idna>=2.0.0",
 ]
 files = [
     {file = "email_validator-2.3.0-py3-none-any.whl", hash = "sha256:80f13f623413e6b197ae73bb10bf4eb0908faf509ad8362c5edeb0be7fd450b4"},

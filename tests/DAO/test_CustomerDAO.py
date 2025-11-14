@@ -43,12 +43,6 @@ class TestCustomerDAO:
 
         assert retrieved_customer is None
 
-    def test_get_all_customer_empty(self, customer_dao, clean_database):
-        """Test getting all customers when there are none"""
-        customers = customer_dao.get_all_customers()
-
-        assert customers == []
-
     def test_get_customer_loads_address(self, customer_dao, sample_customer, clean_database):
         """Tests that fetching a customer gets his address"""
         retrieved_customer = customer_dao.get_customer_by_id(sample_customer.id)
@@ -72,6 +66,34 @@ class TestCustomerDAO:
         retrieved_customer = customer_dao.get_customer_by_email("nonexistent@email.com")
 
         assert retrieved_customer is None
+
+    def test_get_customer_by_phone_not_exist(self, customer_dao, clean_database):
+        retrieved_customer = customer_dao.get_customer_by_phone("0668749528")
+
+        assert retrieved_customer is None
+
+    def test_get_customer_by_phone_exist(self, customer_dao, sample_customer, clean_database):
+        retrieved_customer = customer_dao.get_customer_by_phone(sample_customer.customer_phone)
+        assert retrieved_customer is not None
+        assert retrieved_customer.id == sample_customer.id
+        assert retrieved_customer.customer_phone == sample_customer.customer_phone
+
+    def test_get_all_customers_email(self, customer_dao, address_dao, clean_database):
+        address = address_dao.create_address(1, "Rue Test", "Rennes", 35000, "France")
+
+        customer_dao.create_customer(
+            "A", "A", "0601", "a@test.com", "hash", "salt", address.address_id
+        )
+        customer_dao.create_customer(
+            "B", "B", "0602", "b@test.com", "hash", "salt", address.address_id
+        )
+        customer_dao.create_customer(
+            "C", "C", "0603", "c@test.com", "hash", "salt", address.address_id
+        )
+
+        emails = customer_dao.get_all_customer_email()
+        assert emails is not None
+        assert emails == ["a@test.com", "b@test.com", "c@test.com"]
 
     def test_get_all_customers_empty(self, customer_dao, clean_database):
         """Test get_all_customer when there are no customers"""
