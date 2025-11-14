@@ -103,3 +103,14 @@ class TestGoogleMapService:
                 assert service.coord_rennes == (48.137922, -1.632842)
                 # Vérifier que le rayon est calculé
                 assert service.radius > 0
+
+    def test_get_path_no_route_found(self, google_map_service):
+        """Test: Aucun itinéraire trouvé lève une erreur"""
+        destination = "51 Rue Blaise Pascal, 35170 Bruz, France"
+
+        with patch.object(google_map_service, '_GoogleMapService__gmaps') as mock_gmaps:
+            # Simuler une réponse vide (aucun itinéraire trouvé)
+            mock_gmaps.directions.return_value = []
+
+            with pytest.raises(Exception, match="Error while computing path: No route found"):
+                google_map_service.get_path(destination)

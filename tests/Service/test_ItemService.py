@@ -87,3 +87,78 @@ class TestItemService:
 
         with pytest.raises(ValueError, match="item is in a bundle"):
             item_service.delete_item(multiple_items[0].item_id)
+
+    def test_create_item_invalid_price(self, item_service, sample_item_data, clean_database):
+        """Test creating an item with invalid price raises error"""
+        sample_item_data["item_price"] = 0  # Doit être strictement positif
+        
+        with pytest.raises(ValueError, match="Price must be strictly positive"):
+            item_service.create_item(**sample_item_data)
+
+    def test_create_item_negative_price(self, item_service, sample_item_data, clean_database):
+        """Test creating an item with negative price raises error"""
+        sample_item_data["item_price"] = -5.0  # Doit être strictement positif
+        
+        with pytest.raises(ValueError, match="Price must be strictly positive"):
+            item_service.create_item(**sample_item_data)
+
+    def test_create_item_negative_stock(self, item_service, sample_item_data, clean_database):
+        """Test creating an item with negative stock raises error"""
+        sample_item_data["item_stock"] = -10  # Doit être positif
+        
+        with pytest.raises(ValueError, match="Stock must be positive"):
+            item_service.create_item(**sample_item_data)
+
+    def test_update_item_no_changes(self, item_service, sample_item, clean_database):
+        """Test updating item with no changes raises error"""
+        update_data = {
+            "item_name": None,
+            "item_price": None,
+        }
+        
+        with pytest.raises(ValueError, match="You must change at least one field"):
+            item_service.update_item(sample_item.item_id, update_data)
+
+    def test_update_item_invalid_price(self, item_service, sample_item, clean_database):
+        """Test updating item with invalid price raises error"""
+        update_data = {
+            "item_price": 0.0
+        }
+        
+        with pytest.raises(ValueError, match="Price must be strictly positive"):
+            item_service.update_item(sample_item.item_id, update_data)
+
+    def test_update_item_negative_price(self, item_service, sample_item, clean_database):
+        """Test updating item with negative price raises error"""
+        update_data = {
+            "item_price": -5.0  # Doit être strictement positif
+        }
+        
+        with pytest.raises(ValueError, match="Price must be strictly positive"):
+            item_service.update_item(sample_item.item_id, update_data)
+
+    def test_update_item_negative_stock(self, item_service, sample_item, clean_database):
+        """Test updating item with negative stock raises error"""
+        update_data = {
+            "item_stock": -10  # Doit être positif
+        }
+        
+        with pytest.raises(ValueError, match="Stock must be positive"):
+            item_service.update_item(sample_item.item_id, update_data)
+
+    def test_update_item_partial_fields(self, item_service, sample_item, clean_database):
+        """Test updating only some fields of an item"""
+        original_name = sample_item.item_name
+        original_type = sample_item.item_type
+        
+        update_data = {
+            "item_stock": 75  # Seul le stock est modifié
+        }
+        
+        updated_item = item_service.update_item(sample_item.item_id, update_data)
+        
+        assert updated_item.item_stock == 75
+        # Les autres champs doivent rester inchangés
+        assert updated_item.item_name == original_name
+        assert updated_item.item_type == original_type
+        assert updated_item.item_price == sample_item.item_price

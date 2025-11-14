@@ -129,8 +129,7 @@ files = [
 [[package]]
 name = "faker"
 version = "37.12.0"
-requires_python = ">=3.9"
-summary = "Faker is a Python package that generates fake data for you."
+summary = ""
 dependencies = [
     "tzdata",
 ]
@@ -585,8 +584,7 @@ files = [
 [[package]]
 name = "tzdata"
 version = "2025.2"
-requires_python = ">=2"
-summary = "Provider of IANA time zone data"
+summary = ""
 files = [
     {file = "tzdata-2025.2-py2.py3-none-any.whl", hash = "sha256:1a403fada01ff9221ca8044d701868fa132215d84beb92242d9acd2147f667a8"},
     {file = "tzdata-2025.2.tar.gz", hash = "sha256:b60a638fcc0daffadf82fe0f57e53d06bdec2f36c4df66280ae79bce6bd6f2b9"},
