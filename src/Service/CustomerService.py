@@ -1,10 +1,11 @@
+from email_validator.exceptions import EmailNotValidError
 import re
 from typing import List, Optional
 
 import phonenumbers as pn
 
-from validate_email import validate_email
-#from email_validator import validate_email
+#from validate_email import validate_email
+from email_validator import validate_email
 
 from src.DAO.CustomerDAO import CustomerDAO
 from src.Model.Address import Address
@@ -105,8 +106,10 @@ class CustomerService:
         try:
             emailinfo = validate_email(mail, check_deliverability=True)
             validated_email = emailinfo.normalized
-        except Exception as e:
+        except EmailNotValidError as e:
             raise ValueError("[CustomerService] Cannot create: The email is invalid.") from e
+        except Exception as e:
+            raise RuntimeError("[CustomerService] Unexpected error while validating email.") from e
         # check that email is not already used
         existing_user = self.customer_dao.get_customer_by_email(validated_email)
         if existing_user is not None:
