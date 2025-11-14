@@ -5,7 +5,7 @@
 groups = ["default", "lint", "test", "typing"]
 strategy = []
 lock_version = "4.5.0"
-content_hash = "sha256:5ddbd59831bc60bd58f38ce45ec9dfc04cfcd5bb20cf7fc7ec44a1b25fe5a0be"
+content_hash = "sha256:418efc16a917845e916ddd67b3b3dba798dcfaa28af16392c0db8531adfc1501"
 
 [[metadata.targets]]
 requires_python = "==3.12.*"
@@ -113,10 +113,22 @@ files = [
 ]
 
 [[package]]
+name = "email-validator"
+version = "2.3.0"
+summary = ""
+dependencies = [
+    "dnspython",
+    "idna",
+]
+files = [
+    {file = "email_validator-2.3.0-py3-none-any.whl", hash = "sha256:80f13f623413e6b197ae73bb10bf4eb0908faf509ad8362c5edeb0be7fd450b4"},
+    {file = "email_validator-2.3.0.tar.gz", hash = "sha256:9fc05c37f2f6cf439ff414f8fc46d917929974a82244c20eb10231ba60c54426"},
+]
+
+[[package]]
 name = "faker"
 version = "37.12.0"
-requires_python = ">=3.9"
-summary = "Faker is a Python package that generates fake data for you."
+summary = ""
 dependencies = [
     "tzdata",
 ]
@@ -571,8 +583,7 @@ files = [
 [[package]]
 name = "tzdata"
 version = "2025.2"
-requires_python = ">=2"
-summary = "Provider of IANA time zone data"
+summary = ""
 files = [
     {file = "tzdata-2025.2-py2.py3-none-any.whl", hash = "sha256:1a403fada01ff9221ca8044d701868fa132215d84beb92242d9acd2147f667a8"},
     {file = "tzdata-2025.2.tar.gz", hash = "sha256:b60a638fcc0daffadf82fe0f57e53d06bdec2f36c4df66280ae79bce6bd6f2b9"},
