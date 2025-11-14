@@ -172,6 +172,11 @@ class TestBundleDAO:
         with pytest.raises(ValueError, match="not a parameter of Bundle"):
             bundle_dao.update_bundle(created_bundle.bundle_id, {"invalid_field": "value"})
 
+    def test_update_bundle_id_not_exist(self, bundle_dao):
+        retrieved_bundle = bundle_dao.update_bundle(42316253, {})
+        assert retrieved_bundle is None
+
+
     def test_delete_bundle(self, bundle_dao, multiple_items, clean_database):
         bundle_items = {multiple_items[0]: 1}
         created_bundle = bundle_dao.create_bundle(
