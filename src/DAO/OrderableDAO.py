@@ -100,7 +100,7 @@ class OrderableDAO(metaclass=Singleton):
         orderable_name: str,
         orderable_image_data: bytes,
     ) -> Dict:
-        orderable_image_name = f"image_{orderable_type}_{orderable_name}"
+        orderable_image_name = f"image_{orderable_type}_{orderable_name.lower().replace(' ', '_')}"
 
         raw_orderable = self.db_connector.sql_query(
             """UPDATE Orderables
