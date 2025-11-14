@@ -96,7 +96,7 @@ class TestCustomerService:
         assert created_customer.id > 0
         assert created_customer.first_name == "Test"
         assert created_customer.last_name == "USER"
-        assert created_customer.customer_phone == "0612345678"
+        assert created_customer.customer_phone == "+33612345678"
         assert created_customer.customer_mail == "test@email.com"
         assert created_customer.customer_address is not None
 

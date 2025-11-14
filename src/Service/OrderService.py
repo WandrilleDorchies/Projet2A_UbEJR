@@ -138,13 +138,14 @@ class OrderService:
 
         if raw_orderable["orderable_type"] == "bundle":
             orderable = self.bundle_dao.get_bundle_by_orderable_id(orderable_id)
-            if not orderable.check_availability():
-                raise ValueError("[OrderService] The item isn't available.")
             if not orderable.check_stock(quantity):
                 raise ValueError(
                     f"[OrderService] Not enough stock for {orderable.bundle_name}"
                     f" (available: {orderable.get_stock()})."
                 )
+            if not orderable.check_availability():
+                raise ValueError("[OrderService] The item isn't available.")
+            
 
             for item, nb in orderable.bundle_items.items():
                 update_data = {"item_stock": item.item_stock - nb * quantity}

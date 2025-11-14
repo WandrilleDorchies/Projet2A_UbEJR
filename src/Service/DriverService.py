@@ -112,7 +112,7 @@ class DriverService:
         created_driver = self.driver_dao.create_driver(
             first_name=formatted_first_name,
             last_name=formatted_last_name,
-            phone=driver_phone,
+            phone=valid_formatted_phone,
             password_hash=password_hash,
             salt=salt,
         )
