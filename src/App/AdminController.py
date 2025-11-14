@@ -127,6 +127,7 @@ async def update_item(
         update = locals()
         if item_image:
             image_data = await item_image.read()
+            print(image_data)
             update["item_image"] = image_data
 
         update.pop("item_id")

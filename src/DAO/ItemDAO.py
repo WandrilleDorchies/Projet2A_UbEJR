@@ -115,6 +115,9 @@ class ItemDAO(metaclass=Singleton):
             self.orderable_dao.update_image(orderable_id, "item", item_name, update["item_image"])
             update.pop("item_image")
 
+        if len(update) == 0:
+            return self.get_item_by_id(item_id)
+
         updated_fields = [f"{field} = %({field})s" for field in update.keys()]
         set_field = ", ".join(updated_fields)
         params = {**update, "item_id": item_id}
