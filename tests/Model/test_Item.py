@@ -97,6 +97,7 @@ def test_items_equal():
 
     assert item1 == item2
 
+
 def test_item_hash():
     item = Item(
         item_id=1,
@@ -129,10 +130,10 @@ def test_item_price_property():
 @pytest.mark.parametrize(
     "stock,is_in_menu,expected",
     [
-        (10, True, True),    # Stock > 0 and in menu
-        (0, True, False),    # Stock = 0 and in menu
+        (10, True, True),  # Stock > 0 and in menu
+        (0, True, False),  # Stock = 0 and in menu
         (10, False, False),  # Stock > 0 but not in menu
-        (0, False, False),   # Stock = 0 and not in menu
+        (0, False, False),  # Stock = 0 and not in menu
     ],
 )
 def test_item_check_availability(stock, is_in_menu, expected):
@@ -153,10 +154,10 @@ def test_item_check_availability(stock, is_in_menu, expected):
 @pytest.mark.parametrize(
     "stock,quantity,expected",
     [
-        (10, 5, True),   # 10 - 5 >= 0
+        (10, 5, True),  # 10 - 5 >= 0
         (10, 10, True),  # 10 - 10 >= 0
-        (10, 11, False), # 10 - 11 < 0
-        (0, 1, False),   # 0 - 1 < 0
+        (10, 11, False),  # 10 - 11 < 0
+        (0, 1, False),  # 0 - 1 < 0
     ],
 )
 def test_item_check_stock(stock, quantity, expected):

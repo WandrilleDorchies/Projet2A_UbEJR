@@ -22,22 +22,24 @@ class TestGoogleMapService:
     def test_validate_address_missing_fields(self, google_map_service):
         """Test: Adresse avec des champs manquants lève une erreur"""
         # Mock pour simuler une réponse avec des champs manquants
-        with patch.object(google_map_service, '_GoogleMapService__gmaps') as mock_gmaps:
+        with patch.object(google_map_service, "_GoogleMapService__gmaps") as mock_gmaps:
             # Simuler une réponse avec des composants incomplets (pas de 'route')
-            mock_response = [{
-                "address_components": [
-                    {"types": ["street_number"], "long_name": "51"},
-                    {"types": ["locality"], "long_name": "Bruz"},
-                    {"types": ["postal_code"], "long_name": "35170"},
-                    {"types": ["country"], "long_name": "France"}
-                ],
-                "geometry": {
-                    "location": {
-                        "lat": google_map_service.coord_ensai["lat"],
-                        "lng": google_map_service.coord_ensai["lng"]
-                    }
+            mock_response = [
+                {
+                    "address_components": [
+                        {"types": ["street_number"], "long_name": "51"},
+                        {"types": ["locality"], "long_name": "Bruz"},
+                        {"types": ["postal_code"], "long_name": "35170"},
+                        {"types": ["country"], "long_name": "France"},
+                    ],
+                    "geometry": {
+                        "location": {
+                            "lat": google_map_service.coord_ensai["lat"],
+                            "lng": google_map_service.coord_ensai["lng"],
+                        }
+                    },
                 }
-            }]
+            ]
             mock_gmaps.geocode.return_value = mock_response
 
             with pytest.raises(ValueError, match="Address not found"):
@@ -62,7 +64,6 @@ class TestGoogleMapService:
         assert components["address_postal_code"] == 35170
         assert components["address_country"] == "France"
 
-
     def test_get_path_to_rennes(self, google_map_service):
         """Test: Récupération d'un itinéraire vers Rennes"""
         destination = "Place de la Mairie, 35000 Rennes, France"
@@ -83,18 +84,17 @@ class TestGoogleMapService:
 
     def test_initialization(self):
         """Test: Initialisation du service avec les bonnes coordonnées"""
-        with patch.dict('os.environ', {'GOOGLE_MAPS_API_KEY': 'test_key'}):
-            with patch('googlemaps.Client') as mock_client:
+        with patch.dict("os.environ", {"GOOGLE_MAPS_API_KEY": "test_key"}):
+            with patch("googlemaps.Client") as mock_client:
                 # Mock de la réponse geocode pour ENSAI
                 mock_instance = Mock()
-                mock_instance.geocode.return_value = [{
-                    "geometry": {
-                        "location": {"lat": 48.0, "lng": -1.5}
-                    }
-                }]
+                mock_instance.geocode.return_value = [
+                    {"geometry": {"location": {"lat": 48.0, "lng": -1.5}}}
+                ]
                 mock_client.return_value = mock_instance
 
                 from src.Service.GoogleMapService import GoogleMapService
+
                 service = GoogleMapService()
 
                 # Vérifier que les coordonnées sont bien initialisées
@@ -108,7 +108,7 @@ class TestGoogleMapService:
         """Test: Aucun itinéraire trouvé lève une erreur"""
         destination = "51 Rue Blaise Pascal, 35170 Bruz, France"
 
-        with patch.object(google_map_service, '_GoogleMapService__gmaps') as mock_gmaps:
+        with patch.object(google_map_service, "_GoogleMapService__gmaps") as mock_gmaps:
             # Simuler une réponse vide (aucun itinéraire trouvé)
             mock_gmaps.directions.return_value = []
 

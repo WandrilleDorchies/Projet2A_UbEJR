@@ -176,7 +176,6 @@ class TestBundleDAO:
         retrieved_bundle = bundle_dao.update_bundle(42316253, {})
         assert retrieved_bundle is None
 
-
     def test_delete_bundle(self, bundle_dao, multiple_items, clean_database):
         bundle_items = {multiple_items[0]: 1}
         created_bundle = bundle_dao.create_bundle(

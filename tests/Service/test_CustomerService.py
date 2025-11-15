@@ -154,7 +154,7 @@ class TestCustomerService:
 
     def test_create_customer_invalid_address_raises_error(self, customer_service, clean_database):
         """Test creating customer with invalid address raises error"""
-        with pytest.raises(ValueError, match=re.escape("[GoogleMapService]: Address not found.")):
+        with pytest.raises(ValueError, match=re.escape("[GoogleMapService]: Invalid address.")):
             customer_service.create_customer(
                 first_name="Test",
                 last_name="User",
@@ -176,7 +176,7 @@ class TestCustomerService:
                 phone="0612345678",
                 mail="test@email.com",
                 password="V4lidP@ssword",
-                address_string="Tour Eiffel, 75007 Paris, France",
+                address_string="5, avenue faubourg saint honoré, paris",
             )
 
     def test_update_customer(self, customer_service, sample_customer, clean_database):

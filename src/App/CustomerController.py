@@ -164,10 +164,12 @@ def get_menu():
         menu = menu_service.get_all_orderables()
         for i, content in enumerate(menu):
             if isinstance(content, Item):
-                menu[i]= APIItem(item_name=content.item_name,
-                                item_price=content.item_price,
-                                item_type=content.item_type,
-                                item_description=content.item_description)
+                menu[i] = APIItem(
+                    item_name=content.item_name,
+                    item_price=content.item_price,
+                    item_type=content.item_type,
+                    item_description=content.item_description,
+                )
 
             elif isinstance(content, Bundle):
                 for key, value in content.bundle_items.items():
@@ -179,12 +181,13 @@ def get_menu():
                             item_type=key.item_type,
                             item_description=key.item_description,
                         )
-                        ] = value
+                    ] = value
 
-                menu[i]=APIBundle(
-                        bundle_name=content.bundle_name,
-                        bundle_description=content.bundle_description,
-                        bundle_items=items)
+                menu[i] = APIBundle(
+                    bundle_name=content.bundle_name,
+                    bundle_description=content.bundle_description,
+                    bundle_items=items,
+                )
         return menu
 
     except ValueError as e:
@@ -316,7 +319,9 @@ def view_order_history(customer_id: int = Depends(get_customer_id_from_token)):
 
 
 @customer_router.delete(
-    "/delete_account", status_code=status.HTTP_204_NO_CONTENT, dependencies=[Depends(CustomerBearer())]
+    "/delete_account",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(CustomerBearer())],
 )
 def delete_account(identifier: str, password: str):
     try:
@@ -327,7 +332,6 @@ def delete_account(identifier: str, password: str):
         raise HTTPException(status_code=401, detail=f"Invalid credentials: {e}") from e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Login failed: {e}") from e
-
 
 
 # PROBLEME : Les objets custom comme clé de dict ne sont jamais automatiquement convertis en JSON.

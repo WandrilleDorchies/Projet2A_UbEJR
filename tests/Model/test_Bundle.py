@@ -146,6 +146,7 @@ def test_bundles_equal(sample_item):
     )
     assert bundle1 == bundle2
 
+
 def test_bundle_hash(sample_item):
     bundle = Bundle(
         bundle_id=1,
@@ -182,7 +183,6 @@ def test_bundle_check_stock():
 
     assert bundle.check_stock(1) is True
     mock_item.check_stock.assert_called_once_with(2)  # 1 * 2 = 2
-
 
 
 def test_bundle_get_stock(sample_item):

@@ -38,6 +38,7 @@ def test_address_constructor_throws_on_incorrect_input():
         exception_info.value
     )
 
+
 def test_get_attributes():
     ensai = Address(
         address_id=1,
@@ -56,7 +57,7 @@ def test_get_attributes():
         "address_street": "Rue Blaise Pascal",
         "address_city": "Bruz",
         "address_postal_code": 35170,
-        "address_country": "France"
+        "address_country": "France",
     }
 
     assert attributes == expected_attributes

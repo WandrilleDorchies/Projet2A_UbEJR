@@ -22,7 +22,7 @@ class TestOrderableDAO:
         assert id1 < id2 < id3
 
     def test_create_orderables_with_image(self, orderable_dao, clean_database):
-        orderable_id = orderable_dao.create_orderable("bundle", "test", "")
+        orderable_dao.create_orderable("bundle", "test", "")
         # Todo
 
     def test_get_orderable_by_id_exist(

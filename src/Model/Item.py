@@ -49,7 +49,7 @@ class Item(Orderable):
         bool:
             True if all the conditions are met
         """
-        return self.item_stock > 0 and self.is_in_menu
+        return self.item_stock > 0
 
     def check_stock(self, quantity: int) -> bool:
         """

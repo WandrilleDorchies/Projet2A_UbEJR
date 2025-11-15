@@ -49,6 +49,7 @@ def test_order_constructor_throws_on_incorrect_input():
 def test_order_calculate_price_with_all(sample_order_full):
     assert sample_order_full.order_price == 0.85 * (0.5 + 4.5) + 2.0
 
+
 @pytest.mark.parametrize(
     "order_state,expected_paid,expected_prepared,expected_delivered",
     [

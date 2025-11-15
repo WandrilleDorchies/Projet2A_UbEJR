@@ -145,7 +145,6 @@ class OrderService:
                 )
             if not orderable.check_availability():
                 raise ValueError("[OrderService] The item isn't available.")
-            
 
             for item, nb in orderable.bundle_items.items():
                 update_data = {"item_stock": item.item_stock - nb * quantity}

@@ -56,57 +56,63 @@ class MenuService:
 
         if orderable is None:
             raise ValueError(
-                f"[MenuService] Cannot remove to menu: Orderable with ID {orderable_id} unknown "
+                f"[MenuService] Cannot remove from menu: Orderable with ID {orderable_id} unknown."
             )
+
         if orderable["orderable_type"] == "item":
             orderable_instance = self.item_dao.get_item_by_orderable_id(orderable["orderable_id"])
-
-        if orderable["orderable_type"] == "bundle":
+        elif orderable["orderable_type"] == "bundle":
             orderable_instance = self.bundle_dao.get_bundle_by_orderable_id(
                 orderable["orderable_id"]
             )
 
-        if orderable_instance.is_in_menu is False:
+        if not orderable_instance.is_in_menu:
             raise ValueError(
-                f"[MenuService] Cannot add to menu: Orderable with ID {orderable_id} is "
+                f"[MenuService] Cannot remove from menu: Orderable with ID {orderable_id} is "
                 "already off the menu."
             )
 
-        orderable = self.orderable_dao.update_orderable_state(orderable_id, False)
+        self.orderable_dao.update_orderable_state(orderable_id, False)
+        orderable_instance.is_in_menu = False
 
         return orderable_instance
 
     @log
     def add_orderable_to_menu(self, orderable_id: int) -> Union[Item, Bundle]:
         orderable = self.orderable_dao.get_orderable_by_id(orderable_id)
-        print(orderable)
+
         if orderable is None:
             raise ValueError(
-                f"[MenuService] Cannot add to menu: Orderable with ID {orderable_id} unknown "
+                f"[MenuService] Cannot add to menu: Orderable with ID {orderable_id} unknown."
             )
 
         if orderable["orderable_type"] == "item":
             orderable_instance = self.item_dao.get_item_by_orderable_id(orderable["orderable_id"])
-
-        if orderable["orderable_type"] == "bundle":
+        elif orderable["orderable_type"] == "bundle":
             orderable_instance = self.bundle_dao.get_bundle_by_orderable_id(
                 orderable["orderable_id"]
             )
 
-        if orderable_instance.is_in_menu is True:
+        if orderable_instance.is_in_menu:
             raise ValueError(
                 f"[MenuService] Cannot add to menu: Orderable with ID {orderable_id} is "
                 "already on the menu."
             )
 
         if not orderable_instance.check_availability():
-            raise ValueError(
-                f"[MenuService] Cannot add to menu: Orderable with ID {orderable_id} is "
-                "not available."
-            )
+            if orderable["orderable_type"] == "item":
+                raise ValueError(
+                    f"[MenuService] Cannot add to menu: Item with ID {orderable_id} "
+                    "is out of stock."
+                )
+            else:
+                raise ValueError(
+                    f"[MenuService] Cannot add to menu: Bundle with ID {orderable_id} "
+                    "is not available (check dates or item stock)."
+                )
 
-        orderable = self.orderable_dao.update_orderable_state(orderable_id, True)
-
+        self.orderable_dao.update_orderable_state(orderable_id, True)
+        orderable_instance.is_in_menu = True
         return orderable_instance
 
     @log

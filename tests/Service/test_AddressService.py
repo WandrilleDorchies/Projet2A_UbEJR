@@ -2,14 +2,8 @@ from unittest.mock import patch
 
 import pytest
 
-from src.DAO.AddressDAO import AddressDAO
-from src.Model.Address import Address
-from src.Service.AddressService import AddressService
-from src.Service.GoogleMapService import GoogleMapService
-
 
 class TestAddressService:
-
     def test_get_address_by_id_found(self, address_service, sample_address):
         """Test: Récupération d'une adresse par ID existant"""
         result = address_service.get_address_by_id(sample_address.address_id)
@@ -23,7 +17,9 @@ class TestAddressService:
         with pytest.raises(ValueError, match="Cannot find: Address with ID 999 not found"):
             address_service.get_address_by_id(999)
 
-    def test_get_address_by_customer_id_found(self, address_service, sample_customer, sample_address):
+    def test_get_address_by_customer_id_found(
+        self, address_service, sample_customer, sample_address
+    ):
         """Test: Récupération d'une adresse par customer ID existant"""
         result = address_service.get_address_by_customer_id(sample_customer.id)
 
@@ -63,7 +59,7 @@ class TestAddressService:
             "address_street": "Rue de Nemours",
             "address_city": "Rennes",
             "address_postal_code": 35000,
-            "address_country": sample_address.address_country  # Garder le même pays
+            "address_country": sample_address.address_country,  # Garder le même pays
         }
 
         result = address_service.update_address(sample_address.address_id, update_data)
@@ -77,12 +73,11 @@ class TestAddressService:
 
     def test_update_address_no_changes(self, address_service, sample_address):
         """Test: Mise à jour sans changement lève une erreur"""
-        update_data = {
-            "address_street": None,
-            "address_city": None
-        }
+        update_data = {"address_street": None, "address_city": None}
 
-        with pytest.raises(ValueError, match="Cannot update address: You must change at least one field"):
+        with pytest.raises(
+            ValueError, match="Cannot update address: You must change at least one field"
+        ):
             address_service.update_address(sample_address.address_id, update_data)
 
     def test_update_address_not_found(self, address_service):
@@ -95,7 +90,7 @@ class TestAddressService:
     def test_update_address_invalid_new_address(self, address_service, sample_address):
         """Test: Mise à jour avec une nouvelle adresse invalide"""
         # Mock temporairement la validation pour simuler une adresse invalide
-        with patch.object(address_service.gm_service, 'validate_address') as mock_validate:
+        with patch.object(address_service.gm_service, "validate_address") as mock_validate:
             mock_validate.side_effect = ValueError("Invalid address")
 
             update_data = {
@@ -103,7 +98,7 @@ class TestAddressService:
                 "address_street": "Invalid Street",
                 "address_city": sample_address.address_city,
                 "address_postal_code": sample_address.address_postal_code,
-                "address_country": sample_address.address_country
+                "address_country": sample_address.address_country,
             }
 
             with pytest.raises(ValueError, match="Invalid address"):
@@ -121,7 +116,9 @@ class TestAddressService:
         address_service.delete_address(address_id)
 
         # Vérifier que l'adresse n'existe plus
-        with pytest.raises(ValueError, match=f"Cannot find: Address with ID {address_id} not found"):
+        with pytest.raises(
+            ValueError, match=f"Cannot find: Address with ID {address_id} not found"
+        ):
             address_service.get_address_by_id(address_id)
 
     def test_delete_address_not_found(self, address_service):
