@@ -1,5 +1,5 @@
 import logging
-from typing import Literal, Optional, Union
+from typing import Literal, Union
 
 import phonenumbers as pn
 from email_validator import EmailNotValidError, validate_email
@@ -29,38 +29,17 @@ class UserService:
         self, identifier: str, password: str, user_type: Literal["customer", "driver", "admin"]
     ) -> Union[Customer, Driver, Admin]:
         user = None
-        if user_type == "customer":
-            user = self.customer_dao.get_customer_by_email(identifier)
-            if not user:
-                try:
-                    identifier = pn.parse(identifier, "FR")
-                except Exception:
-                    try:
-                        identifier = pn.parse(identifier)
-                    except Exception as e:
-                        raise ValueError(
-                            "[UserService] Can't parse as FR number or foreign number"
-                        ) from e
-                identifier = pn.format_number(identifier, pn.PhoneNumberFormat.E164)
-                user = self.customer_dao.get_customer_by_phone(identifier)
-
-        elif user_type == "driver":
-            try:
-                identifier = pn.parse(identifier, "FR")
-            except Exception:
-                try:
-                    identifier = pn.parse(identifier)
-                except Exception as e:
-                    raise ValueError(
-                        "[UserService] Can't parse as FR number or foreign number"
-                    ) from e
-            identifier = pn.format_number(identifier, pn.PhoneNumberFormat.E164)
-            user = self.driver_dao.get_driver_by_phone(identifier)
-
+        validated_identifier = self.identifier_validator(identifier)
+        if user_type == "customer" and validated_identifier["type"] == "phone":
+            user = self.customer_dao.get_customer_by_phone(validated_identifier["identifier"])
+        elif user_type == "customer" and validated_identifier["type"] == "email":
+            user = self.customer_dao.get_customer_by_email(validated_identifier["identifier"])
+        elif user_type == "driver" and validated_identifier["type"] == "phone":
+            user = self.driver_dao.get_driver_by_phone(validated_identifier["identifier"])
         elif user_type == "admin" and identifier == "adminsee":
             user = self.admin_dao.get_admin()
-
         if not user:
+            logging.error(f"[UserService] Login failed for user with identfier: {identifier}")
             raise ValueError(f"[UserService] User not found with identifier: {identifier}")
 
         validate_password(user, password)
@@ -100,33 +79,33 @@ class UserService:
         elif user_type == "admin":
             return self.admin_dao.get_admin()
 
-
-def identifier_validator(identifier: str) -> Optional[dict]:
-    logging.info("[UserService] Parsing identifier as email...")
-    try:
-        emailinfo = validate_email(identifier, check_deliverability=True)
-        return {"type": "email", "identifier": emailinfo.normalized}
-    except EmailNotValidError:
-        pass
-    logging.info("[UserService] Parsing identifier as french phone...")
-    try:
-        phone_number = pn.parse(identifier, "FR")
-        if pn.is_valid_number(phone_number):
-            return {
-                "type": "phone",
-                "identifier": pn.format_number(phone_number, pn.PhoneNumberFormat.E164),
-            }
-    except pn.NumberParseException:
-        pass
-    logging.info("[UserService] Parsing identifier as international phone...")
-    try:
-        phone_number = pn.parse(identifier)
-        if pn.is_valid_number(phone_number):
-            return {
-                "type": "phone",
-                "identifier": pn.format_number(phone_number, pn.PhoneNumberFormat.E164),
-            }
-    except pn.NumberParseException:
-        pass
-    logging.warning("Identifier could not be parsed. Login will fail.")
-    return None
+    @log
+    def identifier_validator(self, identifier: str) -> dict:
+        logging.info("[UserService] Parsing identifier as email...")
+        try:
+            emailinfo = validate_email(identifier, check_deliverability=True)
+            return {"type": "email", "identifier": emailinfo.normalized}
+        except EmailNotValidError:
+            pass
+        logging.info("[UserService] Parsing identifier as french phone...")
+        try:
+            phone_number = pn.parse(identifier, "FR")
+            if pn.is_valid_number(phone_number) and pn.is_possible_number(phone_number):
+                return {
+                    "type": "phone",
+                    "identifier": pn.format_number(phone_number, pn.PhoneNumberFormat.E164),
+                }
+        except pn.NumberParseException:
+            pass
+        logging.info("[UserService] Parsing identifier as international phone...")
+        try:
+            phone_number = pn.parse(identifier)
+            if pn.is_valid_number(phone_number) and pn.is_possible_number(phone_number):
+                return {
+                    "type": "phone",
+                    "identifier": pn.format_number(phone_number, pn.PhoneNumberFormat.E164),
+                }
+        except pn.NumberParseException:
+            pass
+        logging.warning("Identifier could not be parsed. Register/Login will fail.")
+        return {"type": None, "identifier": None}

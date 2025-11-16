@@ -1,11 +1,6 @@
+import logging
 import re
 from typing import List, Optional
-
-import phonenumbers as pn
-
-# from validate_email import validate_email
-from email_validator import validate_email
-from email_validator.exceptions import EmailNotValidError
 
 from src.DAO.CustomerDAO import CustomerDAO
 from src.Model.Address import Address
@@ -76,45 +71,35 @@ class CustomerService:
     ) -> Optional[Customer]:
         # Check on first and last name
         if not re.match(self.pattern, first_name) or not re.match(self.pattern, last_name):
+            logging.error("[CustomerService] First name and last name must only contains letters")
             raise ValueError(
                 "[Customer Service] Cannot create customer: First name and last name "
                 "must only contains letters"
             )
-        # Check that phone number is valid
-        try:
-            phone_number = pn.parse(phone, "FR")
-        except Exception:
-            try:
-                phone_number = pn.parse(phone)
-            except Exception as e:
-                raise ValueError(
-                    "[CustomerService] Can't parse as FR number or foreign number"
-                ) from e
-        if not pn.is_valid_number(phone_number) or not pn.is_possible_number(phone_number):
-            raise ValueError(f"[CustomerService] Cannot create: The number {phone} is invalid.")
-
-        # normal  > E164 format : 06 12 12 12 12 > +33612121212
-        valid_formatted_phone = pn.format_number(phone_number, pn.PhoneNumberFormat.E164)
+        validated_phone = self.user_service.identifier_validator(phone)
+        if validated_phone["type"] is None:
+            raise ValueError("[CustomerService] Cannot create: The phone is invalid.")
         # Check that phone number is not already used
-        existing_user = self.customer_dao.get_customer_by_phone(valid_formatted_phone)
+        existing_user = self.customer_dao.get_customer_by_phone(validated_phone["identifier"])
         if existing_user is not None:
+            logging.error("[CustomerService] Phone number already in use")
             raise ValueError(
-                f"[CustomerService] Cannot create: customer with phone {valid_formatted_phone} "
+                "[CustomerService] Cannot create: customer "
+                f"with phone {validated_phone['identifier']} "
                 "already exists."
             )
-        # Check that email is valid
-        try:
-            emailinfo = validate_email(mail, check_deliverability=True)
-            validated_email = emailinfo.normalized
-        except EmailNotValidError as e:
-            raise ValueError("[CustomerService] Cannot create: The email is invalid.") from e
-        except Exception as e:
-            raise RuntimeError("[CustomerService] Unexpected error while validating email.") from e
+        # Check email
+        validated_email = self.user_service.identifier_validator(mail)
+        if validated_email["type"] is None:
+            logging.error("[CustomerService] Cannot create: The email is invalid.")
+            raise ValueError("[CustomerService] Cannot create: The email is invalid.")
         # check that email is not already used
-        existing_user = self.customer_dao.get_customer_by_email(validated_email)
+        existing_user = self.customer_dao.get_customer_by_email(validated_email["identifier"])
         if existing_user is not None:
+            logging.error("[CustomerService] Email already in use !")
             raise ValueError(
-                f"[CustomerService] Cannot create: customer with email {validated_email} "
+                "[CustomerService] Cannot create: customer with "
+                f"email {validated_email['identfier']} "
                 "already exists."
             )
         check_password_strength(password)
@@ -122,7 +107,8 @@ class CustomerService:
         address = self.address_service.create_address(address_string)
         formatted_first_name = first_name.strip().capitalize()
         formatted_last_name = last_name.strip().upper()
-
+        valid_formatted_phone = validated_phone["identifier"]
+        valid_formatted_email = validated_email["identifier"]
         salt = create_salt()
         password_hash = hash_password(password, salt)
 
@@ -130,7 +116,7 @@ class CustomerService:
             formatted_first_name,
             formatted_last_name,
             valid_formatted_phone,
-            validated_email,
+            valid_formatted_email,
             password_hash,
             salt,
             address.address_id,
@@ -169,19 +155,20 @@ class CustomerService:
             update["customer_last_name"] = update["customer_last_name"].strip().upper()
 
         if update.get("customer_phone"):
-            phone_number = pn.parse(update["customer_phone"], "FR")
-            if not pn.is_valid_number(phone_number) or not pn.is_possible_number(phone_number):
+            customer_phone = update["customer_phone"]
+            validated_phone = self.user_service.identifier_validator(customer_phone)
+            if validated_phone["type"] is None:
                 raise ValueError(f"The number {update['customer_phone']} is invalid.")
 
-            update["customer_phone"] = "0" + str(phone_number.national_number)
+            update["customer_phone"] = validated_phone["identifier"]
 
         if update.get("customer_mail"):
             customer_mail = update["customer_mail"]
-            try:
-                emailinfo = validate_email(customer_mail, check_deliverability=True)
-                update["customer_mail"] = emailinfo.normalized
-            except Exception as e:
-                raise ValueError("[CustomerService] Cannot update: The email is invalid.") from e
+            validated_email = self.user_service.identifier_validator(customer_mail)
+            if validated_email["type"] is None:
+                raise ValueError(f"The email {update['customer_mail']} is invalid.")
+
+            update["customer_mail"] = validated_email["identifier"]
 
         updated_customer = self.customer_dao.update_customer(customer_id=customer_id, update=update)
         return updated_customer
