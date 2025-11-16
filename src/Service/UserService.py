@@ -39,7 +39,7 @@ class UserService:
         elif user_type == "admin" and identifier == "adminsee":
             user = self.admin_dao.get_admin()
         if not user:
-            logging.error(f"[UserService] Login failed for user with identfier: {identifier}")
+            logging.error(f"[UserService] Login failed for user with identifier: {identifier}")
             raise ValueError(f"[UserService] User not found with identifier: {identifier}")
 
         validate_password(user, password)

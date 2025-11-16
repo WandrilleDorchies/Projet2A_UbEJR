@@ -162,7 +162,7 @@ def sample_customer(customer_dao, sample_address, clean_database):
     customer = customer_dao.create_customer(
         first_name="Jean",
         last_name="Dupont",
-        phone="0612345678",
+        phone="+33612345678",
         mail="jean.dupont@email.com",
         password_hash="hashed_password_123",
         salt="random_salt_456",

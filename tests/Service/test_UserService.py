@@ -17,7 +17,7 @@ class TestUserService:
         customer = customer_dao.create_customer(
             first_name="John",
             last_name="Doe",
-            phone="0612345678",
+            phone="+33612345678",
             mail="john.doe@email.com",
             password_hash=hashed_password,
             salt=salt,
@@ -41,14 +41,14 @@ class TestUserService:
         customer = customer_dao.create_customer(
             first_name="John",
             last_name="Doe",
-            phone="0612345678",
+            phone="+33612345678",
             mail="john.doe@email.com",
             password_hash=hashed_password,
             salt=salt,
             address_id=sample_address.address_id,
         )
 
-        logged_in_user = user_service.login("0612345678", password, "customer")
+        logged_in_user = user_service.login("+33612345678", password, "customer")
 
         assert logged_in_user is not None
         assert logged_in_user.id == customer.id
@@ -65,7 +65,7 @@ class TestUserService:
         customer_dao.create_customer(
             first_name="John",
             last_name="Doe",
-            phone="0612345678",
+            phone="+33612345678",
             mail="john.doe@email.com",
             password_hash=hashed_password,
             salt=salt,
@@ -92,12 +92,12 @@ class TestUserService:
         driver = driver_dao.create_driver(
             first_name="Lewis",
             last_name="Hamilton",
-            phone="0707070707",
+            phone="+33607070707",
             password_hash=hashed_password,
             salt=salt,
         )
 
-        logged_in_user = user_service.login("0707070707", password, "driver")
+        logged_in_user = user_service.login("+33607070707", password, "driver")
 
         assert logged_in_user is not None
         assert logged_in_user.id == driver.id
@@ -112,13 +112,13 @@ class TestUserService:
         driver_dao.create_driver(
             first_name="Lewis",
             last_name="Hamilton",
-            phone="0707070707",
+            phone="+33756652832",
             password_hash=hashed_password,
             salt=salt,
         )
 
         with pytest.raises(ValueError, match="Incorrect password"):
-            user_service.login("0707070707", "WrongP@ssword123", "driver")
+            user_service.login("+33756652832", "WrongP@ssword123", "driver")
 
     def test_login_driver_not_found(self, user_service, clean_database):
         """Test login with non-existing driver raises error"""
@@ -139,7 +139,7 @@ class TestUserService:
         customer = customer_dao.create_customer(
             first_name="John",
             last_name="Doe",
-            phone="0612345678",
+            phone="+33612345678",
             mail="john.doe@email.com",
             password_hash=hashed_password,
             salt=salt,
@@ -188,7 +188,7 @@ class TestUserService:
         customer = customer_dao.create_customer(
             first_name="John",
             last_name="Doe",
-            phone="0612345678",
+            phone="+33612345678",
             mail="john.doe@email.com",
             password_hash=hashed_password,
             salt=salt,
@@ -208,7 +208,7 @@ class TestUserService:
         driver = driver_dao.create_driver(
             first_name="Lewis",
             last_name="Hamilton",
-            phone="0707070707",
+            phone="+33756652832",
             password_hash=hashed_password,
             salt=salt,
         )
@@ -220,7 +220,7 @@ class TestUserService:
         assert updated_driver is not None
         assert updated_driver.id == driver.id
 
-        logged_in = user_service.login("0707070707", new_password, "driver")
+        logged_in = user_service.login("+33756652832", new_password, "driver")
         assert logged_in.id == driver.id
 
     def test_change_password_driver_wrong_old_password(
@@ -275,7 +275,7 @@ class TestUserService:
         driver = driver_dao.create_driver(
             first_name="Lewis",
             last_name="Hamilton",
-            phone="0707070707",
+            phone="+33756652832",
             password_hash=hashed_password,
             salt=salt,
         )

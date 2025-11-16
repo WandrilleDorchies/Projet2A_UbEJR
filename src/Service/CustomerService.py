@@ -99,7 +99,7 @@ class CustomerService:
             logging.error("[CustomerService] Email already in use !")
             raise ValueError(
                 "[CustomerService] Cannot create: customer with "
-                f"email {validated_email['identfier']} "
+                f"email {validated_email['identifier']} "
                 "already exists."
             )
         check_password_strength(password)
