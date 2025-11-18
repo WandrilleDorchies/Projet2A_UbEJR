@@ -73,7 +73,7 @@ class BundleDAO(metaclass=Singleton):
         raw_bundle["bundle_items"] = self._get_items_from_bundle(bundle_id)
         orderable_infos = self.orderable_dao.get_info_from_orderable(orderable_id)
         raw_bundle_full = {**raw_bundle, **orderable_infos}
-        print(raw_bundle_full)
+
         return Bundle(**raw_bundle_full)
 
     # READ

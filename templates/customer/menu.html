@@ -830,28 +830,21 @@
     </div>
 
     <div class="menu-grid">
-        <!-- Inclusion des bundles -->
-        {% include 'bundles.html' %}
-
-        <!-- Inclusion des items -->
-        {% include 'items.html' %}
+        {% include 'customer/bundles.html' %}
+        {% include 'customer/items.html' %}
     </div>
 </div>
 
-<!-- Overlay pour le panier -->
 <div class="cart-overlay" id="cart-overlay" onclick="toggleCart()"></div>
-
-<!-- Bouton flottant du panier -->
 <button class="floating-cart-btn" onclick="toggleCart()">
-    🛒
+    <i class="fa-solid fa-cart-arrow-down"></i>
     <span class="cart-badge" id="cart-count">0</span>
 </button>
 
-<!-- Sidebar du panier -->
 <div class="cart-sidebar" id="cart-sidebar">
     <div class="cart-header">
         <h2>Mon Panier</h2>
-        <button class="cart-close" onclick="toggleCart()">×</button>
+        <button class="cart-close" onclick="toggleCart()">x</button>
     </div>
     <div class="cart-items" id="cart-items">
         <div class="loading">
@@ -875,12 +868,10 @@
 <script>
     let currentOrder = null;
 
-    // Charger le panier au chargement de la page
     document.addEventListener('DOMContentLoaded', async function() {
         await loadCart();
     });
 
-    // Charger le panier depuis l'API
     async function loadCart() {
         try {
             const response = await fetch('/customer/current-order', {
@@ -899,7 +890,6 @@
         }
     }
 
-    // Afficher le panier vide
     function showEmptyCart() {
         const cartItems = document.getElementById('cart-items');
         cartItems.innerHTML = '<p style="text-align: center; color: #95a5a6; padding: 40px;">Votre panier est vide</p>';
@@ -908,7 +898,6 @@
         document.getElementById('checkout-btn').disabled = true;
     }
 
-    // Mettre à jour l'affichage du panier
     function updateCartDisplay() {
         const cartItems = document.getElementById('cart-items');
         const cartCount = document.getElementById('cart-count');
@@ -925,7 +914,6 @@
         let count = 0;
 
         for (const [orderableId, quantity] of Object.entries(currentOrder.order_orderables)) {
-            // Trouver l'orderable dans la page
             const orderableCard = document.querySelector(`[data-item-id="${orderableId}"]`);
             if (orderableCard) {
                 const name = orderableCard.dataset.name;
@@ -938,7 +926,7 @@
                     image = `<img src=" ${orderableCard.dataset.imageUrl}">`
                 }  
                 else {
-                    image = type === 'bundle' ? '🎁' : '🍽️';
+                    image = type === 'bundle' ? `<i class="fa-solid fa-gift"></i>` : `<i class="fa-solid fa-burger"></i>`;
                 }
 
 

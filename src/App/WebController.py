@@ -37,7 +37,7 @@ async def menu_page(request: Request, user_id: int = Depends(get_customer_id_fro
                 bundles.append(o)
 
         return templates.TemplateResponse(
-            "menu.html",
+            "customer/menu.html",
             {
                 "request": request,
                 "items": items,
@@ -49,7 +49,7 @@ async def menu_page(request: Request, user_id: int = Depends(get_customer_id_fro
     except Exception as e:
         print(f"Erreur lors du chargement du menu: {e}")
         return templates.TemplateResponse(
-            "menu.html",
+            "customer/menu.html",
             {"request": request, "items": [], "bundles": [], "item_types": []},
         )
 

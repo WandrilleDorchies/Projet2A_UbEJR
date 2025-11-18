@@ -11,17 +11,15 @@
             <img src="{{ item.orderable_image_url }}" alt="{{ item.orderable_image_name }}">
             {% else %}
                 {% if item.item_type == "Starter" %}
-                    Entrée
+                    <i class="fa-solid fa-egg"></i>
                 {% elif item.item_type == "Main course" %}
-                    Plat
+                    <i class="fa-solid fa-burger"></i>
                 {% elif item.item_type == "Dessert" %}
-                    Dessert
+                    <i class="fa-solid fa-cookie"></i>
                 {% elif item.item_type == "Drink" %}
-                    Boisson
+                    <i class="fa-solid fa-beer-mug-empty"></i>
                 {% elif item.item_type == "Side dish" %}
-                    Accompagnement
-                {% else %}
-                    Produit
+                    <i class="fa-solid fa-bowl-rice"></i>
                 {% endif %}
             {% endif %} 
             

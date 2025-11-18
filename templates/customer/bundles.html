@@ -10,7 +10,7 @@
             {% if bundle.orderable_image_url %}
                 <img src="{{ bundle.orderable_image_url }}" alt="{{ bundle.orderable_image_name }}">
             {% else %}
-                Menu
+                <i class="fa-solid fa-utensils"></i>
             {% endif %}
             <span class="item-badge">Menu -{{ bundle.bundle_reduction }}%</span>
         </div>
