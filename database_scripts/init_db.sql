@@ -97,8 +97,8 @@ CREATE TABLE project.Bundle_Items (
 CREATE TABLE project.Orderables (
     orderable_id SERIAL PRIMARY KEY,
     orderable_type VARCHAR(8) NOT NULL CHECK (orderable_type IN ('item', 'bundle')),
-    orderable_image_name VARCHAR(255),
-    orderable_image_data BYTEA,
+    orderable_image_name VARCHAR(255) DEFAULT NULL,
+    orderable_image_data VARCHAR(512) DEFAULT NULL,
     is_in_menu BOOLEAN DEFAULT false
 );
 -- linking items and bundle to orderable

@@ -132,15 +132,5 @@ dmypy.json
 # Ruff stuff
 .ruff_cache
 
-# Google credentials
-key.json
-
 # Logs
 /logs
-
-# Interface
-/static
-/templates
-/src/App/WebController.py
-
-password.py

@@ -31,11 +31,11 @@ class BundleDAO(metaclass=Singleton):
         bundle_availability_start_date: datetime,
         bundle_availability_end_date: datetime,
         bundle_items: Dict[Item, int],
-        bundle_image: Optional[bytes] = None,
+        bundle_image: Optional[str] = None,
         is_in_menu: bool = False,
     ):
         orderable_id = self.orderable_dao.create_orderable(
-            "bundle", bundle_image, bundle_name, is_in_menu
+            "bundle", bundle_name, bundle_image, is_in_menu
         )
         raw_bundle = self.db_connector.sql_query(
             """
@@ -70,8 +70,9 @@ class BundleDAO(metaclass=Singleton):
                 "none",
             )
 
-        raw_bundle["bundle_items"] = self._get_items_from_bundle(bundle_id)
-        return Bundle(**raw_bundle)
+        orderable_infos = self.orderable_dao.get_info_from_orderable(orderable_id)
+        raw_bundle_full = {**raw_bundle, **orderable_infos}
+        return Bundle(**raw_bundle_full)
 
     # READ
     @log
@@ -100,8 +101,9 @@ class BundleDAO(metaclass=Singleton):
             return None
 
         raw_bundle["bundle_items"] = self._get_items_from_bundle(bundle_id)
-        raw_bundle["is_in_menu"] = self.orderable_dao._is_in_menu(raw_bundle["orderable_id"])
-        return Bundle(**raw_bundle)
+        orderable_infos = self.orderable_dao.get_info_from_orderable(raw_bundle["orderable_id"])
+        raw_bundle_full = {**raw_bundle, **orderable_infos}
+        return Bundle(**raw_bundle_full)
 
     @log
     def get_bundle_by_orderable_id(self, orderable_id: int) -> Optional[Bundle]:
@@ -128,23 +130,22 @@ class BundleDAO(metaclass=Singleton):
             return None
 
         raw_bundle["bundle_items"] = self._get_items_from_bundle(raw_bundle["bundle_id"])
-        raw_bundle["is_in_menu"] = self.orderable_dao._is_in_menu(raw_bundle["orderable_id"])
-        return Bundle(**raw_bundle)
+        orderable_infos = self.orderable_dao.get_info_from_orderable(raw_bundle["orderable_id"])
+        raw_bundle_full = {**raw_bundle, **orderable_infos}
+        return Bundle(**raw_bundle_full)
 
     @log
     def get_all_bundle(self) -> Optional[List[Bundle]]:
-        raw_bundles = self.db_connector.sql_query("SELECT * FROM Bundles", return_type="all")
+        raw_bundles = self.db_connector.sql_query(
+            "SELECT bundle_id FROM Bundles", return_type="all"
+        )
 
         if not raw_bundles:
             return []
 
-        Bundles = []
-        for raw_bundle in raw_bundles:
-            raw_bundle["bundle_items"] = self._get_items_from_bundle(raw_bundle["bundle_id"])
-            raw_bundle["is_in_menu"] = self.orderable_dao._is_in_menu(raw_bundle["orderable_id"])
-            Bundles.append(Bundle(**raw_bundle))
-
-        return Bundles
+        return [
+            Bundle(**self.get_bundle_by_id(raw_bundle["bundle_id"])) for raw_bundle in raw_bundles
+        ]
 
     @log
     def update_bundle(self, bundle_id: int, update: dict):

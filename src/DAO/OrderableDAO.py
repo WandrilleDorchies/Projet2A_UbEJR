@@ -17,8 +17,8 @@ class OrderableDAO(metaclass=Singleton):
     def create_orderable(
         self,
         orderable_type: str,
-        orderable_name: str = None,
-        orderable_image_data: Optional[bytes] = None,
+        orderable_name: str,
+        orderable_image_url: Optional[str] = None,
         is_in_menu: bool = False,
     ) -> int:
         """
@@ -30,23 +30,25 @@ class OrderableDAO(metaclass=Singleton):
             The orderable_id of the created instance
         """
 
-        if orderable_image_data:
-            orderable_image_name = f"image_{orderable_type}_{orderable_name}"
+        if orderable_image_url:
+            orderable_image_name = (
+                f"image_{orderable_type}_{orderable_name.lower().replace(' ', '_')}"
+            )
         else:
-            orderable_image_name = "No image available"
+            orderable_image_name = None
         result = self.db_connector.sql_query(
             """
             INSERT INTO Orderables (orderable_type, orderable_image_name,
-                                    orderable_image_data, is_in_menu)
+                                    orderable_image_url, is_in_menu)
             VALUES (%(orderable_type)s, %(orderable_image_name)s,
-                    %(orderable_image_data)s, %(is_in_menu)s)
+                    %(orderable_image_url)s, %(is_in_menu)s)
             RETURNING orderable_id;
             """,
             {
                 "orderable_type": orderable_type,
                 "is_in_menu": is_in_menu,
                 "orderable_image_name": orderable_image_name,
-                "orderable_image_data": orderable_image_data,
+                "orderable_image_url": orderable_image_url,
             },
             "one",
         )
@@ -90,7 +92,7 @@ class OrderableDAO(metaclass=Singleton):
         raw_orderable = self.db_connector.sql_query(
             "SELECT * FROM Orderables WHERE orderable_id=%s;", [orderable_id], "one"
         )
-        return raw_orderable["orderable_image_data"] if raw_orderable else None
+        return raw_orderable["orderable_image_url"] if raw_orderable else None
 
     @log
     def update_image(
@@ -98,19 +100,19 @@ class OrderableDAO(metaclass=Singleton):
         orderable_id: int,
         orderable_type: str,
         orderable_name: str,
-        orderable_image_data: bytes,
+        orderable_image_url: str,
     ) -> Dict:
         orderable_image_name = f"image_{orderable_type}_{orderable_name.lower().replace(' ', '_')}"
 
         raw_orderable = self.db_connector.sql_query(
             """UPDATE Orderables
             SET orderable_image_name = %(orderable_image_name)s,
-                orderable_image_data = %(orderable_image_data)s
+                orderable_image_url = %(orderable_image_url)s
             WHERE orderable_id = %(orderable_id)s
             RETURNING *;""",
             {
                 "orderable_image_name": orderable_image_name,
-                "orderable_image_data": orderable_image_data,
+                "orderable_image_url": orderable_image_url,
                 "orderable_id": orderable_id,
             },
             "one",
@@ -130,3 +132,14 @@ class OrderableDAO(metaclass=Singleton):
             "SELECT is_in_menu FROM Orderables WHERE orderable_id=%s;", [orderable_id], "one"
         )
         return raw_orderable["is_in_menu"] if raw_orderable else None
+
+    def get_info_from_orderable(self, orderable_id: int) -> Dict:
+        raw_infos = {}
+        raw_infos["is_in_menu"] = self._is_in_menu(orderable_id)
+        raw_infos["orderable_image_url"] = self.get_image_from_orderable(orderable_id)
+        raw_infos["orderable_image_name"] = self.db_connector.sql_query(
+            "SELECT orderable_image_name FROM Orderables WHERE orderable_id=%s;",
+            [orderable_id],
+            "one",
+        )["orderable_image_name"]
+        return raw_infos

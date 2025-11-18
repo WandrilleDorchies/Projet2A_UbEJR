@@ -25,11 +25,11 @@ class ItemDAO(metaclass=Singleton):
         item_type: str,
         item_description: str,
         item_stock: int,
-        item_image: Optional[bytes] = None,
+        item_image: Optional[str] = None,
         is_in_menu: bool = False,
     ) -> Item:
         orderable_id = self.orderable_dao.create_orderable(
-            "item", item_image, item_name, is_in_menu
+            "item", item_name, item_image, is_in_menu
         )
         raw_item = self.db_connector.sql_query(
             """
@@ -49,8 +49,9 @@ class ItemDAO(metaclass=Singleton):
             },
             "one",
         )
-        raw_item["is_in_menu"] = is_in_menu
-        return Item(**raw_item)
+        orderable_infos = self.orderable_dao.get_info_from_orderable(orderable_id)
+        raw_item_full = {**raw_item, **orderable_infos}
+        return Item(**raw_item_full)
 
     # READ
     @log
@@ -61,8 +62,9 @@ class ItemDAO(metaclass=Singleton):
         if raw_item is None:
             return None
 
-        raw_item["is_in_menu"] = self.orderable_dao._is_in_menu(raw_item["orderable_id"])
-        return Item(**raw_item)
+        orderable_infos = self.orderable_dao.get_info_from_orderable(raw_item["orderable_id"])
+        raw_item_full = {**raw_item, **orderable_infos}
+        return Item(**raw_item_full)
 
     @log
     def get_item_by_orderable_id(self, orderable_id: int) -> Optional[Item]:
@@ -72,22 +74,18 @@ class ItemDAO(metaclass=Singleton):
         if raw_item is None:
             return None
 
-        raw_item["is_in_menu"] = self.orderable_dao._is_in_menu(raw_item["orderable_id"])
-        return Item(**raw_item)
+        orderable_infos = self.orderable_dao.get_info_from_orderable(orderable_id)
+        raw_item_full = {**raw_item, **orderable_infos}
+        return Item(**raw_item_full)
 
     @log
     def get_all_items(self) -> List[Item]:
-        raw_items = self.db_connector.sql_query("SELECT * from Items", return_type="all")
+        raw_items = self.db_connector.sql_query("SELECT item_id from Items", return_type="all")
 
         if not raw_items:
             return []
 
-        Items = []
-        for raw_item in raw_items:
-            raw_item["is_in_menu"] = self.orderable_dao._is_in_menu(raw_item["orderable_id"])
-            Items.append(Item(**raw_item))
-
-        return Items
+        return [Item(**self.get_item_by_id(raw_item["item_id"])) for raw_item in raw_items]
 
     # UPDATE
     @log
