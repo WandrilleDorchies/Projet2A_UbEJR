@@ -42,7 +42,7 @@ class TestCustomerService:
 
     def test_get_customer_by_phone_not_exists(self, customer_service, clean_database):
         """Test getting customer by non-existing phone returns None"""
-        retrieved_customer = customer_service.get_customer_by_phone("0699999999")
+        retrieved_customer = customer_service.get_customer_by_phone("+33699999999")
 
         assert retrieved_customer is None
 
@@ -104,11 +104,11 @@ class TestCustomerService:
         self, customer_service, sample_customer, clean_database
     ):
         """Test creating customer with duplicate email raises error"""
-        with pytest.raises(ValueError, match="already exists"):
+        with pytest.raises(ValueError, match="already associated"):
             customer_service.create_customer(
                 first_name="Test",
                 last_name="User",
-                phone="0698765432",
+                phone="+33698765432",
                 mail=sample_customer.customer_mail,
                 password="V4lidP@ssword",
                 address_string="51 Rue Blaise Pascal, 35170 Bruz, France",
@@ -118,7 +118,7 @@ class TestCustomerService:
         self, customer_service, sample_customer, clean_database
     ):
         """Test creating customer with duplicate phone raises error"""
-        with pytest.raises(ValueError, match="already exists"):
+        with pytest.raises(ValueError, match="already associated"):
             customer_service.create_customer(
                 first_name="Test",
                 last_name="User",
