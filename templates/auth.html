@@ -5,15 +5,47 @@
 {% block extra_css %}
 <style>
     .auth-container {
-        max-width: 500px;
+        max-width: 520px;
         margin: 50px auto;
-        padding: 30px;
+        padding: 40px;
+        background: #f8f9fa;
+        border-radius: 25px;
+        box-shadow: 0 10px 40px rgba(102, 126, 234, 0.15);
+        animation: scaleIn 0.5s ease-out;
+        border: 1px solid rgba(102, 126, 234, 0.1);
+    }
+
+    @keyframes scaleIn {
+        from {
+            transform: scale(0.9);
+            opacity: 0;
+        }
+        to {
+            transform: scale(1);
+            opacity: 1;
+        }
     }
 
     .auth-tabs {
         display: flex;
-        margin-bottom: 30px;
-        border-bottom: 2px solid #e0e0e0;
+        margin-bottom: 35px;
+        border-bottom: 2px solid #e9ecef;
+        position: relative;
+    }
+
+    .auth-tabs::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 50%;
+        height: 2px;
+        background:  #667eea;
+        transition: left 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .auth-tabs.register-active::after {
+        left: 50%;
     }
 
     .auth-tab {
@@ -24,18 +56,35 @@
         background: none;
         border: none;
         font-size: 18px;
-        font-weight: 500;
-        color: #666;
-        transition: all 0.3s;
+        font-weight: 600;
+        color: #95a5a6;
+        transition: all 0.3s ease;
+        position: relative;
     }
 
     .auth-tab.active {
-        color: #e74c3c;
-        border-bottom: 3px solid #e74c3c;
+        color: #667eea;
+    }
+
+    .auth-tab:hover:not(.active) {
+        color: #7f8ff4;
+        transform: translateY(-2px);
     }
 
     .auth-form {
         display: none;
+        animation: fadeInUp 0.5s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     .auth-form.active {
@@ -43,80 +92,146 @@
     }
 
     .form-group {
-        margin-bottom: 20px;
+        margin-bottom: 25px;
+        position: relative;
     }
 
     .form-group label {
         display: block;
-        margin-bottom: 8px;
-        font-weight: 500;
-        color: #333;
+        margin-bottom: 10px;
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 14px;
+        transition: color 0.3s ease;
+    }
+
+    .form-group:focus-within label {
+        color: #667eea;
     }
 
     .form-group input,
     .form-group select {
         width: 100%;
-        padding: 12px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-        font-size: 16px;
-        transition: border-color 0.3s;
+        padding: 14px 18px;
+        border: 2px solid #e9ecef;
+        border-radius: 15px;
+        font-size: 15px;
+        transition: all 0.3s ease;
+        background: #f8f9fa;
+        color: #2c3e50;
     }
 
     .form-group input:focus,
     .form-group select:focus {
         outline: none;
-        border-color: #e74c3c;
+        border-color: #667eea;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .form-group input:hover,
+    .form-group select:hover {
+        border-color: #c5cae9;
     }
 
     .form-group small {
         display: block;
-        margin-top: 5px;
-        color: #666;
-        font-size: 14px;
+        margin-top: 8px;
+        color: #7f8c8d;
+        font-size: 13px;
+        padding-left: 5px;
     }
 
     .btn-submit {
         width: 100%;
-        padding: 15px;
-        background: #e74c3c;
+        padding: 16px;
+        background: #667eea;
         color: white;
         border: none;
-        border-radius: 5px;
-        font-size: 18px;
-        font-weight: 600;
+        border-radius: 20px;
+        font-size: 17px;
+        font-weight: 700;
         cursor: pointer;
-        transition: background 0.3s;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-submit::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-submit:hover::before {
+        width: 400px;
+        height: 400px;
     }
 
     .btn-submit:hover {
-        background: #c0392b;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
     }
 
     .btn-submit:active {
-        transform: scale(0.98);
+        transform: translateY(-1px);
     }
 
     .error-message {
-        color: #e74c3c;
-        font-size: 14px;
-        margin-top: 5px;
+        color: #fa709a;
+        font-size: 13px;
+        margin-top: 8px;
+        padding-left: 5px;
+        animation: shake 0.5s ease;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
     }
 
     .address-help {
-        background: #f8f9fa;
-        padding: 15px;
-        border-radius: 5px;
-        margin-top: 10px;
-        font-size: 14px;
-        color: #666;
+        background: linear-gradient(135deg, #e8f4f8 0%, #d4e9f7 100%);
+        padding: 16px;
+        border-radius: 12px;
+        margin-top: 12px;
+        font-size: 13px;
+        color: #5a6c7d;
+        border-left: 3px solid #84fab0;
+        animation: slideInLeft 0.5s ease-out;
+    }
+
+    @keyframes slideInLeft {
+        from {
+            transform: translateX(-20px);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    .address-help::before {
+        content: "💡 ";
+        margin-right: 5px;
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="auth-container">
-    <div class="auth-tabs">
+    <div class="auth-tabs" id="auth-tabs">
         <button class="auth-tab active" onclick="switchTab('login')">
             Connexion
         </button>
@@ -217,7 +332,7 @@
                 minlength="8"
                 required
             >
-            <small>Minimum 8 caractÃ¨res, avec majuscules, minuscules et chiffres</small>
+            <small>Minimum 8 caractères, avec majuscules, minuscules et chiffres</small>
         </div>
 
         <div class="form-group">
@@ -233,7 +348,7 @@
         </div>
 
         <div class="form-group">
-            <label for="register-address">Adresse complÃ¨te :</label>
+            <label for="register-address">Adresse complète :</label>
             <input 
                 type="text" 
                 id="register-address" 
@@ -255,8 +370,8 @@
 {% block extra_js %}
 <script>
     function switchTab(tab) {
-
         const tabs = document.querySelectorAll('.auth-tab');
+        const authTabsContainer = document.getElementById('auth-tabs');
         tabs.forEach(t => t.classList.remove('active'));
         
         const forms = document.querySelectorAll('.auth-form');
@@ -265,9 +380,11 @@
         if (tab === 'login') {
             tabs[0].classList.add('active');
             document.getElementById('login-form').classList.add('active');
+            authTabsContainer.classList.remove('register-active');
         } else {
             tabs[1].classList.add('active');
             document.getElementById('register-form').classList.add('active');
+            authTabsContainer.classList.add('register-active');
         }
     }
 
@@ -301,6 +418,7 @@
         const password = document.getElementById('register-password').value;
         const confirmPassword = document.getElementById('register-confirm-password').value;
     });
+
     document.getElementById('login-form').addEventListener('submit', async function(e) {
         e.preventDefault();
         
@@ -334,47 +452,47 @@
         }
     });
 
-document.getElementById('register-form').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    const formData = new FormData(this);
-    const data = Object.fromEntries(formData);
-    
-    try {
-        const response = await fetch('/auth/register', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
-        });
+    document.getElementById('register-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
         
-        if (response.ok) {
-            window.location.href = '/menu';
-        } else {
-            const error = await response.json();
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData);
         
-            let errorMessage = 'Inscription échouée';
+        try {
+            const response = await fetch('/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
             
-            if (typeof error.detail === 'string') {
-                errorMessage = error.detail;
-            } else if (Array.isArray(error.detail)) {
-                errorMessage = error.detail.map(err => {
-                    if (err.msg) return err.msg;
-                    if (err.message) return err.message;
-                    return JSON.stringify(err);
-                }).join('\n');
-            } else if (typeof error.detail === 'object') {
-                errorMessage = JSON.stringify(error.detail, null, 2);
-            } else if (error.message) {
-                errorMessage = error.message;
+            if (response.ok) {
+                window.location.href = '/menu';
+            } else {
+                const error = await response.json();
+            
+                let errorMessage = 'Inscription échouée';
+                
+                if (typeof error.detail === 'string') {
+                    errorMessage = error.detail;
+                } else if (Array.isArray(error.detail)) {
+                    errorMessage = error.detail.map(err => {
+                        if (err.msg) return err.msg;
+                        if (err.message) return err.message;
+                        return JSON.stringify(err);
+                    }).join('\n');
+                } else if (typeof error.detail === 'object') {
+                    errorMessage = JSON.stringify(error.detail, null, 2);
+                } else if (error.message) {
+                    errorMessage = error.message;
+                }
+                
+                alert('Erreur: ' + errorMessage);
             }
-            
-            alert('Erreur: ' + errorMessage);
+        } catch (error) {
+            alert('Erreur d\'inscription: ' + error.message);
         }
-    } catch (error) {
-        alert('Erreur d\'inscription: ' + error.message);
-    }
-});
+    });
 </script>
 {% endblock %}

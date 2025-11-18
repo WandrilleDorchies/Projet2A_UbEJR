@@ -10,11 +10,6 @@ templates = Jinja2Templates(directory="templates")
 web_router = APIRouter(tags=["Web Interface"])
 
 
-@web_router.get("/", response_class=HTMLResponse)
-async def home(request: Request):
-    return templates.TemplateResponse("auth.html", {"request": request})
-
-
 @web_router.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
     return templates.TemplateResponse("auth.html", {"request": request})
@@ -61,6 +56,6 @@ async def menu_page(request: Request, user_id: int = Depends(get_customer_id_fro
 
 @web_router.get("/logout", response_class=HTMLResponse)
 async def logout(request: Request):
-    response = RedirectResponse("auth.html", status_code=302)
+    response = RedirectResponse("/", status_code=302)
     response.delete_cookie(key="access_token")
     return templates.TemplateResponse("auth.html", {"request": request})

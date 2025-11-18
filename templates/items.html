@@ -1,0 +1,74 @@
+<!-- Items du menu -->
+{% if items %}
+    {% for item in items %}
+    <div class="menu-item" data-type="{{ item.item_type }}" 
+         data-item-id="{{ item.orderable_id }}" 
+         data-name="{{ item.item_name }}"
+         data-price="{{ item.item_price }}"
+         data-orderable-type="item">
+        <div class="item-image">
+            {% if item.orderable_image_url %}
+            <img src="{{ item.orderable_image_url }}" alt="{{ item.orderable_image_name }}">
+            {% else %}
+                {% if item.item_type == "Starter" %}
+                    Entrée
+                {% elif item.item_type == "Main course" %}
+                    Plat
+                {% elif item.item_type == "Dessert" %}
+                    Dessert
+                {% elif item.item_type == "Drink" %}
+                    Boisson
+                {% elif item.item_type == "Side dish" %}
+                    Accompagnement
+                {% else %}
+                    Produit
+                {% endif %}
+            {% endif %} 
+            
+            {% if item.item_stock > 50 %}
+                <span class="item-badge">Populaire</span>
+            {% elif item.item_stock <= 10 and item.item_stock > 0 %}
+                <span class="item-badge" style="background: linear-gradient(135deg, #feca57 0%, #ff9ff3 100%);">Stock faible</span>
+            {% elif item.item_stock == 0 %}
+                <span class="item-badge" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">Rupture</span>
+            {% endif %}
+        </div>
+        <div class="item-content">
+            <div class="item-header">
+                <h3 class="item-name">{{ item.item_name }}</h3>
+                <span class="item-price">{{ "%.2f"|format(item.price) }}€</span>
+            </div>
+            <p class="item-description">
+                {{ item.item_description or "Délicieux produit de l'EJR" }}
+            </p>
+            
+            {% if item.item_stock > 0 %}
+                <p class="item-stock {% if item.item_stock <= 10 %}low{% endif %}">
+                    En stock : {{ item.item_stock }} unité{{ "s" if item.item_stock > 1 else "" }}
+                </p>
+                <div class="item-actions">
+                    <div class="quantity-selector">
+                        <button class="qty-btn" onclick="decreaseQty(this)">−</button>
+                        <span class="qty-display">1</span>
+                        <button class="qty-btn" onclick="increaseQty(this, {{ item.item_stock }})">+</button>
+                    </div>
+                    <button class="add-to-cart-btn" onclick="addToCart(this)">
+                        Ajouter
+                    </button>
+                </div>
+            {% else %}
+                <p class="item-stock out">Rupture de stock</p>
+                <button class="add-to-cart-btn" disabled>
+                    Indisponible
+                </button>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="empty-message" style="grid-column: 1 / -1;">
+        <div class="empty-message-icon">Menu vide</div>
+        <h3 style="color: #2c3e50; margin-bottom: 10px; font-size: 24px;">Aucun produit disponible</h3>
+        <p style="color: #7f8c8d;">Le menu est en cours de préparation. Revenez bientôt !</p>
+    </div>
+{% endif %}
