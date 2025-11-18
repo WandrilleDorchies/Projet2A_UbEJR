@@ -13,7 +13,7 @@ class StripeService:
         stripe.api_key = os.environ["STRIPE_SECRET_KEY"]
         self.base_url = os.environ["BASE_URL"]
         self.success_url = f"{self.base_url}payment/success"
-        self.cancel_url = f"{self.base_url}login"
+        self.cancel_url = f"{self.base_url}menu"
 
     @log
     def create_checkout_session(self, order: Order, customer_mail: str) -> Session:
@@ -48,8 +48,8 @@ class StripeService:
                 payment_method_types=["card"],
                 line_items=line_items,
                 mode="payment",
-                success_url=self.success_url,
-                # "?session_id={{CHECKOUT_SESSION_ID}}&order_id={order.order_id}",
+                success_url=f"{self.success_url}?session_id={{CHECKOUT_SESSION_ID}}"
+                f"&order_id={order.order_id}",
                 cancel_url=self.cancel_url,
                 customer_email=customer_mail,
                 metadata={

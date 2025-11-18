@@ -1163,7 +1163,6 @@
             if (response.ok) {
                 const data = await response.json();
                 window.location.href = data.url;
-                localStorage.setItem("sessionId", data.id);
             } else {
                 const error = await response.json();
                 alert('Erreur lors de la commande: ' + (error.detail || 'Erreur inconnue'));

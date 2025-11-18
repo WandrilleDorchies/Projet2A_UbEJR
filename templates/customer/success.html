@@ -1,38 +1,326 @@
 {% extends "base.html" %}
 
-{% block title %}Menu - Ub'EJR Eats{% endblock %}
+{% block title %}Paiement Réussi - Ub'EJR Eats{% endblock %}
 
-<h2>Vous avez bien payé votre commande</h2>
+{% block extra_css %}
+<style>
+    .success-container {
+        max-width: 700px;
+        margin: 80px auto;
+        padding: 40px;
+        text-align: center;
+        animation: fadeInScale 0.6s ease-out;
+    }
 
+    @keyframes fadeInScale {
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
 
+    .success-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+        border-radius: 25px;
+        padding: 50px 40px;
+        box-shadow: 0 15px 50px rgba(102, 126, 234, 0.2);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .success-icon {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto 30px;
+        background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: pulse 2s infinite;
+        box-shadow: 0 8px 30px rgba(132, 250, 176, 0.4);
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    .success-icon svg {
+        width: 50px;
+        height: 50px;
+        stroke: white;
+        stroke-width: 3;
+        fill: none;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    .checkmark {
+        animation: drawCheck 0.8s ease-out 0.3s both;
+    }
+
+    @keyframes drawCheck {
+        0% {
+            stroke-dasharray: 100;
+            stroke-dashoffset: 100;
+        }
+        100% {
+            stroke-dasharray: 100;
+            stroke-dashoffset: 0;
+        }
+    }
+
+    .success-title {
+        font-size: 36px;
+        font-weight: 800;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 15px;
+    }
+
+    .success-message {
+        color: #5a6c7d;
+        font-size: 18px;
+        line-height: 1.8;
+        margin-bottom: 30px;
+    }
+
+    .order-summary {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 25px;
+        margin: 30px 0;
+        text-align: left;
+    }
+
+    .order-summary h3 {
+        color: #2c3e50;
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .order-detail {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .order-detail:last-child {
+        border-bottom: none;
+        padding-top: 15px;
+        margin-top: 10px;
+        border-top: 2px solid #e9ecef;
+        font-weight: 700;
+        font-size: 18px;
+    }
+
+    .order-detail-value {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 700;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 30px;
+    }
+
+    .btn {
+        padding: 14px 32px;
+        border: none;
+        border-radius: 25px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+        background: linear-gradient(135deg, #a8b8d8 0%, #8b9dc3 100%);
+        color: white;
+        box-shadow: 0 6px 20px rgba(168, 184, 216, 0.3);
+    }
+
+    .btn-secondary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(168, 184, 216, 0.4);
+    }
+
+    .loading-state {
+        padding: 60px 20px;
+    }
+
+    .loading-spinner {
+        width: 60px;
+        height: 60px;
+        border: 5px solid #e9ecef;
+        border-top: 5px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .error-state {
+        color: #fa709a;
+        padding: 40px 20px;
+    }
+
+    .error-icon {
+        font-size: 64px;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="success-container">
+    <div class="success-card">
+        <!-- État de chargement -->
+        <div id="loading-state" class="loading-state">
+            <div class="loading-spinner"></div>
+            <p style="color: #7f8c8d; font-size: 16px;">Vérification de votre paiement...</p>
+        </div>
+
+        <!-- État de succès -->
+        <div id="success-state" style="display: none;">
+            <div class="success-icon">
+                <svg viewBox="0 0 52 52">
+                    <circle cx="26" cy="26" r="25" fill="none"/>
+                    <path class="checkmark" d="M14 27l7.5 7.5L38 18"/>
+                </svg>
+            </div>
+
+            <h1 class="success-title">Paiement Réussi !</h1>
+            <p class="success-message">
+                Merci pour votre commande ! Votre paiement a été traité avec succès.<br>
+                Vous allez recevoir un email de confirmation sous peu.
+            </p>
+
+            <div class="order-summary" id="order-summary">
+                <h3>Récapitulatif de votre commande</h3>
+                <div class="order-detail">
+                    <span>Numéro de commande</span>
+                    <span class="order-detail-value" id="order-id">--</span>
+                </div>
+                <div class="order-detail">
+                    <span>Statut</span>
+                    <span class="order-detail-value">En préparation</span>
+                </div>
+                <div class="order-detail">
+                    <span>Total</span>
+                    <span class="order-detail-value" id="order-total">--€</span>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <a href="/menu" class="btn btn-primary">Nouvelle commande</a>
+                <a href="/profile" class="btn btn-secondary">Voir mes commandes</a>
+            </div>
+        </div>
+
+        <!-- État d'erreur -->
+        <div id="error-state" class="error-state" style="display: none;">
+            <div class="error-icon">⚠️</div>
+            <h2 style="color: #2c3e50; margin-bottom: 15px;">Erreur de vérification</h2>
+            <p id="error-message" style="margin-bottom: 30px;">
+                Nous n'avons pas pu vérifier votre paiement. Veuillez contacter le support.
+            </p>
+            <a href="/menu" class="btn btn-primary">Retour au menu</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
 
 {% block extra_js %}
 <script>
+    // Récupérer le session_id depuis l'URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('session_id');
+
+    // Vérifier le paiement au chargement de la page
     document.addEventListener('DOMContentLoaded', async function() {
-        await verifyPayment();
+        if (!sessionId) {
+            showError('Aucune session de paiement trouvée');
+            return;
+        }
+
+        await verifyPayment(sessionId);
     });
 
-    async function verifyPayment() {
+    async function verifyPayment(sessionId) {
         try {
-            const sessionId = localStorage.getItem("sessionId");
-            console.log(JSON.stringify(sessionId))
-            const response = await fetch('/customer/payment/success', {
+            // Appeler l'API pour vérifier le paiement (attention: "succes" sans "s")
+            const response = await fetch("/customer/payment/verify-payment", {
                 method: 'POST',
                 credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
                 body: JSON.stringify(sessionId)
             });
 
             if (response.ok) {
-                console.log("ca marche");
-                // window.location.href = '/menu';
+                const order = await response.json();
+                showSuccess(order);
+            } else {
+                const error = await response.json();
+                showError(error.detail || 'Erreur lors de la vérification du paiement');
             }
         } catch (error) {
             console.error('Erreur:', error);
-            alert('Erreur lors de la commande. Veuillez réessayer.');
+            showError('Erreur de connexion. Veuillez réessayer.');
         }
+    }
+
+    function showSuccess(order) {
+        document.getElementById('loading-state').style.display = 'none';
+        document.getElementById('success-state').style.display = 'block';
+        document.getElementById('error-state').style.display = 'none';
+
+        // Afficher les détails de la commande
+        if (order) {
+            document.getElementById('order-id').textContent = `#${order.order_id || '--'}`;
+            document.getElementById('order-total').textContent = `${(order.order_price || 0).toFixed(2)}€`;
+        }
+    }
+
+    function showError(message) {
+        document.getElementById('loading-state').style.display = 'none';
+        document.getElementById('success-state').style.display = 'none';
+        document.getElementById('error-state').style.display = 'block';
+        document.getElementById('error-message').textContent = message;
     }
 </script>
 {% endblock %}

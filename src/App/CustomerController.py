@@ -4,9 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import BaseModel
 
-from src.Model.APIBundle import APIBundle
 from src.Model.APICustomer import APICustomer
-from src.Model.APIItem import APIItem
 from src.Model.Bundle import Bundle
 from src.Model.Item import Item
 
@@ -14,7 +12,6 @@ from .init_app import (
     address_service,
     customer_service,
     jwt_service,
-    menu_service,
     order_service,
     stripe_service,
 )
@@ -69,19 +66,22 @@ def get_profile(customer_id: int = Depends(get_customer_id_from_token)) -> APICu
         raise HTTPException(status_code=500, detail=f"Error fetching profile: {e}") from e
 
 
+class CustomerUpdate(BaseModel):
+    customer_first_name: str = None
+    customer_last_name: str = None
+    customer_mail: str = None
+    customer_phone: str = None
+
+
 @customer_router.put(
     "/me", status_code=status.HTTP_200_OK, dependencies=[Depends(CustomerBearer())]
 )
 def update_profile(
-    customer_first_name: str = None,
-    customer_last_name: str = None,
-    customer_mail: str = None,
-    customer_phone: str = None,
+    customer_update: CustomerUpdate,
     customer_id: int = Depends(get_customer_id_from_token),
 ):
     try:
-        update_data = locals()
-        update_data.pop("customer_id")
+        update_data = vars(customer_update)
         updated_customer = customer_service.update_customer(customer_id, update_data)
         return updated_customer
 
@@ -91,20 +91,23 @@ def update_profile(
         raise HTTPException(status_code=500, detail=f"Error updating profile: {e}") from e
 
 
+class AdressUpdate(BaseModel):
+    address_number: int = None
+    address_street: str = None
+    address_city: str = None
+    address_postal_code: int = None
+    address_country: str = None
+
+
 @customer_router.put(
     "/address", status_code=status.HTTP_200_OK, dependencies=[Depends(CustomerBearer())]
 )
 def update_address(
-    address_number: int = None,
-    address_street: str = None,
-    address_city: str = None,
-    address_postal_code: int = None,
-    address_country: str = None,
+    address_update: AdressUpdate,
     customer_id: int = Depends(get_customer_id_from_token),
 ):
     try:
-        update_data = locals()
-        update_data.pop("customer_id")
+        update_data = vars(address_update)
         updated_address = address_service.update_address(customer_id, update_data)
         return updated_address
 
@@ -114,22 +117,26 @@ def update_address(
         raise HTTPException(status_code=500, detail=f"Error updating address: {e}") from e
 
 
+class PasswordUpdate(BaseModel):
+    current_password: str
+    new_password: str
+    confirm_password: str
+
+
 @customer_router.put(
     "me/password", status_code=status.HTTP_200_OK, dependencies=[Depends(CustomerBearer())]
 )
 def update_password(
-    current_password: str,
-    new_password: str,
-    confirm_password: str,
+    password_update: PasswordUpdate,
     customer_id: int = Depends(get_customer_id_from_token),
 ):
     try:
-        if new_password != confirm_password:
+        if password_update.new_password != password_update.confirm_password:
             raise HTTPException(status_code=400, detail="")
 
-        customer_service.update_password(customer_id, current_password, new_password)
-
-        return "Password "
+        customer_service.update_password(
+            customer_id, password_update.current_password, password_update.new_password
+        )
 
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
@@ -137,58 +144,6 @@ def update_password(
         raise HTTPException(
             status_code=500, detail=f"Error while changing password: {str(e)}"
         ) from e
-
-
-# @customer_router.get(
-#     "/menu", status_code=status.HTTP_200_OK, dependencies=[Depends(CustomerBearer())]
-# )
-# def get_menu():
-#     try:
-#         menu = menu_service.get_all_orderables()
-#         for i, content in enumerate(menu):
-#             if isinstance(content, Item):
-#                 menu[i] = APIItem(
-#                     item_name=content.item_name,
-#                     item_price=content.item_price,
-#                     item_type=content.item_type,
-#                     item_description=content.item_description,
-#                 )
-
-#             elif isinstance(content, Bundle):
-#                 for key, value in content.bundle_items.items():
-#                     items = {}
-#                     items[
-#                         APIItem(
-#                             item_name=key.item_name,
-#                             item_price=key.item_price,
-#                             item_type=key.item_type,
-#                             item_description=key.item_description,
-#                         )
-#                     ] = value
-
-#                 menu[i] = APIBundle(
-#                     bundle_name=content.bundle_name,
-#                     bundle_description=content.bundle_description,
-#                     bundle_items=items,
-#                 )
-#         return menu
-
-#     except ValueError as e:
-#         raise HTTPException(status_code=400, detail=str(e)) from e
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=f"Error updating profile: {e}") from e
-
-
-@customer_router.get(
-    "/menu/{orderable_id}", status_code=status.HTTP_200_OK, dependencies=[Depends(CustomerBearer())]
-)
-def get_orderable_detail(orderable_id: int):
-    try:
-        return menu_service.get_orderable_from_menu(orderable_id)
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e)) from e
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error updating profile: {e}") from e
 
 
 @customer_router.get(
@@ -270,44 +225,48 @@ def remove_orderable_from_order(
 def view_order_history(customer_id: int = Depends(get_customer_id_from_token)):
     try:
         orders = order_service.get_all_orders_by_customer(customer_id)
+        history = []
 
         for order in orders:
-            history = {}
-            for key, value in order.order_orderables.items():
-                if isinstance(key, Item):
-                    history[
-                        APIItem(
-                            item_name=key.item_name,
-                            item_price=key.item_price,
-                            item_type=key.item_type,
-                            item_description=key.item_description,
-                        )
-                    ] = value
+            orderables_list = []
 
-                elif isinstance(key, Bundle):
-                    for key2, value2 in key.bundle_items.items():
-                        items = {}
-                        items[
-                            APIItem(
-                                item_name=key2.item_name,
-                                item_price=key2.item_price,
-                                item_type=key2.item_type,
-                                item_description=key2.item_description,
-                            )
-                        ] = value2
+            for orderable, qty in order.order_orderables.items():
+                if isinstance(orderable, Item):
+                    orderables_list.append(
+                        {
+                            "item_name": orderable.item_name,
+                            "item_price": orderable.item_price,
+                            "quantity": qty,
+                            "type": "item",
+                        }
+                    )
 
-                    history[
-                        APIBundle(
-                            bundle_name=key.bundle_name,
-                            bundle_description=key.bundle_description,
-                            bundle_items=items,
-                        )
-                    ] = value
+                elif isinstance(orderable, Bundle):
+                    orderables_list.append(
+                        {
+                            "bundle_name": orderable.bundle_name,
+                            "bundle_price": orderable.bundle_price,
+                            "quantity": qty,
+                            "type": "bundle",
+                        }
+                    )
 
-            order.order_orderables = history
-        return orders
+            formatted_order = {
+                "order_id": order.order_id,
+                "order_timestamp": str(order.order_timestamp),
+                "order_state": str(order.order_state),
+                "order_price": order.order_price,
+                "items": orderables_list,
+            }
+
+            history.append(formatted_order)
+
+        return history
+
     except Exception as e:
-        raise Exception("[CustomerController] Could not get order history") from e
+        raise HTTPException(
+            status_code=500, detail=f"[CustomerController] Could not get order history: {str(e)}"
+        ) from e
 
 
 @customer_router.delete(
@@ -324,12 +283,6 @@ def delete_account(identifier: str, password: str):
         raise HTTPException(status_code=401, detail=f"Invalid credentials: {e}") from e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Login failed: {e}") from e
-
-
-# PROBLEME : Les objets custom comme clé de dict ne sont jamais automatiquement convertis en JSON.
-# Pour un affichage lisible avec des virgules (JSON),
-# il faudrait utiliser une string ou un tuple comme clé.
-# Peut-être : prendre les élèments voulus et faire un tuple (mais APIBunde & APIIteam dégage)
 
 
 # PAYMENT
@@ -361,11 +314,11 @@ def create_checkout_session(
 
 
 @customer_router.post(
-    "/payment/success",
+    "/payment/verify-payment",
     status_code=status.HTTP_202_ACCEPTED,
     dependencies=[Depends(CustomerBearer())],
 )
-def succesful_payment(
+def verify_payment(
     session_id: str,
     customer_id: int = Depends(get_customer_id_from_token),
     order_id: int = Depends(get_current_order_id),

@@ -18,7 +18,14 @@
             </div>
             <div class="nav-menu">
                 {% if user %}
-                    <span class="nav-item">Bonjour, {{ user.first_name }}</span>
+                    {% if user.user_role == "customer" %}
+                        <a href="/menu" class="nav-item">Menu</a>
+                    {% endif %}
+
+                    {% if user.user_role == "driver" %}
+                        <a href="/deliveries" class="nav-item">Livraisons</a>
+                    {% endif %}
+                    <a href="/profile" class="nav-item">Bonjour, {{ user.first_name }}</a>
                     <a href="/logout" class="nav-item btn-logout">Déconnexion</a>
                 {% else %}
                     <a href="/login" class="nav-item">Connexion</a>
