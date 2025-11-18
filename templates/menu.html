@@ -760,7 +760,7 @@
                  data-orderable-type="bundle">
                 <div class="item-image">
                     {% if bundle.orderable_image_url %}
-                        <img src="{{ item.orderable_image_url }}"" alt="{{ item.orderable_image_name }}", height="220"></img>
+                        <img src="{{ bundle.orderable_image_url }}" alt="{{ bundle.orderable_image_name }}", height="220"></img>
                     {% else %}
                         🎁
                     {% endif %}
@@ -808,7 +808,7 @@
                  data-orderable-type="item">
                 <div class="item-image">
                     {% if item.orderable_image_url %}
-                    <img src="{{ item.orderable_image_url }}"" alt="{{ item.orderable_image_name }}", height="220"></img>
+                    <img src="{{ item.orderable_image_url }}" alt="{{ item.orderable_image_name }}", height="220"></img>
                     {% else %}
                         {% if item.item_type == "Starter" %}
                             🥗
@@ -972,10 +972,10 @@
                 count += quantity;
 
                 if (orderableCard.dataset.imageUrl){
-                    const image = `<img src=" ${orderableCard.dataset.imageUrl}">`
+                    image = `<img src=" ${orderableCard.dataset.imageUrl}">`
                 }  
                 else {
-                    const image = type === 'bundle' ? '🎁' : '🍽️';
+                    image = type === 'bundle' ? '🎁' : '🍽️';
                 }
 
 
