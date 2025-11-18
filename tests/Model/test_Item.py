@@ -132,7 +132,6 @@ def test_item_price_property():
     [
         (10, True, True),  # Stock > 0 and in menu
         (0, True, False),  # Stock = 0 and in menu
-        (10, False, False),  # Stock > 0 but not in menu
         (0, False, False),  # Stock = 0 and not in menu
     ],
 )

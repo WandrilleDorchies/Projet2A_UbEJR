@@ -116,7 +116,7 @@ class TestItemService:
             "item_price": None,
         }
 
-        with pytest.raises(ValueError, match="You must change at least one field"):
+        with pytest.raises(ValueError, match="At least one value should be updated"):
             item_service.update_item(sample_item.item_id, update_data)
 
     def test_update_item_invalid_price(self, item_service, sample_item, clean_database):

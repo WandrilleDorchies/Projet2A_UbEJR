@@ -74,7 +74,7 @@ class Usurper:
         data["orderable_type"] = orderable_types
 
         data["orderable_image_name"] = [f"'image_{i}'" for i in n]
-        data["orderable_image_data"] = ["NULL" for _ in n]
+        data["orderable_image_url"] = ["NULL" for _ in n]
         data["is_in_menu"] = ["TRUE" if randint(0, 100) > 30 else "FALSE" for _ in n]
 
         return data

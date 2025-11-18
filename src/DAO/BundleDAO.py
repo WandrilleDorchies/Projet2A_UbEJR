@@ -70,8 +70,10 @@ class BundleDAO(metaclass=Singleton):
                 "none",
             )
 
+        raw_bundle["bundle_items"] = self._get_items_from_bundle(bundle_id)
         orderable_infos = self.orderable_dao.get_info_from_orderable(orderable_id)
         raw_bundle_full = {**raw_bundle, **orderable_infos}
+        print(raw_bundle_full)
         return Bundle(**raw_bundle_full)
 
     # READ
@@ -143,9 +145,7 @@ class BundleDAO(metaclass=Singleton):
         if not raw_bundles:
             return []
 
-        return [
-            Bundle(**self.get_bundle_by_id(raw_bundle["bundle_id"])) for raw_bundle in raw_bundles
-        ]
+        return [self.get_bundle_by_id(raw_bundle["bundle_id"]) for raw_bundle in raw_bundles]
 
     @log
     def update_bundle(self, bundle_id: int, update: dict):

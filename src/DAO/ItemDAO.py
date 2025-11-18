@@ -85,7 +85,7 @@ class ItemDAO(metaclass=Singleton):
         if not raw_items:
             return []
 
-        return [Item(**self.get_item_by_id(raw_item["item_id"])) for raw_item in raw_items]
+        return [self.get_item_by_id(raw_item["item_id"]) for raw_item in raw_items]
 
     # UPDATE
     @log

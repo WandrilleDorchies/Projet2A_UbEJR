@@ -8,7 +8,7 @@ class Orderable(BaseModel, ABC):
     orderable_id: int
     orderable_type: Literal["item", "bundle"]
     orderable_image_name: Optional[str] = None
-    orderable_image_data: Optional[str] = None
+    orderable_image_url: Optional[str] = None
     is_in_menu: bool = False
 
     @abstractmethod
