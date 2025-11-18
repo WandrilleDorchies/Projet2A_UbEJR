@@ -125,7 +125,7 @@
         </button>
     </div>
 
-    <form id="login-form" class="auth-form active" method="POST" action="/api/auth/login">
+    <form id="login-form" class="auth-form active" method="POST" action="/auth/login">
         <div class="form-group">
             <label for="login-user-type">Je suis :</label>
             <select id="login-user-type" name="user_type" required>
@@ -136,7 +136,7 @@
         </div>
 
         <div class="form-group" id="login-identifier-group">
-            <label for="login-identifier">Email ou tÃ©lÃ©phone :</label>
+            <label for="login-identifier">Email ou téléphone :</label>
             <input 
                 type="text" 
                 id="login-identifier" 
@@ -160,9 +160,9 @@
         <button type="submit" class="btn-submit">Se connecter</button>
     </form>
 
-    <form id="register-form" class="auth-form" method="POST" action="/api/auth/register">
+    <form id="register-form" class="auth-form" method="POST" action="/auth/register">
         <div class="form-group">
-            <label for="register-first-name">PrÃ©nom :</label>
+            <label for="register-first-name">Prénom :</label>
             <input 
                 type="text" 
                 id="register-first-name" 
@@ -184,7 +184,7 @@
         </div>
 
         <div class="form-group">
-            <label for="register-phone">TÃ©lÃ©phone :</label>
+            <label for="register-phone">Téléphone :</label>
             <input 
                 type="tel" 
                 id="register-phone" 
@@ -213,7 +213,7 @@
                 type="password" 
                 id="register-password" 
                 name="password" 
-                placeholder="Minimum 8 caractÃ¨res"
+                placeholder="Minimum 8 caractères, 1 majuscule et un caractère spécial"
                 minlength="8"
                 required
             >
@@ -238,11 +238,11 @@
                 type="text" 
                 id="register-address" 
                 name="address_string" 
-                placeholder="12 Rue de la RÃ©publique, 35000 Rennes"
+                placeholder="12 Rue de la République, 35000 Rennes"
                 required
             >
             <div class="address-help">
-                Format: NumÃ©ro Rue, Code Postal Ville, Pays<br>
+                Format: Numéro Rue, Code Postal Ville, Pays<br>
                 Exemple: 12 Rue Victor Hugo, 35000 Rennes, France
             </div>
         </div>
@@ -277,18 +277,21 @@
         const label = identifierGroup.querySelector('label');
         
         if (e.target.value === 'admin') {
-            identifierGroup.style.display = 'none';
-            identifierInput.required = false;
+            identifierGroup.style.display = 'block';
+            identifierInput.required = true;
+            label.textContent = 'Identifiant :';
+            identifierInput.placeholder = 'id';
+            identifierInput.type = 'tel';
         } else if (e.target.value === 'driver') {
             identifierGroup.style.display = 'block';
             identifierInput.required = true;
-            label.textContent = 'TÃ©lÃ©phone :';
+            label.textContent = 'Téléphone :';
             identifierInput.placeholder = '0612345678';
             identifierInput.type = 'tel';
         } else {
             identifierGroup.style.display = 'block';
             identifierInput.required = true;
-            label.textContent = 'Email ou tÃ©lÃ©phone :';
+            label.textContent = 'Email ou téléphone :';
             identifierInput.placeholder = 'exemple@email.com ou 0612345678';
             identifierInput.type = 'text';
         }
@@ -305,7 +308,7 @@
         const data = Object.fromEntries(formData);
         
         try {
-            const response = await fetch('/api/auth/login', {
+            const response = await fetch('/auth/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -320,7 +323,7 @@
                 } else if (data.user_type === 'driver') {
                     window.location.href = '/driver/deliveries';
                 } else if (data.user_type === 'admin') {
-                    window.location.href = '/admin/dashboard';
+                    window.location.href = '/admin';
                 }
             } else {
                 const error = await response.json();
@@ -338,7 +341,7 @@ document.getElementById('register-form').addEventListener('submit', async functi
     const data = Object.fromEntries(formData);
     
     try {
-        const response = await fetch('/api/auth/register', {
+        const response = await fetch('/auth/register', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -351,7 +354,7 @@ document.getElementById('register-form').addEventListener('submit', async functi
         } else {
             const error = await response.json();
         
-            let errorMessage = 'Inscription Ã©chouÃ©e';
+            let errorMessage = 'Inscription échouée';
             
             if (typeof error.detail === 'string') {
                 errorMessage = error.detail;

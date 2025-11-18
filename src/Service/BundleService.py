@@ -43,7 +43,7 @@ class BundleService:
         bundle_availability_start_date: datetime,
         bundle_availability_end_date: datetime,
         bundle_items: Dict[Item, int],
-        bundle_image: Optional[bytes] = None,
+        bundle_image: Optional[str] = None,
         is_in_menu: bool = False,
     ) -> Optional[Bundle]:
         if not (0 <= bundle_reduction <= 100):

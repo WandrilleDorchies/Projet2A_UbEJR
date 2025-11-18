@@ -60,7 +60,7 @@ class ItemService:
         item_type: str,
         item_description: str,
         item_stock: int,
-        item_image: Optional[bytes] = None,
+        item_image: Optional[str] = None,
         is_in_menu: bool = False,
     ) -> Optional[Item]:
         if item_price <= 0:

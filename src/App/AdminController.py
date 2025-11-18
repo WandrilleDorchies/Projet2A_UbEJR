@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Annotated, Literal, Optional
 
-from fastapi import APIRouter, Depends, File, HTTPException, Query, Response, UploadFile, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from fastapi.security import HTTPAuthorizationCredentials
 
 from .init_app import (
@@ -15,7 +15,7 @@ from .init_app import (
 )
 from .JWTBearer import AdminBearer
 
-admin_router = APIRouter(prefix="/admin", tags=["Admin"], dependencies=[Depends(AdminBearer())])
+admin_router = APIRouter(prefix="", tags=["Admin"], dependencies=[Depends(AdminBearer())])
 
 
 def get_admin_id_from_token(
@@ -87,9 +87,6 @@ def get_item_by_id(item_id: int):
         raise HTTPException(status_code=400, detail=f"Invalid request: {e}") from e
 
 
-file_bundle_image = File(None, media_type="image/*")
-
-
 @admin_router.post(
     "/items", status_code=status.HTTP_201_CREATED, dependencies=[Depends(AdminBearer())]
 )
@@ -99,12 +96,11 @@ async def create_item(
     item_type: Literal["Starter", "Main course", "Dessert", "Side dish", "Drink"],
     item_description: str,
     item_stock: int,
-    item_image: UploadFile | str | None = file_bundle_image,
+    item_image: Optional[str] = None,
 ):
     try:
-        image_data = await item_image.read() if item_image else None
         item = item_service.create_item(
-            item_name, item_price, item_type, item_description, item_stock, image_data
+            item_name, item_price, item_type, item_description, item_stock, item_image
         )
         return item
     except Exception as e:
@@ -121,15 +117,10 @@ async def update_item(
     item_type: Literal["Starter", "Main course", "Dessert", "Side dish", "Drink"] = None,
     item_description: str = None,
     item_stock: int = None,
-    item_image: UploadFile | str | None = file_bundle_image,
+    item_image: Optional[str] = None,
 ):
     try:
         update = locals()
-        if item_image:
-            image_data = await item_image.read()
-            print(image_data)
-            update["item_image"] = image_data
-
         update.pop("item_id")
         updated_item = item_service.update_item(item_id, update)
         return updated_item
@@ -184,13 +175,11 @@ async def create_bundle(
     bundle_availability_end_date: str,
     item_ids: list[int] = query_item_id,
     item_quantities: list[int] = query_item_quantities,
-    bundle_image: UploadFile | str | None = file_bundle_image,
+    bundle_image: Optional[str] = None,
 ):
     try:
         if len(item_ids) != len(item_quantities):
             raise ValueError("The number of item and quantities does not match.")
-
-        image_data = await bundle_image.read() if bundle_image else None
 
         Items = {}
         for item_id, nb in zip(item_ids, item_quantities, strict=False):
@@ -206,7 +195,7 @@ async def create_bundle(
             datetime.strptime(bundle_availability_start_date, "%d/%m/%Y"),
             datetime.strptime(bundle_availability_end_date, "%d/%m/%Y"),
             Items,
-            image_data,
+            bundle_image,
         )
         return bundle
     except Exception as e:
@@ -225,7 +214,7 @@ async def update_bundle(
     bundle_availability_end_date: datetime = None,
     item_ids: Optional[list[int]] = query_item_id,
     item_quantities: Optional[list[int]] = query_item_quantities,
-    bundle_image: UploadFile | str | None = file_bundle_image,
+    bundle_image: Optional[str] = None,
 ):
     try:
         update = locals()
@@ -243,10 +232,6 @@ async def update_bundle(
                     raise ValueError(f"Item with id {item_id} not found")
                 Items[item] = nb
             update["bundle_items"] = Items
-
-        if bundle_image:
-            image_data = await bundle_image.read()
-            update["bundle_image"] = image_data
 
         updated_bundle = bundle_service.update_bundle(bundle_id, update)
         return updated_bundle

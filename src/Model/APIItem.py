@@ -13,27 +13,33 @@ class APIItem(BaseModel):
         item_description (str): Description of the item.
     """
 
+    item_id: int
+    orderable_id: int
     item_name: str
     item_price: float
     item_type: str
-    item_description: str
+    item_stock: int
+    is_in_menu: bool
 
     def __hash__(self):
-        return hash((self.item_name, self.item_price, self.item_type, self.item_description))
+        return hash(self.item_id)
 
     def __eq__(self, other):
-        return (
-            isinstance(other, APIItem)
-            and self.item_name == other.item_name
-            and self.item_price == other.item_price
-            and self.item_type == other.item_type
-            and self.item_description == other.item_description
-        )
+        return isinstance(other, APIItem) and self.item_id == other.item_id
 
     def __repr__(self):
         return (
-            f"item_name={self.item_name}, "
-            f"item_price={self.item_price}, "
-            f"item_type={self.item_type}, "
-            f"item_description={self.item_description}"
+            f"item_name={self.item_name}, item_price={self.item_price}, item_type={self.item_type}"
+        )
+
+    @classmethod
+    def from_item(cls, item):
+        return cls(
+            item_id=item.item_id,
+            orderable_id=item.orderable_id,
+            item_name=item.item_name,
+            item_price=item.item_price,
+            item_type=item.item_type,
+            item_stock=item.item_stock,
+            is_in_menu=item.is_in_menu,
         )
