@@ -2,8 +2,8 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
+from pydantic import BaseModel
 
-# from traitlets.traitlets import isidentifier
 from src.Model.APIBundle import APIBundle
 from src.Model.APICustomer import APICustomer
 from src.Model.APIItem import APIItem
@@ -23,6 +23,11 @@ from .JWTBearer import CustomerBearer
 customer_router = APIRouter(
     prefix="/customer", tags=["Customers"], dependencies=[Depends(CustomerBearer())]
 )
+
+
+class AddRemoveOrderable(BaseModel):
+    orderable_id: int
+    quantity: int
 
 
 # PROFILE
@@ -194,21 +199,27 @@ def get_orderable_detail(orderable_id: int):
 def get_order(
     order_id: int = Depends(get_current_order_id),
 ):
-    return order_service.get_order_by_id(order_id)
-    # Modif Néo comme pour history
+    order = order_service.get_order_by_id(order_id)
+    return {
+        "order_id": order.order_id,
+        "order_price": order.order_price,
+        "order_orderables": {
+            orderable.orderable_id: quantity
+            for orderable, quantity in order.order_orderables.items()
+        },
+    }
 
 
 @customer_router.put(
-    "/current-order/{orderable_id}/add",
+    "/current-order/add",
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(CustomerBearer())],
 )
 def add_orderable_to_order(
-    orderable_id: int,
-    quantity: int,
+    add_orderable: AddRemoveOrderable,
     order_id: int = Depends(get_current_order_id),
 ):
-    if quantity <= 0:
+    if add_orderable.quantity <= 0:
         errortext = "[CustomerController] Invalid input:"
         errortext += " cannot add 0 or a negative number of orderables."
         raise HTTPException(
@@ -216,7 +227,9 @@ def add_orderable_to_order(
             detail=errortext,
         )
     try:
-        return order_service.add_orderable_to_order(orderable_id, order_id, quantity)
+        return order_service.add_orderable_to_order(
+            add_orderable.orderable_id, order_id, add_orderable.quantity
+        )
     except Exception as e:
         raise HTTPException(
             status_code=403, detail=f"[CustomerController] cannot add orderable : {str(e)}"
@@ -224,16 +237,15 @@ def add_orderable_to_order(
 
 
 @customer_router.put(
-    "/current-order/{orderable_id}/remove",
+    "/current-order/remove",
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(CustomerBearer())],
 )
 def remove_orderable_from_order(
-    orderable_id: int,
-    quantity: int,
+    add_orderable: AddRemoveOrderable,
     order_id: int = Depends(get_current_order_id),
 ):
-    if quantity <= 0:
+    if add_orderable.quantity <= 0:
         errortext = "[CustomerController] Invalid input:"
         errortext += " cannot remove 0 or a negative number of orderables."
         raise HTTPException(
@@ -241,7 +253,9 @@ def remove_orderable_from_order(
             detail=errortext,
         )
     try:
-        return order_service.remove_orderable_from_order(orderable_id, order_id, quantity)
+        return order_service.remove_orderable_from_order(
+            add_orderable.orderable_id, order_id, add_orderable.quantity
+        )
     except Exception as e:
         raise HTTPException(
             status_code=403,

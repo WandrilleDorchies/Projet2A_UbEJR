@@ -754,18 +754,22 @@
         {% if bundles %}
             {% for bundle in bundles %}
             <div class="menu-item bundle-card" data-type="bundles" 
-                 data-item-id="{{ bundle.id }}" 
+                 data-item-id="{{ bundle.orderable_id }}" 
                  data-name="{{ bundle.bundle_name }}"
                  data-price="{{ bundle.bundle_price }}"
                  data-orderable-type="bundle">
                 <div class="item-image">
-                    🎁
+                    {% if bundle.orderable_image_url %}
+                        <img src="{{ item.orderable_image_url }}"" alt="{{ item.orderable_image_name }}", height="220"></img>
+                    {% else %}
+                        🎁
+                    {% endif %}
                     <span class="item-badge">Menu -{{ bundle.bundle_reduction }}%</span>
                 </div>
                 <div class="item-content">
                     <div class="item-header">
                         <h3 class="item-name">{{ bundle.bundle_name }}</h3>
-                        <span class="item-price">{{ "%.2f"|format(bundle.bundle_price) }}€</span>
+                        <span class="item-price">{{ "%.2f"|format(bundle.price) }}€</span>
                     </div>
                     <p class="item-description">
                         {{ bundle.bundle_description or "Menu spécial avec plusieurs produits" }}
@@ -785,7 +789,7 @@
                     </span>
                     
                     <div class="item-actions" style="margin-top: 16px;">
-                        <button class="add-to-cart-btn" onclick="addBundleToCart({{ bundle.id }}, '{{ bundle.bundle_name }}', {{ bundle.bundle_price }})">
+                        <button class="add-to-cart-btn" onclick="addBundleToCart({{ bundle.orderable_id }}, '{{ bundle.bundle_name }}', {{ bundle.price }})">
                             Ajouter au panier
                         </button>
                     </div>
@@ -798,24 +802,28 @@
         {% if items %}
             {% for item in items %}
             <div class="menu-item" data-type="{{ item.item_type }}" 
-                 data-item-id="{{ item.id }}" 
+                 data-item-id="{{ item.orderable_id }}" 
                  data-name="{{ item.item_name }}"
                  data-price="{{ item.item_price }}"
                  data-orderable-type="item">
                 <div class="item-image">
-                    {% if item.item_type == "Starter" %}
-                        🥗
-                    {% elif item.item_type == "Main course" %}
-                        🌭
-                    {% elif item.item_type == "Dessert" %}
-                        🍰
-                    {% elif item.item_type == "Drink" %}
-                        🥤
-                    {% elif item.item_type == "Side dish" %}
-                        🍟
+                    {% if item.orderable_image_url %}
+                    <img src="{{ item.orderable_image_url }}"" alt="{{ item.orderable_image_name }}", height="220"></img>
                     {% else %}
-                        🥖 
-                    {% endif %}
+                        {% if item.item_type == "Starter" %}
+                            🥗
+                        {% elif item.item_type == "Main course" %}
+                            🌭
+                        {% elif item.item_type == "Dessert" %}
+                            🍰
+                        {% elif item.item_type == "Drink" %}
+                            🥤
+                        {% elif item.item_type == "Side dish" %}
+                            🍟
+                        {% else %}
+                            🥖 
+                        {% endif %}
+                    {% endif %} 
                     
                     {% if item.item_stock > 50 %}
                         <span class="item-badge">Populaire</span>
@@ -828,7 +836,7 @@
                 <div class="item-content">
                     <div class="item-header">
                         <h3 class="item-name">{{ item.item_name }}</h3>
-                        <span class="item-price">{{ "%.2f"|format(item.item_price) }}€</span>
+                        <span class="item-price">{{ "%.2f"|format(item.price) }}€</span>
                     </div>
                     <p class="item-description">
                         {{ item.item_description or "Délicieux produit de l'EJR" }}
@@ -912,10 +920,9 @@
     // Charger le panier depuis l'API
     async function loadCart() {
         try {
-            const response = await fetch('/api/customer/current-order', {
+            const response = await fetch('/customer/current-order', {
                 credentials: 'include'
             });
-
             if (response.ok) {
                 currentOrder = await response.json();
                 updateCartDisplay();
@@ -964,19 +971,27 @@
                 const itemTotal = price * quantity;
                 count += quantity;
 
-                const typeIcon = type === 'bundle' ? '🎁' : '🍽️';
+                if (orderableCard.dataset.imageUrl){
+                    const image = `<img src=" ${orderableCard.dataset.imageUrl}">`
+                }  
+                else {
+                    const image = type === 'bundle' ? '🎁' : '🍽️';
+                }
+
 
                 html += `
                     <div class="cart-item">
-                        <div class="cart-item-emoji">${typeIcon}</div>
+                        <div class="cart-item-image">
+                            ${image}
+                        </div>
                         <div class="cart-item-info">
                             <div class="cart-item-name">${name}</div>
-                            <div class="cart-item-details">${quantity} × ${price.toFixed(2)}€</div>
+                            <div class="cart-item-details">${quantity} x ${price.toFixed(2)}€</div>
                             <div class="cart-item-price">${itemTotal.toFixed(2)}€</div>
                         </div>
                         <div class="cart-item-controls">
                             <div class="cart-qty-controls">
-                                <button class="cart-qty-btn" onclick="removeOneFromCart(${orderableId})">−</button>
+                                <button class="cart-qty-btn" onclick="removeOneFromCart(${orderableId})">-</button>
                                 <span class="cart-qty-display">${quantity}</span>
                                 <button class="cart-qty-btn" onclick="addOneToCart(${orderableId})">+</button>
                             </div>
@@ -1047,7 +1062,7 @@
                 quantity: qty
             };
 
-            const response = await fetch(`/api/customer/current-order/add`, {
+            const response = await fetch(`/customer/current-order/add`, {
                 method: 'PUT',
                 credentials: 'include',
                 headers: {
@@ -1096,7 +1111,7 @@
                 quantity: 1
             };
 
-            const response = await fetch(`/api/customer/current-order/add`, {
+            const response = await fetch(`/customer/current-order/add`, {
                 method: 'PUT',
                 credentials: 'include',
                 headers: {
@@ -1137,7 +1152,7 @@
                 quantity: 1
             };
 
-            const response = await fetch(`/api/customer/current-order/add`, {
+            const response = await fetch(`/customer/current-order/add`, {
                 method: 'PUT',
                 credentials: 'include',
                 headers: {
@@ -1166,7 +1181,7 @@
                 quantity: 1
             };
 
-            const response = await fetch(`/api/customer/current-order/remove`, {
+            const response = await fetch(`/customer/current-order/remove`, {
                 method: 'PUT',
                 credentials: 'include',
                 headers: {
@@ -1201,7 +1216,7 @@
                 quantity: quantity
             };
 
-            const response = await fetch(`/api/customer/current-order/remove`, {
+            const response = await fetch(`/customer/current-order/remove`, {
                 method: 'PUT',
                 credentials: 'include',
                 headers: {
@@ -1242,7 +1257,7 @@
         checkoutBtn.textContent = 'Chargement...';
 
         try {
-            const response = await fetch('/api/customer/payment/checkout', {
+            const response = await fetch('/customer/payment/checkout', {
                 method: 'POST',
                 credentials: 'include',
                 headers: {

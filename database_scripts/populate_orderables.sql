@@ -1,14 +1,14 @@
-INSERT INTO project.Orderables (orderable_type, is_in_menu)
+INSERT INTO project.Orderables (orderable_type, is_in_menu, orderable_image_name, orderable_image_url)
 VALUES
-    ('item', true),
-    ('item', true),
-    ('item', true),
-    ('item', true),
-    ('item', false),
-    ('item', false),
-    ('bundle', true),
-    ('bundle', true),
-    ('bundle', true);
+    ('item', true, 'image_item_galette_saucisse', 'https://www.krill.fr/media/recipe/resized/700x700/recipe/352074-R-GALETTE-SAUCISSE-C.jpg'),
+    ('item', true, 'image_item_fajitas_vg', 'https://media.bonduelle.com/apr_128477/FRGP14839-fajitas_veggie_30967.webp'),
+    ('item', true, 'image_item_coca-cola_33cl', 'https://pizzavia.fr/wp-content/uploads/2025/01/coca.png'),
+    ('item', true, 'image_item_bahn-mi', 'https://images.getrecipekit.com/20230518150440-andy-20cooks-20-20bahn-20mi.jpg'),
+    ('item', false, 'image_item_tiramisu', 'https://images.ctfassets.net/1p5r6txvlxu4/2AuCQgVaK08nA3Wgm7TJbr/7981b99d4a52359fe5dd1090dd2ec96a/Tiramisu_original.jpg'),
+    ('item', false, 'image_item_chips', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJYqc9TgYa8FBwpM0X98qKK76hzccD-sUhjg&s'),
+    ('bundle', true, 'image_bundle_ah_t''as_faim', 'https://uploads.dailydot.com/2024/09/rubbing-hands-emoji.jpg'),
+    ('bundle', true, 'image_bundle_la_totale', 'https://i.pinimg.com/564x/c6/c4/1e/c6c41ed61a1ed83c500c7ab0e5a54bfc.jpg'),
+    ('bundle', true, 'image_bundle_mejico', 'https://www.larousse.fr/encyclopedie/data/images/1009548-Drapeau_du_Mexique.jpg');
 
 INSERT INTO project.Items (
     orderable_id, item_name, item_price, item_type,
@@ -21,7 +21,7 @@ VALUES
     (2, 'Fajitas VG', 4, 'Main course',
         'Des fajitas au stick de mozzarella frits', 200),
 
-    (3, 'Coca-Cola 33cl', 21.50, 'Drink',
+    (3, 'Coca-Cola 33cl', 1.50, 'Drink',
         'Canette de Coca-Cola', 300),
 
     (4, 'Bahn-Mi', 3.9, 'Main course',
