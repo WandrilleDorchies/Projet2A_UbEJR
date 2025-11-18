@@ -961,7 +961,6 @@
         checkoutBtn.disabled = false;
     }
 
-    // Filtres
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -978,7 +977,6 @@
         });
     });
 
-    // Gestion des quantités dans le menu
     function increaseQty(btn, maxStock) {
         const display = btn.previousElementSibling;
         const qty = parseInt(display.textContent);
@@ -996,7 +994,6 @@
         }
     }
 
-    // Ajouter un item au panier via l'API
     async function addToCart(btn) {
         const itemCard = btn.closest('.menu-item');
         const orderableId = parseInt(itemCard.dataset.itemId);
@@ -1007,7 +1004,6 @@
         btn.textContent = '...';
 
         try {
-            // Créer l'objet de données correctement
             const data = {
                 orderable_id: orderableId,
                 quantity: qty
@@ -1019,13 +1015,12 @@
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(data)  // Convertir en JSON
+                body: JSON.stringify(data) 
             });
 
             if (response.ok) {
                 await loadCart();
                 
-                // Animation de succès
                 btn.textContent = '✓ Ajouté';
                 btn.classList.add('success');
                 setTimeout(() => {
@@ -1048,53 +1043,6 @@
         }
     }
 
-    // Ajouter un bundle au panier via l'API
-    async function addBundleToCart(bundleId, bundleName, bundlePrice) {
-        const btn = event.target;
-        btn.disabled = true;
-        const originalText = btn.textContent;
-        btn.textContent = '...';
-
-        try {
-            const data = {
-                orderable_id: bundleId,
-                quantity: 1
-            };
-
-            const response = await fetch(`/customer/current-order/add`, {
-                method: 'PUT',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data)
-            });
-
-            if (response.ok) {
-                await loadCart();
-                
-                btn.textContent = '✓ Ajouté';
-                btn.classList.add('success');
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                    btn.classList.remove('success');
-                    btn.disabled = false;
-                }, 1500);
-            } else {
-                const error = await response.json();
-                alert('Erreur: ' + (error.detail || 'Impossible d\'ajouter au panier'));
-                btn.textContent = originalText;
-                btn.disabled = false;
-            }
-        } catch (error) {
-            console.error('Erreur:', error);
-            alert('Erreur lors de l\'ajout au panier');
-            btn.textContent = originalText;
-            btn.disabled = false;
-        }
-    }
-
-    // Ajouter 1 exemplaire via l'API
     async function addOneToCart(orderableId) {
         try {
             const data = {
@@ -1123,7 +1071,6 @@
         }
     }
 
-    // Retirer 1 exemplaire via l'API
     async function removeOneFromCart(orderableId) {
         try {
             const data = {
@@ -1152,7 +1099,6 @@
         }
     }
 
-    // Supprimer complètement un article via l'API
     async function removeAllFromCart(orderableId) {
         if (!currentOrder || !currentOrder.order_orderables[orderableId]) {
             return;
@@ -1187,7 +1133,7 @@
         }
     }
 
-    // Toggle panier
+
     function toggleCart() {
         const sidebar = document.getElementById('cart-sidebar');
         const overlay = document.getElementById('cart-overlay');
@@ -1195,7 +1141,6 @@
         overlay.classList.toggle('open');
     }
 
-    // Commander - Redirection vers le paiement
     async function checkout() {
         if (!currentOrder || !currentOrder.order_orderables || Object.keys(currentOrder.order_orderables).length === 0) {
             alert('Votre panier est vide !');
@@ -1217,8 +1162,8 @@
 
             if (response.ok) {
                 const data = await response.json();
-                // Rediriger vers la page de paiement Stripe
-                window.location.href = data;
+                window.location.href = data.url;
+                localStorage.setItem("sessionId", data.id);
             } else {
                 const error = await response.json();
                 alert('Erreur lors de la commande: ' + (error.detail || 'Erreur inconnue'));

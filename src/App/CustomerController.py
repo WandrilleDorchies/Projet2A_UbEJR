@@ -350,9 +350,7 @@ def create_checkout_session(
 
         customer = customer_service.get_customer_by_id(customer_id)
 
-        session_url = stripe_service.create_checkout_session(order, customer.customer_mail)
-
-        return session_url
+        return stripe_service.create_checkout_session(order, customer.customer_mail)
 
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
@@ -362,11 +360,13 @@ def create_checkout_session(
         ) from e
 
 
-@customer_router.get(
-    "/payment/succes", status_code=status.HTTP_200_OK, dependencies=[Depends(CustomerBearer())]
+@customer_router.post(
+    "/payment/success",
+    status_code=status.HTTP_202_ACCEPTED,
+    dependencies=[Depends(CustomerBearer())],
 )
 def succesful_payment(
-    session_id,
+    session_id: str,
     customer_id: int = Depends(get_customer_id_from_token),
     order_id: int = Depends(get_current_order_id),
 ):

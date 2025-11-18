@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Menu - Ub'EJR Eats{% endblock %}
+
+<h2>Vous avez bien payé votre commande</h2>
+
+
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', async function() {
+        await verifyPayment();
+    });
+
+    async function verifyPayment() {
+        try {
+            const sessionId = localStorage.getItem("sessionId");
+            console.log(JSON.stringify(sessionId))
+            const response = await fetch('/customer/payment/success', {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(sessionId)
+            });
+
+            if (response.ok) {
+                console.log("ca marche");
+                // window.location.href = '/menu';
+            }
+        } catch (error) {
+            console.error('Erreur:', error);
+            alert('Erreur lors de la commande. Veuillez réessayer.');
+        }
+    }
+</script>
+{% endblock %}

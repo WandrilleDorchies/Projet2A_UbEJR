@@ -54,6 +54,11 @@ async def menu_page(request: Request, user_id: int = Depends(get_customer_id_fro
         )
 
 
+@web_router.get("/payment/success", response_class=HTMLResponse)
+async def payment_success(request: Request):
+    return templates.TemplateResponse("customer/success.html", {"request": request})
+
+
 @web_router.get("/logout", response_class=HTMLResponse)
 async def logout(request: Request):
     response = RedirectResponse("/", status_code=302)
