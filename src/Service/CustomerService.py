@@ -72,36 +72,30 @@ class CustomerService:
         # Check on first and last name
         if not re.match(self.pattern, first_name) or not re.match(self.pattern, last_name):
             logging.error("[CustomerService] First name and last name must only contains letters")
-            raise ValueError(
-                "[Customer Service] Cannot create customer: First name and last name "
-                "must only contains letters"
-            )
+            raise ValueError("Your first name and last name must only contains letters!")
         validated_phone = self.user_service.identifier_validator(phone)
-        if validated_phone["type"] is None:
-            raise ValueError("[CustomerService] Cannot create: The phone is invalid.")
+        if validated_phone is None or validated_phone["type"] != "phone":
+            logging.error("Please enter a valid phone number !")
+            raise ValueError("[CustomerService] Cannot create: The phone {phone} is invalid.")
         # Check that phone number is not already used
         existing_user = self.customer_dao.get_customer_by_phone(validated_phone["identifier"])
         if existing_user is not None:
-            logging.error("[CustomerService] Phone number already in use")
-            raise ValueError(
+            logging.error(
                 "[CustomerService] Cannot create: customer "
                 f"with phone {validated_phone['identifier']} "
                 "already exists."
             )
+            raise ValueError("This phone number is already associated with an account !")
         # Check email
         validated_email = self.user_service.identifier_validator(mail)
-        if validated_email["type"] is None:
+        if validated_email is None or validated_email["type"] != "email":
             logging.error("[CustomerService] Cannot create: The email is invalid.")
-            raise ValueError("[CustomerService] Cannot create: The email is invalid.")
+            raise ValueError("Please enter a valid email !")
         # check that email is not already used
         existing_user = self.customer_dao.get_customer_by_email(validated_email["identifier"])
         if existing_user is not None:
             logging.error("[CustomerService] Email already in use !")
-            raise ValueError(
-                "[CustomerService] Cannot create: customer with "
-                f"email {validated_email['identifier']} "
-                "already exists."
-            )
+            raise ValueError("This email is already associated with an account !")
         check_password_strength(password)
 
         address = self.address_service.create_address(address_string)
@@ -126,6 +120,22 @@ class CustomerService:
 
     @log
     def login_customer(self, identifier: str, password: str) -> Optional[Customer]:
+        """
+        Allows the customer to login by calling the mutual user_service.login method,
+        which also handles errors
+
+        Parameters
+        ----------
+        identifier : str
+            Either a phone number or an email address
+        password : str
+            The customer's password
+
+        Returns
+        -------
+        Optional[Customer]
+            A Csutomer object in case of successful login
+        """
         return self.user_service.login(identifier, password, "customer")
 
     @log
@@ -157,7 +167,7 @@ class CustomerService:
         if update.get("customer_phone"):
             customer_phone = update["customer_phone"]
             validated_phone = self.user_service.identifier_validator(customer_phone)
-            if validated_phone["type"] is None:
+            if validated_phone is None or validated_phone["type"] != "phone":
                 raise ValueError(f"The number {update['customer_phone']} is invalid.")
 
             update["customer_phone"] = validated_phone["identifier"]
@@ -165,7 +175,7 @@ class CustomerService:
         if update.get("customer_mail"):
             customer_mail = update["customer_mail"]
             validated_email = self.user_service.identifier_validator(customer_mail)
-            if validated_email["type"] is None:
+            if validated_email is None or validated_email["type"] != "email":
                 raise ValueError(f"The email {update['customer_mail']} is invalid.")
 
             update["customer_mail"] = validated_email["identifier"]
@@ -175,6 +185,28 @@ class CustomerService:
 
     @log
     def update_address(self, customer_id: int, update: dict) -> Customer:
+        """
+        Allows a customer to update its address.
+
+        Invalid address errors are handled by the AddressService
+
+        Parameters
+        ----------
+        customer_id : int
+            The id of the customer
+        update : dict
+             dict containg the elements of the address that are to be updated
+
+        Returns
+        -------
+        Customer
+            A Customer object with the new address
+
+        Raises
+        ------
+        ValueError
+            Raised if no fields of the address are changed
+        """
         customer = self.get_customer_by_id(customer_id)
 
         if all([value is None for value in update.values()]):
@@ -187,6 +219,24 @@ class CustomerService:
 
     @log
     def update_password(self, customer_id: int, old_password: str, new_password: str) -> Customer:
+        """
+        Allows a customer to update its password by calling the password change method
+        from UserService, which also handles errors
+
+        Parameters
+        ----------
+        customer_id : int
+            ID of the customer
+        old_password : str
+            the old password
+        new_password : str
+            The new password (must be different from the old one)
+
+        Returns
+        -------
+        Customer
+            A Customer object
+        """
         self.get_customer_by_id(customer_id)
         return self.user_service.change_password(
             customer_id, old_password, new_password, "customer"

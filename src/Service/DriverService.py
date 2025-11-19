@@ -1,7 +1,6 @@
+import logging
 import re
 from typing import Optional
-
-import phonenumbers as pn
 
 from src.DAO.DeliveryDAO import DeliveryDAO
 from src.DAO.DriverDAO import DriverDAO
@@ -59,10 +58,45 @@ class DriverService:
 
     @log
     def login(self, identifier: str, password: str) -> Optional[Driver]:
+        """
+        Allows the driver to login by calling the mutual user_service.login method,
+        which also handles errors
+
+        Parameters
+        ----------
+        identifier : str
+            a phone number
+        password : str
+            The driver's password
+
+        Returns
+        -------
+        Optional[Driver]
+            A Driver object in case of successful login
+        """
         return self.user_service.login(identifier, password)
 
     @log
     def get_driver_current_order(self, driver_id: int) -> Optional[Order]:
+        """
+        Retrieves the Order the driver is supposed to be handling
+
+        Parameters
+        ----------
+        driver_id : int
+            ID of the driver
+
+        Returns
+        -------
+        Optional[Order]
+            An Order, if the driver is currently handling one through a delivery
+
+        Raises
+        ------
+        ValueError
+            raised if there is no in progress delivery assigned to this driver
+            and therefore no order
+        """
         delivery = self.delivery_dao.get_driver_current_delivery(driver_id)
         if delivery is None or delivery.delivery_state == 2:
             raise ValueError(
@@ -76,26 +110,20 @@ class DriverService:
     def create_driver(
         self, first_name: str, last_name: str, phone: str, password: str
     ) -> Optional[Driver]:
-        try:
-            phone_number = pn.parse(phone, "FR")
-        except Exception:
-            try:
-                phone_number = pn.parse(phone)
-            except Exception as e:
-                raise ValueError(
-                    "[DriverService] Can't parse as FR number or foreign number"
-                ) from e
-        if not pn.is_valid_number(phone_number) or not pn.is_possible_number(phone_number):
-            raise ValueError(f"[DriverService] Cannot create: The number {phone} is invalid.")
-
-        # normal  > E164 format : 06 12 12 12 12 > +33612121212
-        valid_formatted_phone = pn.format_number(phone_number, pn.PhoneNumberFormat.E164)
+        #
+        validated_phone = self.user_service.identifier_validator(phone)
+        if validated_phone is None or validated_phone["type"] != "phone":
+            logging.error("[DriverService] Cannot create: The phone {phone} is invalid.")
+            raise ValueError("Please enter a valid phone number !")
         # Check that phone number is not already used
-        existing_driver = self.driver_dao.get_driver_by_phone(valid_formatted_phone)
-        if existing_driver is not None:
-            raise ValueError(
-                f"[DriverService] Cannot create: customer with phone {valid_formatted_phone} already exists."
+        existing_user = self.driver_dao.get_driver_by_phone(validated_phone["identifier"])
+        if existing_user is not None:
+            logging.error(
+                "[DriverService] Cannot create: customer "
+                f"with phone {validated_phone['identifier']} "
+                "already exists."
             )
+            raise ValueError("This phone number is already associated with an account !")
         if not re.match(self.pattern, first_name) or not re.match(self.pattern, last_name):
             raise ValueError(
                 "[Driver Service] Cannot create driver: First name and last name "
@@ -108,7 +136,7 @@ class DriverService:
 
         formatted_first_name = first_name.strip().capitalize()
         formatted_last_name = last_name.strip().upper()
-
+        valid_formatted_phone = validated_phone["identifier"]
         created_driver = self.driver_dao.create_driver(
             first_name=formatted_first_name,
             last_name=formatted_last_name,
@@ -143,12 +171,12 @@ class DriverService:
             update["driver_last_name"] = update["driver_last_name"].strip().upper()
 
         if update.get("driver_phone"):
-            phone_number = pn.parse(update["driver_phone"], "FR")
-            if not pn.is_valid_number(phone_number) or not pn.is_possible_number(phone_number):
+            customer_phone = update["driver_phone"]
+            validated_phone = self.user_service.identifier_validator(customer_phone)
+            if validated_phone is None or validated_phone["type"] != "phone":
                 raise ValueError(f"The number {update['driver_phone']} is invalid.")
 
-            driver_phone = "0" + str(phone_number.national_number)
-            update["driver_phone"] = driver_phone
+            update["driver_phone"] = validated_phone["identifier"]
 
         updated_driver = self.driver_dao.update_driver(driver_id=driver_id, update=update)
         return updated_driver

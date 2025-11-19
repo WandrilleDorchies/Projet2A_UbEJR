@@ -1,5 +1,5 @@
 import logging
-from typing import Literal, Union
+from typing import Literal, Optional, Union
 
 import phonenumbers as pn
 from email_validator import EmailNotValidError, validate_email
@@ -30,6 +30,13 @@ class UserService:
     ) -> Union[Customer, Driver, Admin]:
         user = None
         validated_identifier = self.identifier_validator(identifier)
+        if not validated_identifier:
+            logging.error(
+                "[UserService] Login failed for user of type {user_type}:"
+                " Identifier {identfier} invalid"
+            )
+            raise ValueError("Invalid identfier!")
+        logging.info("[UserService] Identifier validated. Attempting to find the user... ")
         if user_type == "customer" and validated_identifier["type"] == "phone":
             user = self.customer_dao.get_customer_by_phone(validated_identifier["identifier"])
         elif user_type == "customer" and validated_identifier["type"] == "email":
@@ -80,7 +87,29 @@ class UserService:
             return self.admin_dao.get_admin()
 
     @log
-    def identifier_validator(self, identifier: str) -> dict:
+    def identifier_validator(self, identifier: str) -> Optional[dict]:
+        """
+        Atttempts to validate (check if real, and properly format) an identfier
+        which is either a phone number (for both drivers and customers)
+        or an email address (customers only)
+
+        Phone numbers are formatted in the E164 format as it is globally unique
+
+        in case it is not valid, it returns None instead of raising an error
+        and lets the service function (register, login, update) raise the error
+
+        Parameters
+        ----------
+        identifier : str
+            either an email or a p
+
+        Returns
+        -------
+        Optional[dict]
+             A dictionary containing the type of identfier (either phone or email)
+             and the formatted identifier
+             Or None if the identifier is not valid
+        """
         logging.info("[UserService] Parsing identifier as email...")
         try:
             emailinfo = validate_email(identifier, check_deliverability=True)
@@ -107,5 +136,5 @@ class UserService:
                 }
         except pn.NumberParseException:
             pass
-        logging.warning("Identifier could not be parsed. Register/Login will fail.")
-        return {"type": None, "identifier": None}
+        logging.warning("[UserService] Identifier could not be parsed. Register/Login will fail.")
+        return None
