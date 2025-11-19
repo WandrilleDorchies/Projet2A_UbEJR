@@ -337,17 +337,19 @@
         }
 
         const statusLabels = {
-            'CREATED': 'En préparation',
-            'PREPARED': 'Prête',
-            'DELIVERING': 'En livraison',
-            'DELIVERED': 'Livrée'
+            'OrderState.PENDING': 'En cours',
+            'OrderState.PAID': 'En cours de préparation',
+            'OrderState.PREPARED': 'Prête',
+            'OrderState.DELIVERING': 'En livraison',
+            'OrderState.DELIVERED': 'Livrée'
         };
 
         const statusClasses = {
-            'CREATED': 'status-preparing',
-            'PREPARED': 'status-preparing',
-            'DELIVERING': 'status-delivering',
-            'DELIVERED': 'status-delivered'
+            'OrderState.PENDING': 'status-preparing',
+            'OrderState.PAID': 'status-preparing',
+            'OrderState.PREPARED': 'status-preparing',
+            'OrderState.DELIVERING': 'status-delivering',
+            'OrderState.DELIVERED': 'status-delivered'
         };
 
         container.innerHTML = orders.map(order => {
@@ -361,9 +363,8 @@
 
             const itemsHtml = (order.items || [])
                 .map(item => {
-                    let itemName = 'Produit';
                     if (item.type === 'bundle') {
-                        itemName = item.bundle_name + ' (Menu)';
+                        itemName = item.bundle_name;
                     } else {
                         itemName = item.item_name;
                     }
@@ -382,8 +383,8 @@
                             <div class="order-id">Commande #${order.order_id}</div>
                             <div class="order-date">${orderDate}</div>
                         </div>
-                        <span class="order-status ${statusClasses[order.order_state] || 'status-preparing'}">
-                            ${statusLabels[order.order_state] || order.order_state}
+                        <span class="order-status ${statusClasses[order.order_state.toString()] || 'status-preparing'}">
+                            ${statusLabels[order.order_state.toString()]}
                         </span>
                     </div>
 

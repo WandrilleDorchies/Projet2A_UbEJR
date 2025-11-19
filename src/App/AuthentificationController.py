@@ -82,7 +82,7 @@ def register(
             value=jwt_token.access_token,
             httponly=True,
             max_age=600,
-            samesite="strict",
+            samesite="lax",
             secure=True,
         )
 
@@ -161,7 +161,7 @@ def login(
             value=token.access_token,
             httponly=True,
             max_age=600,
-            samesite="strict",
+            samesite="lax",
             secure=True,
         )
 

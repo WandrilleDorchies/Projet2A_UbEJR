@@ -1,13 +1,9 @@
-from typing import Annotated
-
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi.security import HTTPAuthorizationCredentials
 from fastapi.templating import Jinja2Templates
 
 from .CustomerController import get_customer_id_from_token
 from .init_app import customer_service, driver_service, jwt_service, menu_service
-from .JWTBearer import JWTBearer
 
 templates = Jinja2Templates(directory="templates")
 
@@ -17,11 +13,6 @@ web_router = APIRouter(tags=["Web Interface"])
 @web_router.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
     return templates.TemplateResponse("auth.html", {"request": request})
-
-
-@web_router.get("/register", response_class=HTMLResponse)
-async def register_page(request: Request):
-    return templates.TemplateResponse("auth.html", {"request": request, "active_tab": "register"})
 
 
 @web_router.get("/menu", response_class=HTMLResponse)
@@ -60,10 +51,11 @@ async def menu_page(request: Request, user_id: int = Depends(get_customer_id_fro
 
 @web_router.get("/profile", response_class=HTMLResponse)
 async def get_profile_page(
-    request: Request, credentials: Annotated[HTTPAuthorizationCredentials, Depends(JWTBearer())]
+    request: Request,
 ):
     try:
-        token = jwt_service.validate_user_jwt(credentials.credentials)
+        cookie = request.cookies.get("access_token")
+        token = jwt_service.decode_jwt(cookie)
         user_id = int(token["user_id"])
         user_type = token["user_role"]
 
@@ -83,9 +75,7 @@ async def get_profile_page(
             )
 
         else:
-            raise HTTPException(
-                status_code=403, detail="Type d'utilisateur non autorisé à accéder au profil"
-            )
+            raise HTTPException(status_code=403, detail="You're not allowed to access this page")
 
     except ValueError as e:
         raise HTTPException(status_code=401, detail=str(e)) from e
@@ -95,17 +85,23 @@ async def get_profile_page(
         ) from e
 
 
-@web_router.post("payment/success", response_class=HTMLResponse)
-async def payment_success_page(request: Request, session_id: str):
-    try:
-        return templates.TemplateResponse(
-            "customer/success.html", {"request": request, "session_id": session_id}
-        )
+@web_router.get("/payment/success", response_class=HTMLResponse)
+async def payment_success_page(
+    request: Request,
+    session_id: str,
+):
+    cookie = request.cookies.get("access_token")
+    token = jwt_service.decode_jwt(cookie.encode("utf-8"))
 
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Erreur lors du chargement de la page: {e}"
-        ) from e
+    user_id = int(token["user_id"])
+    user = customer_service.get_customer_by_id(user_id)
+
+    user_id = int(token["user_id"])
+    user = customer_service.get_customer_by_id(user_id)
+    return templates.TemplateResponse(
+        "customer/success.html",
+        {"request": request, "session_id": session_id, "user": user},
+    )
 
 
 @web_router.get("/logout", response_class=HTMLResponse)

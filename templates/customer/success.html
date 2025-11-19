@@ -237,9 +237,6 @@
                     <span>Numéro de commande</span>
                     <span class="order-detail-value" id="order-id">--</span>
                 </div>
-                <div class="order-detail">
-                    <span>Statut</span>
-                    <span class="order-detail-value">En préparation</span>
                 </div>
                 <div class="order-detail">
                     <span>Total</span>
@@ -253,7 +250,6 @@
             </div>
         </div>
 
-        <!-- État d'erreur -->
         <div id="error-state" class="error-state" style="display: none;">
             <div class="error-icon">⚠️</div>
             <h2 style="color: #2c3e50; margin-bottom: 15px;">Erreur de vérification</h2>
@@ -271,6 +267,9 @@
     // Récupérer le session_id depuis l'URL
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get('session_id');
+    const orderId = urlParams.get('order_id');
+    console.log(sessionId)
+    console.log(orderId)
 
     // Vérifier le paiement au chargement de la page
     document.addEventListener('DOMContentLoaded', async function() {
@@ -284,16 +283,15 @@
 
     async function verifyPayment(sessionId) {
         try {
-            // Appeler l'API pour vérifier le paiement (attention: "succes" sans "s")
-            const response = await fetch("/customer/payment/verify-payment", {
-                method: 'POST',
-                credentials: 'include',
-                body: JSON.stringify(sessionId)
+            const response = await fetch(`/customer/payment/verify-payment?session_id=${sessionId}`, {
+                method: 'GET',
+                credentials: 'include'
             });
 
             if (response.ok) {
-                const order = await response.json();
-                showSuccess(order);
+                const order_infos = await response.json();
+                console.log(order_infos)
+                showSuccess(order_infos);
             } else {
                 const error = await response.json();
                 showError(error.detail || 'Erreur lors de la vérification du paiement');
@@ -304,15 +302,17 @@
         }
     }
 
-    function showSuccess(order) {
+    function showSuccess(order_infos) {
         document.getElementById('loading-state').style.display = 'none';
         document.getElementById('success-state').style.display = 'block';
         document.getElementById('error-state').style.display = 'none';
-
+        
         // Afficher les détails de la commande
-        if (order) {
+        if (order_infos) {
+            console.log(order_infos.order_price)
+            order = order_infos.order
             document.getElementById('order-id').textContent = `#${order.order_id || '--'}`;
-            document.getElementById('order-total').textContent = `${(order.order_price || 0).toFixed(2)}€`;
+            document.getElementById('order-total').textContent = `${(order_infos.order_price || 0).toFixed(2)}€`;
         }
     }
 

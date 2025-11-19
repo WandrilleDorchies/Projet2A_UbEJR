@@ -235,7 +235,7 @@ def view_order_history(customer_id: int = Depends(get_customer_id_from_token)):
                     orderables_list.append(
                         {
                             "item_name": orderable.item_name,
-                            "item_price": orderable.item_price,
+                            "item_price": orderable.price,
                             "quantity": qty,
                             "type": "item",
                         }
@@ -245,7 +245,7 @@ def view_order_history(customer_id: int = Depends(get_customer_id_from_token)):
                     orderables_list.append(
                         {
                             "bundle_name": orderable.bundle_name,
-                            "bundle_price": orderable.bundle_price,
+                            "bundle_price": orderable.price,
                             "quantity": qty,
                             "type": "bundle",
                         }
@@ -253,7 +253,7 @@ def view_order_history(customer_id: int = Depends(get_customer_id_from_token)):
 
             formatted_order = {
                 "order_id": order.order_id,
-                "order_timestamp": str(order.order_timestamp),
+                "order_timestamp": str(order.order_created_at),
                 "order_state": str(order.order_state),
                 "order_price": order.order_price,
                 "items": orderables_list,
@@ -313,7 +313,7 @@ def create_checkout_session(
         ) from e
 
 
-@customer_router.post(
+@customer_router.get(
     "/payment/verify-payment",
     status_code=status.HTTP_202_ACCEPTED,
     dependencies=[Depends(CustomerBearer())],
@@ -332,10 +332,10 @@ def verify_payment(
                 detail=f"Payment not completed. Status: {payment_info['payment_status']}",
             )
 
-        order_service.mark_as_paid(order_id)
+        paid_order = order_service.mark_as_paid(order_id)
         order_service.create_order(customer_id)
 
-        return order_service.get_order_by_id(order_id)
+        return {"order": paid_order, "order_price": paid_order.order_price}
 
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
