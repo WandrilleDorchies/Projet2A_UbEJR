@@ -28,6 +28,31 @@ class UserService:
     def login(
         self, identifier: str, password: str, user_type: Literal["customer", "driver", "admin"]
     ) -> Union[Customer, Driver, Admin]:
+        """
+        Allows a user to login
+
+        Parameters
+        ----------
+        identifier : str
+            The user's identifier
+            Phone number for customer and drivers, email for customers only
+        password : str
+            The user's password
+        user_type : Literal[&quot;customer&quot;, &quot;driver&quot;, &quot;admin&quot;]
+            _description_
+
+        Returns
+        -------
+        Union[Customer, Driver, Admin]
+            _description_
+
+        Raises
+        ------
+        ValueError
+            _description_
+        ValueError
+            _description_
+        """
         user = None
         validated_identifier = self.identifier_validator(identifier)
         if not validated_identifier:
@@ -61,6 +86,28 @@ class UserService:
         new_password: str,
         user_type: Literal["customer", "driver", "admin"],
     ) -> Union[Customer, Driver, Admin]:
+        """
+        Allows a user of any kind to change its password.
+        The method requires knowledge of the old password,
+        and performs checks (special character, number ...)
+        on the new password.
+
+        Parameters
+        ----------
+        user_id : int
+            The id of the user updating its password
+        old_password : str
+            the user's password to be replaced
+        new_password : str
+            he new password chosen by the user
+        user_type : Literal[customer, driver, admin]
+            the user's type
+
+        Returns
+        -------
+        Union[Customer, Driver, Admin]
+            _description_
+        """
         user = self._get_user_by_type(user_id, user_type)
 
         validate_password(user, old_password)
@@ -78,7 +125,24 @@ class UserService:
         elif user_type == "admin":
             return self.admin_dao.update_admin_password(new_hashed)
 
-    def _get_user_by_type(self, user_id: int, user_type: Literal["customer", "driver", "admin"]):
+    def _get_user_by_type(
+        self, user_id: int, user_type: Literal["customer", "driver", "admin"]
+    ) -> Union[Customer, Driver, Admin]:
+        """
+        Given a user id and a user type, retries the user by its id according to its type
+
+        Parameters
+        ----------
+        user_id : int
+            The user to be retrieved's id (unique by type)
+        user_type : Literal[customer, driver, admin]
+            _description_
+
+        Returns
+        -------
+        Union[Customer, Driver, Admin]
+            The user as identified by id and type
+        """
         if user_type == "customer":
             return self.customer_dao.get_customer_by_id(user_id)
         elif user_type == "driver":
@@ -101,7 +165,7 @@ class UserService:
         Parameters
         ----------
         identifier : str
-            either an email or a p
+            either an email or a phone number
 
         Returns
         -------
