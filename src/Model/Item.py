@@ -31,6 +31,7 @@ class Item(Orderable):
     def __init__(self, **args):
         args["orderable_type"] = "item"
         super().__init__(**args)
+        self.is_in_menu = True if self.is_in_menu and self.check_availability() else False
 
     def __hash__(self) -> int:
         return hash(self.orderable_id)

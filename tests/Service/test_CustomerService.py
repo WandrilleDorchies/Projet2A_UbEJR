@@ -41,8 +41,12 @@ class TestCustomerService:
 
     def test_get_customer_by_phone_not_exists(self, customer_service, clean_database):
         """Test getting customer by non-existing phone returns None"""
-        with pytest.raises(ValueError, match=re.escape("[CustomerService] Cannot find: customer "
-                                                       "with phone +33699999999 not found.")):
+        with pytest.raises(
+            ValueError,
+            match=re.escape(
+                "[CustomerService] Cannot find: customer with phone +33699999999 not found."
+            ),
+        ):
             customer_service.get_customer_by_phone("+33699999999")
 
     def test_get_all_customers_empty(self, customer_service, clean_database):

@@ -1,4 +1,5 @@
 import os
+from typing import Dict
 
 import stripe
 from stripe._error import StripeError
@@ -16,28 +17,29 @@ class StripeService:
         self.cancel_url = f"{self.base_url}menu"
 
     @log
-    def create_checkout_session(self, order: Order, customer_mail: str) -> Session:
+    def create_checkout_session(self, order: Order, customer_mail: str) -> Dict:
         """
-        _summary_
+        Create a checkout session with the order infos
+        that will redirect the user to the payment page.
 
         Parameters
         ----------
         order : Order
-            _description_
+            The order that will be paid
         customer_mail : str
-            _description_
+            The unique mail of the customer
 
         Returns
         -------
-        Session
-            _description_
+        Dict
+            A dictionnary with the url to the payment page and the id of the checkout session
 
         Raises
         ------
         ValueError
-            _description_
+            If the shopping cart is empty
         ValueError
-            _description_
+            If an error occured during the creation of the session
         """
         if len(order.order_orderables) == 0:
             raise ValueError("Your order is empty.")
@@ -90,24 +92,28 @@ class StripeService:
             raise ValueError(f"Error while creating Stripe checkout session: {str(e)}") from e
 
     @log
-    def verify_payment(self, session_id: int):
+    def verify_payment(self, session_id: int) -> Dict:
         """
-        _summary_
+        Retrieve a checkout session to check that it was correctly paid
 
         Parameters
         ----------
         session_id : int
-            _description_
+            The unique id of the checkout session
 
         Returns
         -------
-        _type_
-            _description_
+        Dict
+            A dictionnary :
+                - paid: bool
+                    True if the order was correctly paid else False
+                -payment_status: str
+                    The payment status
 
         Raises
         ------
         ValueError
-            _description_
+            If an error occured while retrieving the checkout session
         """
         try:
             session = Session.retrieve(session_id)
