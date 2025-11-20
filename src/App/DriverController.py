@@ -4,6 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import BaseModel
 
+from src.Model.Bundle import Bundle
+from src.Model.Item import Item
 from src.Model.Order import OrderState
 
 from .init_app import customer_service, driver_service, gm_service, jwt_service, order_service
@@ -75,7 +77,47 @@ def update_profile(
 )
 def get_available_orders():
     try:
-        return order_service.get_available_orders_for_drivers()
+        orders = order_service.get_available_orders_for_drivers()
+        orders_infos = []
+
+        for order in orders:
+            orderables_list = []
+            address = customer_service.get_address_by_customer_id(order.order_customer_id)
+
+            for orderable, qty in order.order_orderables.items():
+                if isinstance(orderable, Item):
+                    orderables_list.append(
+                        {
+                            "item_name": orderable.item_name,
+                            "item_price": orderable.price,
+                            "item_type": orderable.item_type,
+                            "image_url": orderable.orderable_image_url,
+                            "quantity": qty,
+                            "type": "item",
+                        }
+                    )
+
+                elif isinstance(orderable, Bundle):
+                    orderables_list.append(
+                        {
+                            "bundle_name": orderable.bundle_name,
+                            "bundle_price": orderable.price,
+                            "image_url": orderable.orderable_image_url,
+                            "quantity": qty,
+                            "type": "bundle",
+                        }
+                    )
+
+            formatted_order = {
+                "order_id": order.order_id,
+                "order_timestamp": str(order.order_created_at),
+                "order_price": round(order.order_price, 2),
+                "items": orderables_list,
+                "address": str(address),
+            }
+            orders_infos.append(formatted_order)
+
+        return orders_infos
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
     except Exception as e:
@@ -127,7 +169,7 @@ def start_delivery(order_id: int, driver_id: int = Depends(get_driver_id_from_to
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(DriverBearer())],
 )
-def get_path(order_id: int = Depends(get_current_order_id)):
+def get_path(order_id: int):
     try:
         order = order_service.get_order_by_id(order_id)
         if order.order_state != OrderState.DELIVERING:
@@ -149,7 +191,7 @@ def get_path(order_id: int = Depends(get_current_order_id)):
     dependencies=[Depends(DriverBearer())],
 )
 def end_delivery(
-    order_id: int = Depends(get_current_order_id),
+    order_id: int,
     driver_id: int = Depends(get_driver_id_from_token),
 ):
     try:

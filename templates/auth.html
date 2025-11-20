@@ -229,7 +229,7 @@
         <div class="form-group">
             <label for="login-user-type">I am :</label>
             <select id="login-user-type" name="user_type" required>
-                <option value="customer">Client</option>
+                <option value="customer">Customer</option>
                 <option value="driver">Driver</option>
                 <option value="admin">Admin</option>
             </select>
@@ -420,7 +420,7 @@
                 if (data.user_type === 'customer') {
                     window.location.href = '/menu';
                 } else if (data.user_type === 'driver') {
-                    window.location.href = '/driver/deliveries';
+                    window.location.href = '/deliveries';
                 } else if (data.user_type === 'admin') {
                     window.location.href = '/admin/docs';
                 }

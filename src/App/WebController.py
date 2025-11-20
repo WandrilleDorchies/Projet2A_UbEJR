@@ -3,6 +3,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from .CustomerController import get_customer_id_from_token
+from .DriverController import get_driver_id_from_token
 from .init_app import customer_service, driver_service, jwt_service, menu_service
 
 templates = Jinja2Templates(directory="templates")
@@ -107,6 +108,26 @@ async def payment_success_page(
     return templates.TemplateResponse(
         "customer/success.html",
         {"request": request, "session_id": session_id, "user": user},
+    )
+
+
+@web_router.get("/deliveries", response_class=HTMLResponse)
+async def driver_deliveries_page(
+    request: Request, user_id: int = Depends(get_driver_id_from_token)
+):
+    driver = driver_service.get_driver_by_id(user_id)
+    return templates.TemplateResponse(
+        "driver/deliveries.html", {"request": request, "user": driver}
+    )
+
+
+@web_router.get("/driver/delivery/{order_id}", response_class=HTMLResponse)
+async def driver_active_delivery_page(
+    request: Request, order_id: int, user_id: int = Depends(get_driver_id_from_token)
+):
+    user = driver_service.get_driver_by_id(user_id)
+    return templates.TemplateResponse(
+        "driver/active_delivery.html", {"request": request, "user": user, "order_id": order_id}
     )
 
 

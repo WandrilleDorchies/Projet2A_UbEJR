@@ -1,6 +1,5 @@
 from typing import Annotated
 
-from __unknown__ import driver_service
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import BaseModel
@@ -12,6 +11,7 @@ from src.Model.Item import Item
 from .init_app import (
     address_service,
     customer_service,
+    driver_service,
     jwt_service,
     order_service,
     stripe_service,

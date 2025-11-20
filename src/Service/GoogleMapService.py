@@ -124,14 +124,23 @@ class GoogleMapService:
 
         try:
             directions_result = self.__gmaps.directions(
-                self.ensai_address, destination, mode="driving", departure_time=now, language="fr"
+                self.ensai_address, destination, mode="driving", departure_time=now
             )
-
             if not directions_result:
                 raise ValueError("No route found.")
+
+            destination_geocode = self.__gmaps.geocode(destination)
+            coord_destination = destination_geocode[0]["geometry"]["location"]
+
+            url = (
+                "https://www.google.com/maps/embed/v1/directions"
+                f"?key={os.environ['GOOGLE_MAPS_API_KEY']}"
+                f"&origin={self.coord_ensai['lat']}, {self.coord_ensai['lng']}"
+                f"&destination={coord_destination['lat']}, {coord_destination['lng']}"
+                "&mode=driving&zoom=15"
+            )
 
         except Exception as e:
             raise Exception(f"Error while computing path: {e}") from e
 
-        path = directions_result[0]["legs"][0]
-        return path
+        return url

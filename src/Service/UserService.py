@@ -54,22 +54,23 @@ class UserService:
             _description_
         """
         user = None
-        validated_identifier = self.identifier_validator(identifier)
-        if not validated_identifier:
-            logging.error(
-                "[UserService] Login failed for user of type {user_type}:"
-                " Identifier {identfier} invalid"
-            )
-            raise ValueError("Invalid identfier!")
-        logging.info("[UserService] Identifier validated. Attempting to find the user... ")
-        if user_type == "customer" and validated_identifier["type"] == "phone":
-            user = self.customer_dao.get_customer_by_phone(validated_identifier["identifier"])
-        elif user_type == "customer" and validated_identifier["type"] == "email":
-            user = self.customer_dao.get_customer_by_email(validated_identifier["identifier"])
-        elif user_type == "driver" and validated_identifier["type"] == "phone":
-            user = self.driver_dao.get_driver_by_phone(validated_identifier["identifier"])
-        elif user_type == "admin" and identifier == "adminsee":
+        if user_type == "admin" and identifier == "adminsee":
             user = self.admin_dao.get_admin()
+        else:
+            validated_identifier = self.identifier_validator(identifier)
+            if not validated_identifier:
+                logging.error(
+                    "[UserService] Login failed for user of type {user_type}:"
+                    " Identifier {identfier} invalid"
+                )
+                raise ValueError("Invalid identfier!")
+            logging.info("[UserService] Identifier validated. Attempting to find the user... ")
+            if user_type == "customer" and validated_identifier["type"] == "phone":
+                user = self.customer_dao.get_customer_by_phone(validated_identifier["identifier"])
+            elif user_type == "customer" and validated_identifier["type"] == "email":
+                user = self.customer_dao.get_customer_by_email(validated_identifier["identifier"])
+            elif user_type == "driver" and validated_identifier["type"] == "phone":
+                user = self.driver_dao.get_driver_by_phone(validated_identifier["identifier"])
         if not user:
             logging.error(f"[UserService] Login failed for user with identifier: {identifier}")
             raise ValueError(f"[UserService] User not found with identifier: {identifier}")

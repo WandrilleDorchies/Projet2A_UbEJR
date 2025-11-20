@@ -346,7 +346,7 @@
             
             if (response.ok || response.status === 204) {
                 alert('Your account has been deleted');
-                window.location.href = '/';
+                window.location.href = '/logout';
             } else {
                 const error = await response.json();
                 alert('Error: ' + (error.detail || 'An error occured while deleting your account'));
