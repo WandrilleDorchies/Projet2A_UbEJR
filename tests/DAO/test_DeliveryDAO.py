@@ -13,20 +13,20 @@ class TestDeliveryDAO:
         assert delivery.delivery_driver_id == sample_driver.id
         assert delivery.delivery_state == 0
 
-    def test_get_delivery_by_driver_exists(
+    def test_get_deliveries_by_driver_exists(
         self, delivery_dao, sample_order, sample_driver, clean_database
     ):
         """Test getting delivery by driver id"""
         delivery_dao.create_delivery(order_id=sample_order.order_id, driver_id=sample_driver.id)
-        retrieved_delivery = delivery_dao.get_delivery_by_driver(sample_driver.id)
+        retrieved_delivery = delivery_dao.get_deliveries_by_driver(sample_driver.id)
 
         assert retrieved_delivery is not None
         assert retrieved_delivery.delivery_driver_id == sample_driver.id
         assert retrieved_delivery.delivery_order_id == sample_order.order_id
 
-    def test_get_delivery_by_driver_not_exists(self, delivery_dao, clean_database):
+    def test_get_deliveries_by_driver_not_exists(self, delivery_dao, clean_database):
         """Test getting delivery by non-existant driver id"""
-        retrieved_delivery = delivery_dao.get_delivery_by_driver(9999)
+        retrieved_delivery = delivery_dao.get_deliveries_by_driver(9999)
 
         assert retrieved_delivery is None
 
@@ -142,7 +142,7 @@ class TestDeliveryDAO:
 
         delivery_dao.delete_delivery(delivery_id)
 
-        retrieved_delivery = delivery_dao.get_delivery_by_driver(sample_driver.id)
+        retrieved_delivery = delivery_dao.get_deliveries_by_driver(sample_driver.id)
 
         if retrieved_delivery is not None:
             assert retrieved_delivery.delivery_order_id != delivery_id

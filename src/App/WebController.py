@@ -68,10 +68,16 @@ async def get_profile_page(
 
         elif user_type == "driver":
             user = driver_service.get_driver_by_id(user_id)
-
+            stats = driver_service.get_sriver_stats(user_id)
             return templates.TemplateResponse(
                 "driver/profile_driver.html",
-                {"request": request, "user": user, "user_type": "driver"},
+                {
+                    "request": request,
+                    "user": user,
+                    "user_type": "driver",
+                    "nb_orders": stats["nb_orders"],
+                    "earnings": stats["earnings"],
+                },
             )
 
         else:

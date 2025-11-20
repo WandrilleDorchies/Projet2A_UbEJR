@@ -1,6 +1,6 @@
 import logging
 import re
-from typing import Optional
+from typing import Dict, Optional, Union
 
 from src.DAO.DeliveryDAO import DeliveryDAO
 from src.DAO.DriverDAO import DriverDAO
@@ -225,3 +225,16 @@ class DriverService:
     def delete_driver(self, driver_id: int) -> None:
         self.get_driver_by_id(driver_id)
         self.driver_dao.delete_driver(driver_id)
+
+    @log
+    def get_driver_stats(self, driver_id: int) -> Dict[str, Union[int, float]]:
+        deliveries = self.delivery_dao.get_deliveries_by_driver(driver_id)
+
+        nb_orders = len(deliveries)
+        earnings = 0.0
+
+        for delivery in deliveries:
+            order = self.order_dao.get_order_by_id(delivery.delivery_order_id)
+            earnings += order.order_price
+
+        return {"nb_orders": nb_orders, "earnings": round(earnings, 2)}

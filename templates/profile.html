@@ -87,7 +87,7 @@
         <h2>Password</h2>
     </div>
     
-    <form id="password-form" class="profile-form" onsubmit="updatePassword(event)"">
+    <form id="password-form" class="profile-form" onsubmit="updatePassword(event)">
         <div class="form-group">
             <label for="current_password">Current password</label>
             <input type="password" id="current_password" name="current_password" placeholder="Your current password" required>
@@ -182,7 +182,6 @@
             const editBtn = form.previousElementSibling.querySelector('.edit-btn');
             
             form.reset();
-            form.style.display = 'none';
             placeholder.style.display = 'block';
             editBtn.style.display = 'block';
         }
