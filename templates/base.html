@@ -23,7 +23,9 @@
                     {% endif %}
 
                     {% if user.user_role == "driver" %}
-                        <a href="/deliveries" class="nav-item">Deliveries</a>
+                        {% if user.is_delivering %}
+                            <a href="/deliveries" class="nav-item">Deliveries</a>
+                        {% endif %}
                     {% endif %}
                     <a href="/profile" class="nav-item">Hello, {{ user.first_name }}</a>
                     <a href="/logout" class="nav-item btn-logout">Logout</a>

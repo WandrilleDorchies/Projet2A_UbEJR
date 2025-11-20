@@ -14,7 +14,6 @@
         gap: 20px;
     }
 
-    /* Header de la livraison */
     .delivery-header {
         background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
         border-radius: 20px;
@@ -298,17 +297,11 @@
             <div class="info-card">
                 <h3>
                     <i class="fa-solid fa-location-dot"></i>
-                    Address
+                    Delivery address
                 </h3>
                 <div class="address-box">
-                    <div class="address-text" id="delivery-address">Loading...</div>
+                    <div class="address-text" id="delivery-address">{{ address }}</div>
                 </div>
-            </div>
-            <div class="info-card">
-                <h3>
-                    <i class="fa-solid fa-compass"></i>
-                    Navigation
-                </h3>
             </div>
         </div>
     </div>
@@ -332,10 +325,9 @@
             const response = await fetch(`/drivers/orders/${currentOrderId}/path`, {
                 credentials: 'include'
             });
-            console.log(response)
             if (response.ok) {
-                const pathData = await response.json();
-                console.log(pathData)
+                const data = await response.json();
+                console.log(data)
                 const mapHtml = `
                     <iframe
                         width="100%"
@@ -344,12 +336,14 @@
                         loading="lazy"
                         allowfullscreen
                         referrerpolicy="no-referrer-when-downgrade"
-                        src="${pathData}">
+                        src="${data.url}">
                     </iframe>
                 `;
                 
                 document.getElementById('map').innerHTML = mapHtml;
+                document.getElementById('delivery-address').innerHTML = data.address
             }
+
         } catch (error) {
             console.error('Erreur:', error);
         }
@@ -367,7 +361,7 @@
             });
 
             if (response.ok) {
-                window.location.href = '/driver/deliveries';
+                window.location.href = '/deliveries';
             } else {
                 const error = await response.json();
                 alert('Error: ' + (error.detail || 'Error ending delivery'));

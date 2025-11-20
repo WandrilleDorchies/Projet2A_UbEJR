@@ -178,7 +178,7 @@ def get_path(order_id: int):
                 detail=f"This order isn't in delivery, current state : {order.order_state}",
             )
         address = customer_service.get_address_by_customer_id(order.order_customer_id)
-        return gm_service.get_path(str(address))
+        return {"url": gm_service.get_path(str(address)), "address": str(address)}
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
     except Exception as e:

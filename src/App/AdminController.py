@@ -1,8 +1,10 @@
 from datetime import datetime
 from typing import Annotated, Literal, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.security import HTTPAuthorizationCredentials
+from fastapi.templating import Jinja2Templates
 
 from .init_app import (
     bundle_service,
@@ -15,6 +17,7 @@ from .init_app import (
 )
 from .JWTBearer import AdminBearer
 
+templates = Jinja2Templates(directory="templates")
 admin_router = APIRouter(prefix="", tags=["Admin"], dependencies=[Depends(AdminBearer())])
 
 
@@ -475,3 +478,10 @@ def get_overview():
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching datas: {e}") from e
+
+
+@admin_router.get("/logout", response_class=HTMLResponse)
+async def logout(request: Request):
+    response = RedirectResponse("/", status_code=302)
+    response.delete_cookie(key="access_token")
+    return templates.TemplateResponse("auth.html", {"request": request})

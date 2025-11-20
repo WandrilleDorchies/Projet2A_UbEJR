@@ -121,7 +121,7 @@ async def driver_deliveries_page(
     )
 
 
-@web_router.get("/driver/delivery/{order_id}", response_class=HTMLResponse)
+@web_router.get("/delivery/{order_id}", response_class=HTMLResponse)
 async def driver_active_delivery_page(
     request: Request, order_id: int, user_id: int = Depends(get_driver_id_from_token)
 ):

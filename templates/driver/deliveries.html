@@ -547,7 +547,7 @@
             });
 
             if (response.ok) {
-                window.location.href = `/driver/delivery/${orderId}`;
+                window.location.href = `/delivery/${orderId}`;
             } else {
                 const error = await response.json();
                 alert('Error: ' + (error.detail || 'Error occured while starting delivery'));
