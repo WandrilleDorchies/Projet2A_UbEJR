@@ -15,7 +15,7 @@ def test_encode_jwt():
     print(jwtResponse.access_token)
     assert (
         jwtResponse.access_token
-        == "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoibXlVc2VyIiwidXNlcl9yb2xlIjoiY3VzdG9tZXIiLCJleHBpcnlfdGltZXN0YW1wIjoxNzI0Njc0MjAwLjB9.arE3LvBst4NygMUWdXD1sMIaeW9yrWDIo5KswSM6des"  # noqa: E501
+        == "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoibXlVc2VyIiwidXNlcl9yb2xlIjoiY3VzdG9tZXIiLCJleHBpcnlfdGltZXN0YW1wIjoxNzI0Njc3MjAwLjB9.Zmay-jStMDgD5GssJXrkTC9VLNVQddorYVwPomF93XE"  # noqa: E501
     )
 
 

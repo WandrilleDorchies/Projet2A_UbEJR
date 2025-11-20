@@ -186,6 +186,7 @@ class TestMenuService:
             is_in_menu=True,
         )
 
+        print(item.is_in_menu)
         orderable = menu_service.get_orderable_from_menu(item.orderable_id)
 
         assert orderable is None

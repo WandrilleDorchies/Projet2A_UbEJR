@@ -38,20 +38,20 @@ class UserService:
             Phone number for customer and drivers, email for customers only
         password : str
             The user's password
-        user_type : Literal[&quot;customer&quot;, &quot;driver&quot;, &quot;admin&quot;]
-            _description_
+        user_type : Literal["customer", "driver", "admin"]
+            The user's role
 
         Returns
         -------
         Union[Customer, Driver, Admin]
-            _description_
+            The corresponding user object
 
         Raises
         ------
         ValueError
-            _description_
+            If the used identifier isn't valid
         ValueError
-            _description_
+            If the used identifier is unknown
         """
         user = None
         if user_type == "admin" and identifier == "adminsee":
@@ -63,7 +63,7 @@ class UserService:
                     "[UserService] Login failed for user of type {user_type}:"
                     " Identifier {identfier} invalid"
                 )
-                raise ValueError("Invalid identfier!")
+                raise ValueError("Invalid identifier!")
             logging.info("[UserService] Identifier validated. Attempting to find the user... ")
             if user_type == "customer" and validated_identifier["type"] == "phone":
                 user = self.customer_dao.get_customer_by_phone(validated_identifier["identifier"])
@@ -107,7 +107,7 @@ class UserService:
         Returns
         -------
         Union[Customer, Driver, Admin]
-            _description_
+            The corresponding user object
         """
         user = self._get_user_by_type(user_id, user_type)
 
@@ -137,7 +137,7 @@ class UserService:
         user_id : int
             The user to be retrieved's id (unique by type)
         user_type : Literal[customer, driver, admin]
-            _description_
+            The corresponding user object
 
         Returns
         -------

@@ -103,8 +103,7 @@ namespace DAOs {
         +get_customer_by_id(customer_id: int): Optional[Customer]
         +get_customer_by_email(mail: str) -> Optional[Customer]
         +get_customer_by_phone(phone: str) -> Optional[Customer]
-        +get_all_customer_email(): List[str]
-        +get_all_customers(): Optional[list[Customer]]
+        +get_all_customers(): Optional[List[Customer]]
         +update_customer(customer_id: int, update: dict): Optional[Customer]
         +delete_customer(self, customer_id: int):None
         _map_db_to_model(raw_customer: dict) -> dict:

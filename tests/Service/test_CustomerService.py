@@ -28,9 +28,8 @@ class TestCustomerService:
 
     def test_get_customer_by_email_not_exists(self, customer_service, clean_database):
         """Test getting customer by non-existing email returns None"""
-        retrieved_customer = customer_service.get_customer_by_email("nonexistent@email.com")
-
-        assert retrieved_customer is None
+        with pytest.raises(ValueError, match="customer with email nonexistent@email.com not found"):
+            customer_service.get_customer_by_email("nonexistent@email.com")
 
     def test_get_customer_by_phone_exists(self, customer_service, sample_customer, clean_database):
         """Test getting a customer by phone"""
@@ -42,9 +41,13 @@ class TestCustomerService:
 
     def test_get_customer_by_phone_not_exists(self, customer_service, clean_database):
         """Test getting customer by non-existing phone returns None"""
-        retrieved_customer = customer_service.get_customer_by_phone("+33699999999")
-
-        assert retrieved_customer is None
+        with pytest.raises(
+            ValueError,
+            match=re.escape(
+                "[CustomerService] Cannot find: customer with phone +33699999999 not found."
+            ),
+        ):
+            customer_service.get_customer_by_phone("+33699999999")
 
     def test_get_all_customers_empty(self, customer_service, clean_database):
         """Test getting all customers when there are none"""
@@ -72,14 +75,6 @@ class TestCustomerService:
 
         assert customers != []
         assert len(customers) == 3
-
-    def test_get_all_customer_email(self, customer_service, sample_customer, clean_database):
-        """Test getting all customer emails"""
-        emails = customer_service.get_all_customer_email()
-
-        assert emails is not None
-        assert len(emails) >= 1
-        assert sample_customer.customer_mail in emails
 
     def test_create_customer_success(self, customer_service, clean_database):
         """Test creating a customer successfully"""

@@ -29,7 +29,7 @@ class JwtService:
         payload = {
             "user_id": user_id,
             "user_role": user_role,
-            "expiry_timestamp": time.time() + 600,
+            "expiry_timestamp": time.time() + 3600,
         }
         token = jwt.encode(payload, self.secret, algorithm=self.algorithm)
 

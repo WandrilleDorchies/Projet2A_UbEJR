@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Optional, Union
 
 from src.DAO.BundleDAO import BundleDAO
 from src.DAO.ItemDAO import ItemDAO
@@ -21,17 +21,18 @@ class MenuService:
     @log
     def get_all_orderables(self, in_menu=True) -> List[Union[Item, Bundle]]:
         """
-        _summary_
+        Fetch all the orderables
 
         Parameters
         ----------
         in_menu : bool, optional
-            _description_, by default True
+            if True only fetch the orderables in the menu, else fetch all orderables
+            by default True
 
         Returns
         -------
         List[Union[Item, Bundle]]
-            _description_
+            A list of Item and Bundle object
         """
         orderables = self.orderable_dao.get_all_orderables()
 
@@ -39,34 +40,34 @@ class MenuService:
         for orderable in orderables:
             if orderable["orderable_type"] == "item":
                 item = self.item_dao.get_item_by_orderable_id(orderable["orderable_id"])
-                if (in_menu and item.check_availability()) or in_menu is False:
+                if (in_menu and item.is_in_menu) or in_menu is False:
                     Orderables_in_menu.append(item)
             if orderable["orderable_type"] == "bundle":
                 bundle = self.bundle_dao.get_bundle_by_orderable_id(orderable["orderable_id"])
-                if (in_menu and bundle.check_availability()) or in_menu is False:
+                if (in_menu and bundle.is_in_menu) or in_menu is False:
                     Orderables_in_menu.append(bundle)
 
         return Orderables_in_menu
 
     @log
-    def get_orderable_from_menu(self, orderable_id: int) -> Union[Item, Bundle]:
+    def get_orderable_from_menu(self, orderable_id: int) -> Optional[Union[Item, Bundle]]:
         """
-        _summary_
+        Fetch an orderable if it's currently on the menu
 
         Parameters
         ----------
         orderable_id : int
-            _description_
+            Unique identifier of the ordereable
 
         Returns
         -------
         Union[Item, Bundle]
-            _description_
+            An Item or Bundle object
 
         Raises
         ------
         ValueError
-            _description_
+            If the orderable id is invalid
         """
         orderable = self.orderable_dao.get_orderable_by_id(orderable_id)
         if orderable is None:
@@ -75,33 +76,33 @@ class MenuService:
             )
         if orderable["orderable_type"] == "item":
             item = self.item_dao.get_item_by_orderable_id(orderable["orderable_id"])
-            return item if item.check_availability() else None
+            return item if item.is_in_menu else None
 
         if orderable["orderable_type"] == "bundle":
             bundle = self.bundle_dao.get_bundle_by_orderable_id(orderable["orderable_id"])
-            return bundle if bundle.check_availability() else None
+            return bundle if bundle.is_in_menu else None
 
     @log
     def remove_orderable_from_menu(self, orderable_id: int) -> Union[Item, Bundle]:
         """
-        _summary_
+        Check if the orderable can be removed from the menu, if so remove it
 
         Parameters
         ----------
         orderable_id : int
-            _description_
+            Unique identifier of the orderable
 
         Returns
         -------
         Union[Item, Bundle]
-            _description_
+            The removed orderable
 
         Raises
         ------
         ValueError
-            _description_
+            If the orderable id is invalid
         ValueError
-            _description_
+            If the orderable is already off the menu
         """
         orderable = self.orderable_dao.get_orderable_by_id(orderable_id)
 
@@ -131,28 +132,28 @@ class MenuService:
     @log
     def add_orderable_to_menu(self, orderable_id: int) -> Union[Item, Bundle]:
         """
-        _summary_
+        Check if an orderable can be added to the menu, if so add it
 
         Parameters
         ----------
         orderable_id : int
-            _description_
+            Unique identifier of the orderable
 
         Returns
         -------
         Union[Item, Bundle]
-            _description_
+            The added orderable
 
         Raises
         ------
         ValueError
-            _description_
+            If the orderable id is invalid
         ValueError
-            _description_
+            If the orderable is already on the menu
         ValueError
-            _description_
+            If the item hasn't enough stock
         ValueError
-            _description_
+            If the bundle isn't available
         """
         orderable = self.orderable_dao.get_orderable_by_id(orderable_id)
 
@@ -191,18 +192,18 @@ class MenuService:
         return orderable_instance
 
     @log
-    def get_orderable_image(self, orderable_id: int) -> bytes:
+    def get_orderable_image(self, orderable_id: int) -> str:
         """
-        _summary_
+        Fetch the image url of an orderable
 
         Parameters
         ----------
         orderable_id : int
-            _description_
+            Unique identifier of the orderable
 
         Returns
         -------
-        bytes
-            _description_
+        str
+            The url of the orderable img
         """
         return self.orderable_dao.get_image_from_orderable(orderable_id)

@@ -1,6 +1,6 @@
 import logging
 import re
-from typing import List, Optional
+from typing import List
 
 from src.DAO.CustomerDAO import CustomerDAO
 from src.Model.Address import Address
@@ -28,24 +28,24 @@ class CustomerService:
         self.pattern = r"^(?=.*[A-Za-zÀ-ÖØ-öø-ÿ])[-A-Za-zÀ-ÖØ-öø-ÿ ]+$"
 
     @log
-    def get_customer_by_id(self, customer_id: int) -> Optional[Customer]:
+    def get_customer_by_id(self, customer_id: int) -> Customer:
         """
-        _summary_
+        Retrieve the customer associated with a given id.
 
         Parameters
         ----------
         customer_id : int
-            _description_
+            Unique identifier of the customer
 
         Returns
         -------
-        Optional[Customer]
-            _description_
+        Customer
+            A Customer object if found in the database
 
         Raises
         ------
         ValueError
-            _description_
+           Raised if the customer isn't found in the database
         """
         customer = self.customer_dao.get_customer_by_id(customer_id)
         if customer is None:
@@ -57,80 +57,87 @@ class CustomerService:
     @log
     def get_address_by_customer_id(self, customer_id: int) -> Address:
         """
-        _summary_
+        Retrieve the address associated with a customer
 
         Parameters
         ----------
         customer_id : int
-            _description_
+            Unique identifier of the customer
 
         Returns
         -------
         Address
-            _description_
+            An Address Object if the customer is found in the database
         """
         self.get_customer_by_id(customer_id)
         return self.address_service.get_address_by_customer_id(customer_id)
 
     @log
-    def get_customer_by_email(self, customer_email: str) -> Optional[Customer]:
+    def get_customer_by_email(self, customer_email: str) -> Customer:
         """
-        _summary_
+        Retrieve a customer via his email address
 
         Parameters
         ----------
         customer_email : str
-            _description_
+            Unique email of the customer
 
         Returns
         -------
-        Optional[Customer]
-            _description_
+        Customer
+            A Customer object if found in the database
+
+        Raises
+        ------
+        ValueError
+           Raised if the customer isn't found in the database
         """
-        return self.customer_dao.get_customer_by_email(customer_email)
+        customer = self.customer_dao.get_customer_by_email(customer_email)
+        if customer is None:
+            raise ValueError(
+                f"[CustomerService] Cannot find: customer with email {customer_email} not found."
+            )
+        return customer
 
     @log
-    def get_customer_by_phone(self, customer_phone: int) -> Optional[Customer]:
+    def get_customer_by_phone(self, customer_phone: int) -> Customer:
         """
-        _summary_
+        Retrive a customer by his phone number
 
         Parameters
         ----------
         customer_phone : int
-            _description_
+            Unique phone number of a customer
 
         Returns
         -------
-        Optional[Customer]
-            _description_
+        Customer
+            A Customer object if found in the database
+
+        Raises
+        ------
+        ValueError
+           Raised if the customer isn't found in the database
         """
-        return self.customer_dao.get_customer_by_phone(customer_phone)
+        customer = self.customer_dao.get_customer_by_phone(customer_phone)
+        if customer is None:
+            raise ValueError(
+                f"[CustomerService] Cannot find: customer with phone {customer_phone} not found."
+            )
+        return customer
 
     @log
-    def get_all_customers(self) -> Optional[List[Customer]]:
+    def get_all_customers(self) -> List[Customer]:
         """
-        _summary_
+        Fetch all customers of the database
 
         Returns
         -------
-        Optional[List[Customer]]
-            _description_
+        List[Customer]
+            A list of Customer object, an empty list if there is none
         """
         customers = self.customer_dao.get_all_customers()
         return customers
-
-    @log
-    def get_all_customer_email(self) -> Optional[List[str]]:
-        """
-        _summary_
-
-        Returns
-        -------
-        Optional[List[str]]
-            _description_
-        """
-        customers_email = self.customer_dao.get_all_customer_email()
-        return customers_email
 
     @log
     def create_customer(
@@ -141,42 +148,53 @@ class CustomerService:
         mail: str,
         password: str,
         address_string: str,
-    ) -> Optional[Customer]:
+    ) -> Customer:
         """
-        _summary_
+        Create a customer (and his address) after checking and formatting infos
+        Checking:
+            - First and last name should only contains letters
+            - Email is unique and valid
+            - Phone number is unique and valid
+            - Password meet all the requirements
+
+        Formatting:
+            - First name as snake-case
+            - Last Name as uppercase
+            - Format the phone number to E164
+            - Normalize the email
 
         Parameters
         ----------
         first_name : str
-            _description_
+            First name of the customer
         last_name : str
-            _description_
+            Last name of the customer
         phone : str
-            _description_
+            Phone number (will be formatted)
         mail : str
-            _description_
+            An email
         password : str
-            _description_
+            A password that meets the requirements (will be hashed)
         address_string : str
-            _description_
+            A string containing all the infos of the address
 
         Returns
         -------
-        Optional[Customer]
-            _description_
+        Customer
+            The customer if successfuly created
 
         Raises
         ------
         ValueError
-            _description_
+            If the first or last name is invalid
         ValueError
-            _description_
+            If the phone number is invalid
         ValueError
-            _description_
+            If a customer with the same phone number already exists
         ValueError
-            _description_
+            If the email is invalid
         ValueError
-            _description_
+            If a customer with the same email already exists
         """
         # Check on first and last name
         if not re.match(self.pattern, first_name) or not re.match(self.pattern, last_name):
@@ -228,7 +246,7 @@ class CustomerService:
         return customer
 
     @log
-    def login_customer(self, identifier: str, password: str) -> Optional[Customer]:
+    def login_customer(self, identifier: str, password: str) -> Customer:
         """
         Allows the customer to login by calling the mutual user_service.login method,
         which also handles errors
@@ -242,40 +260,53 @@ class CustomerService:
 
         Returns
         -------
-        Optional[Customer]
-            A Csutomer object in case of successful login
+        Customer
+            A Customer object in case of successful login
         """
         return self.user_service.login(identifier, password, "customer")
 
     @log
-    def update_customer(self, customer_id: int, update: dict) -> Customer:
+    def update_customer(self, customer_id: int, update: dict) -> Customer:  # noqa 901C
         """
-        _summary_
+        Update a customer personal informations after checking and formatting
+        infos from the dictionnary
+
+        Checking:
+            - First and last name should only contains letters
+            - Email is unique and valid
+            - Phone number is unique and valid
+            - Password meet all the requirements
+
+        Formatting:
+            - First name as snake-case
+            - Last Name as uppercase
+            - Format the phone number to E164
+            - Normalize the email
 
         Parameters
         ----------
         customer_id : int
-            _description_
+            Unique identifier of the customer
         update : dict
-            _description_
+            A dictionnary with the name of the variable to update as key and the change as value
 
         Returns
         -------
         Customer
-            _description_
+            The customer if successfuly updated
 
         Raises
         ------
         ValueError
-            _description_
+            If the first or last name is invalid
         ValueError
-            _description_
+            If the phone number is invalid
         ValueError
-            _description_
+            If a customer with the same phone number already exists
         ValueError
-            _description_
+            If the email is invalid
         ValueError
-            _description_
+            If a customer with the same email already exists
         """
         self.get_customer_by_id(customer_id)
 
@@ -307,6 +338,14 @@ class CustomerService:
             if validated_phone is None or validated_phone["type"] != "phone":
                 raise ValueError(f"The number {update['customer_phone']} is invalid.")
 
+            existing_user = self.customer_dao.get_customer_by_phone(validated_phone["identifier"])
+            if existing_user is not None:
+                logging.error(
+                    "[CustomerService] Cannot create: customer "
+                    f"with phone {validated_phone['identifier']} "
+                    "already exists."
+                )
+            raise ValueError("This phone number is already associated with an account !")
             update["customer_phone"] = validated_phone["identifier"]
 
         if update.get("customer_mail"):
@@ -314,6 +353,11 @@ class CustomerService:
             validated_email = self.user_service.identifier_validator(customer_mail)
             if validated_email is None or validated_email["type"] != "email":
                 raise ValueError(f"The email {update['customer_mail']} is invalid.")
+
+            existing_user = self.customer_dao.get_customer_by_email(validated_email["identifier"])
+            if existing_user is not None:
+                logging.error("[CustomerService] Email already in use !")
+                raise ValueError("This email is already associated with an account !")
 
             update["customer_mail"] = validated_email["identifier"]
 
@@ -378,19 +422,6 @@ class CustomerService:
         return self.user_service.change_password(
             customer_id, old_password, new_password, "customer"
         )
-
-    # @log
-    # def update_phone(self, customer_id: int, phone: str) -> Customer:
-
-    #     phone_number = pn.parse(phone, "FR")
-    #     if not pn.is_valid_number(phone_number) or not pn.is_possible_number(phone_number):
-    #         raise ValueError(f"The number {phone} is invalid.")
-
-    #     customer_phone = "0" + str(phone_number.national_number)
-
-    #     update = {"customer_phone": customer_phone}
-    #     updated_customer = self.update_customer(customer_id, update)
-    #     return updated_customer
 
     @log
     def delete_customer(self, customer_id: int) -> None:
