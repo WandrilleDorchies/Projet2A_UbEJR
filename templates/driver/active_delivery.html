@@ -275,7 +275,6 @@
     <div class="delivery-header">
         <div class="delivery-title">
             <h1 id="order-title">Delivery #--</h1>
-            <div class="delivery-subtitle">Delivering...</div>
         </div>
         <button class="end-delivery-btn" onclick="endDelivery()">
             <i class="fa-solid fa-check-circle"></i>
@@ -342,6 +341,7 @@
                 
                 document.getElementById('map').innerHTML = mapHtml;
                 document.getElementById('delivery-address').innerHTML = data.address
+                document.getElementById('order-title').innerHTML = `Delivery # ${currentOrderId}`
             }
 
         } catch (error) {
