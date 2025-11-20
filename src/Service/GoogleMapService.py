@@ -79,6 +79,19 @@ class GoogleMapService:
 
     @log
     def extract_components(self, address: str) -> Dict[str, Union[str, int]]:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        address : str
+            a complete address as a single string
+
+        Returns
+        -------
+        Dict[str, Union[str, int]]
+            _description_
+        """
         result = self.__gmaps.geocode(address)
 
         number = street = city = postal_code = country = None

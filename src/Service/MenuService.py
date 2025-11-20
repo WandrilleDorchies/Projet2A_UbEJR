@@ -20,6 +20,19 @@ class MenuService:
 
     @log
     def get_all_orderables(self, in_menu=True) -> List[Union[Item, Bundle]]:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        in_menu : bool, optional
+            _description_, by default True
+
+        Returns
+        -------
+        List[Union[Item, Bundle]]
+            _description_
+        """
         orderables = self.orderable_dao.get_all_orderables()
 
         Orderables_in_menu = []
@@ -37,6 +50,24 @@ class MenuService:
 
     @log
     def get_orderable_from_menu(self, orderable_id: int) -> Union[Item, Bundle]:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        orderable_id : int
+            _description_
+
+        Returns
+        -------
+        Union[Item, Bundle]
+            _description_
+
+        Raises
+        ------
+        ValueError
+            _description_
+        """
         orderable = self.orderable_dao.get_orderable_by_id(orderable_id)
         if orderable is None:
             raise ValueError(
@@ -52,6 +83,26 @@ class MenuService:
 
     @log
     def remove_orderable_from_menu(self, orderable_id: int) -> Union[Item, Bundle]:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        orderable_id : int
+            _description_
+
+        Returns
+        -------
+        Union[Item, Bundle]
+            _description_
+
+        Raises
+        ------
+        ValueError
+            _description_
+        ValueError
+            _description_
+        """
         orderable = self.orderable_dao.get_orderable_by_id(orderable_id)
 
         if orderable is None:
@@ -79,6 +130,30 @@ class MenuService:
 
     @log
     def add_orderable_to_menu(self, orderable_id: int) -> Union[Item, Bundle]:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        orderable_id : int
+            _description_
+
+        Returns
+        -------
+        Union[Item, Bundle]
+            _description_
+
+        Raises
+        ------
+        ValueError
+            _description_
+        ValueError
+            _description_
+        ValueError
+            _description_
+        ValueError
+            _description_
+        """
         orderable = self.orderable_dao.get_orderable_by_id(orderable_id)
 
         if orderable is None:
@@ -117,4 +192,17 @@ class MenuService:
 
     @log
     def get_orderable_image(self, orderable_id: int) -> bytes:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        orderable_id : int
+            _description_
+
+        Returns
+        -------
+        bytes
+            _description_
+        """
         return self.orderable_dao.get_image_from_orderable(orderable_id)
