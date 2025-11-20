@@ -1,3 +1,4 @@
+import logging
 from typing import List, Optional
 
 from src.DAO.AddressDAO import AddressDAO
@@ -19,6 +20,7 @@ class AddressService:
     def get_address_by_id(self, address_id: int) -> Optional[Address]:
         address = self.address_dao.get_address_by_id(address_id)
         if address is None:
+            logging.error(f"[AddressService] Cannot find: Address with ID {address_id} not found.")
             raise ValueError(
                 f"[AddressService] Cannot find: Address with ID {address_id} not found."
             )
@@ -28,6 +30,9 @@ class AddressService:
     def get_address_by_customer_id(self, customer_id: int) -> Optional[Address]:
         address = self.address_dao.get_address_by_customer_id(customer_id)
         if address is None:
+            logging.error(
+                f"[AddressService] Cannot find Address for customer ID {customer_id} not found."
+            )
             raise ValueError(
                 f"[AddressService] Cannot find Address for customer ID {customer_id} not found."
             )
@@ -37,6 +42,7 @@ class AddressService:
     def get_all_address(self) -> Optional[List[Address]]:
         addresses = self.address_dao.get_all_address()
         if addresses is None:
+            logging.error("[AddressService] No adresses in the database.")
             raise ValueError("[AddressService] No adresses in the database.")
         return addresses
 
