@@ -105,14 +105,7 @@ class CustomerDAO(metaclass=Singleton):
         return Customer(**mapped_args)
 
     @log
-    def get_all_customer_email(self) -> List[str]:
-        raw_mails = self.db_connector.sql_query(
-            "SELECT customer_mail FROM Customers;", return_type="all"
-        )
-        return [raw_mail["customer_mail"] for raw_mail in raw_mails] if raw_mails else None
-
-    @log
-    def get_all_customers(self) -> Optional[list[Customer]]:
+    def get_all_customers(self) -> Optional[List[Customer]]:
         raw_customers = self.db_connector.sql_query("SELECT * from Customers ", return_type="all")
 
         if not raw_customers:

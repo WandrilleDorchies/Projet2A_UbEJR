@@ -73,14 +73,6 @@ class TestCustomerService:
         assert customers != []
         assert len(customers) == 3
 
-    def test_get_all_customer_email(self, customer_service, sample_customer, clean_database):
-        """Test getting all customer emails"""
-        emails = customer_service.get_all_customer_email()
-
-        assert emails is not None
-        assert len(emails) >= 1
-        assert sample_customer.customer_mail in emails
-
     def test_create_customer_success(self, customer_service, clean_database):
         """Test creating a customer successfully"""
         created_customer = customer_service.create_customer(

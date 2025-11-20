@@ -36,7 +36,7 @@ def hash_password(password: str, salt: str) -> str:
     return hashlib.sha256(salt.encode() + password.encode()).hexdigest()
 
 
-def check_password_strength(password: str) -> Literal[True]:  # noqa: C901
+def check_password_strength(password: str) -> Literal[True]:
     """
     Validate that a password meets security requirements.
 
