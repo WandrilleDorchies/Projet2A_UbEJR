@@ -25,8 +25,8 @@
                     {% if user.user_role == "driver" %}
                         <a href="/deliveries" class="nav-item">Livraisons</a>
                     {% endif %}
-                    <a href="/profile" class="nav-item">Bonjour, {{ user.first_name }}</a>
-                    <a href="/logout" class="nav-item btn-logout">Déconnexion</a>
+                    <a href="/profile" class="nav-item">Hello, {{ user.first_name }}</a>
+                    <a href="/logout" class="nav-item btn-logout">Logout</a>
                 {% else %}
                     <a href="/login" class="nav-item">Connexion</a>
                 {% endif %}
@@ -51,7 +51,7 @@
 
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2025 Ub'EJR Eats - La meilleure galette-saucisse de Rennes!</p>
+            <p>2025 Ub'EJR Eats - Best galette-saucisse of Rennes</p>
         </div>
     </footer>
 

@@ -1,10 +1,10 @@
-<!-- Bundles/Menus -->
 {% if bundles %}
     {% for bundle in bundles %}
     <div class="menu-item bundle-card" data-type="bundles" 
          data-item-id="{{ bundle.orderable_id }}" 
          data-name="{{ bundle.bundle_name }}"
          data-price="{{ bundle.price }}"
+        data-image-url="{{ bundle.orderable_image_url }}"
          data-orderable-type="bundle">
         <div class="item-image">
             {% if bundle.orderable_image_url %}
@@ -12,7 +12,7 @@
             {% else %}
                 <i class="fa-solid fa-utensils"></i>
             {% endif %}
-            <span class="item-badge">Menu -{{ bundle.bundle_reduction }}%</span>
+            <span class="item-badge">Save {{ bundle.bundle_reduction }}%</span>
         </div>
         <div class="item-content">
             <div class="item-header">
@@ -20,7 +20,10 @@
                 <span class="item-price">{{ "%.2f"|format(bundle.price) }}€</span>
             </div>
             <p class="item-description">
-                {{ bundle.bundle_description or "Menu spécial avec plusieurs produits" }}
+                {{ bundle.bundle_description}}
+            </p>
+            <p class="item-stock {% if bundle.get_stock() <= 10 %}low{% endif %}">
+                En stock : {{ bundle.get_stock() }} unité{{ "s" if bundle.get_stock() > 1 else "" }}
             </p>
             
             <div class="bundle-items-list">
@@ -39,7 +42,7 @@
                         <button class="qty-btn" onclick="increaseQty(this, {{ bundle.get_stock() }})">+</button>
                     </div>
                     <button class="add-to-cart-btn" onclick="addToCart(this)">
-                        Ajouter
+                        Add
                     </button>
             </div>
         </div>

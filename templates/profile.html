@@ -1,20 +1,17 @@
-<!-- Composant commun de profil - Formulaires de modification -->
-
-<!-- Section Profil -->
 <div class="profile-section">
     <div class="section-header">
-        <h2>Informations personnelles</h2>
-        <button class="edit-btn" onclick="toggleEdit('profile')">Modifier</button>
+        <h2>Personal Informations</h2>
+        <button class="edit-btn" onclick="toggleEdit('profile')">Edit</button>
     </div>
     
     <form id="profile-form" class="profile-form" onsubmit="updateProfile(event)">
         <div class="form-row">
             <div class="form-group">
-                <label for="first_name">Prénom</label>
+                <label for="first_name">First Name</label>
                 <input type="text" id="first_name" name="first_name" value="{{ user.first_name }}" disabled>
             </div>
             <div class="form-group">
-                <label for="last_name">Nom</label>
+                <label for="last_name">Last Name</label>
                 <input type="text" id="last_name" name="last_name" value="{{ user.last_name }}" disabled>
             </div>
         </div>
@@ -26,108 +23,97 @@
                 <input type="email" id="email" name="mail" value="{{ user.customer_mail }}" disabled>
             </div>
             <div class="form-group">
-                <label for="phone">Téléphone</label>
+                <label for="phone">Phone</label>
                 <input type="tel" id="phone" name="phone" value="{{ user.customer_phone }}" disabled>
             </div>
         </div>
         {% else %}
         <div class="form-group">
-            <label for="phone">Téléphone</label>
+            <label for="phone">Phone</label>
             <input type="tel" id="phone" name="phone" value="{{ user.driver_phone }}" disabled>
         </div>
         {% endif %}
         
-        <div class="form-actions" style="display: none;">
-            <button type="button" class="btn-secondary" onclick="cancelEdit('profile')">Annuler</button>
-            <button type="submit" class="btn-primary">Enregistrer</button>
+        <div class="form-actions">
+            <button type="button" class="btn-secondary" onclick="cancelEdit('profile')">Cancel</button>
+            <button type="submit" class="btn-primary">Save</button>
         </div>
     </form>
 </div>
-
-<!-- Section Adresse (uniquement pour customer) -->
 {% if user_type == 'customer'%}
 <div class="profile-section">
     <div class="section-header">
-        <h2>Adresse de livraison</h2>
-        <button class="edit-btn" onclick="toggleEdit('address')">Modifier</button>
+        <h2>Address</h2>
+        <button class="edit-btn" onclick="toggleEdit('address')">Edit</button>
     </div>
     
     <form id="address-form" class="profile-form" onsubmit="updateAddress(event)">
         <div class="form-group">
-            <label for="address_street">Rue</label>
+            <label for="address_street">Street</label>
             <input type="text" id="address_street" name="address_street" value="{{ user.customer_address.address_street }}" disabled>
         </div>
         
         <div class="form-row">
             <div class="form-group">
-                <label for="address_number">Numéro</label>
+                <label for="address_number">Number</label>
                 <input type="number" id="address_number" name="address_number" value="{{ user.customer_address.address_number }}" disabled>
             </div>
             <div class="form-group">
-                <label for="address_postal_code">Code postal</label>
+                <label for="address_postal_code">Postal Code</label>
                 <input type="number" id="address_postal_code" name="address_postal_code" value="{{ user.customer_address.address_postal_code }}" disabled>
             </div>
         </div>
         
         <div class="form-row">
             <div class="form-group">
-                <label for="address_city">Ville</label>
+                <label for="address_city">City</label>
                 <input type="text" id="address_city" name="address_city" value="{{ user.customer_address.address_city }}" disabled>
             </div>
             <div class="form-group">
-                <label for="address_country">Pays</label>
+                <label for="address_country">Country</label>
                 <input type="text" id="address_country" name="address_country" value="{{ user.customer_address.address_country }}" disabled>
             </div>
         </div>
         
         <div class="form-actions" style="display: none;">
-            <button type="button" class="btn-secondary" onclick="cancelEdit('address')">Annuler</button>
-            <button type="submit" class="btn-primary">Enregistrer</button>
+            <button type="button" class="btn-secondary" onclick="cancelEdit('address')">Cancel</button>
+            <button type="submit" class="btn-primary">Save</button>
         </div>
     </form>
 </div>
 {% endif %}
-
-<!-- Section Mot de passe -->
 <div class="profile-section">
     <div class="section-header">
-        <h2>Mot de passe</h2>
-        <button class="edit-btn" onclick="toggleEdit('password')">Modifier</button>
+        <h2>Password</h2>
     </div>
     
-    <form id="password-form" class="profile-form" onsubmit="updatePassword(event)" style="display: none;">
+    <form id="password-form" class="profile-form" onsubmit="updatePassword(event)"">
         <div class="form-group">
-            <label for="current_password">Mot de passe actuel</label>
-            <input type="password" id="current_password" name="current_password" placeholder="Votre mot de passe actuel" required>
+            <label for="current_password">Current password</label>
+            <input type="password" id="current_password" name="current_password" placeholder="Your current password" required>
         </div>
         
         <div class="form-group">
-            <label for="new_password">Nouveau mot de passe</label>
-            <input type="password" id="new_password" name="new_password" placeholder="Minimum 8 caractères" minlength="8" required>
+            <label for="new_password">New password</label>
+            <input type="password" id="new_password" name="new_password" placeholder="At least 8 characters, 1 uppercase later and a special character" minlength="8" required>
         </div>
         
         <div class="form-group">
-            <label for="confirm_password">Confirmer le mot de passe</label>
-            <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirmez votre nouveau mot de passe" minlength="8" required>
+            <label for="confirm_password">Confirm new password</label>
+            <input type="password" id="confirm_password" name="confirm_password" placeholder="Confirme your new password" minlength="8" required>
         </div>
         
         <div class="form-actions">
-            <button type="button" class="btn-secondary" onclick="cancelEdit('password')">Annuler</button>
-            <button type="submit" class="btn-primary">Modifier le mot de passe</button>
+            <button type="button" class="btn-secondary" onclick="cancelEdit('password')">Cancel</button>
+            <button type="submit" class="btn-primary">Edit password</button>
         </div>
     </form>
-    
-    <div id="password-placeholder">
-        <p style="color: #7f8c8d;">Cliquez sur "Modifier" pour changer votre mot de passe</p>
-    </div>
 </div>
 
 <script>
-    // Variables pour stocker les valeurs originales
     let originalProfileData = {};
     let originalAddressData = {};
 
-    // Toggle edit mode pour chaque section
     function toggleEdit(section) {
         if (section === 'profile') {
             const form = document.getElementById('profile-form');
@@ -135,7 +121,6 @@
             const actions = form.querySelector('.form-actions');
             const editBtn = form.previousElementSibling.querySelector('.edit-btn');
             
-            // Sauvegarder les valeurs originales
             originalProfileData = {};
             inputs.forEach(input => {
                 input.disabled = false;
@@ -151,7 +136,6 @@
             const actions = form.querySelector('.form-actions');
             const editBtn = form.previousElementSibling.querySelector('.edit-btn');
             
-            // Sauvegarder les valeurs originales
             originalAddressData = {};
             inputs.forEach(input => {
                 input.disabled = false;
@@ -160,19 +144,9 @@
             
             actions.style.display = 'flex';
             editBtn.style.display = 'none';
-            
-        } else if (section === 'password') {
-            const form = document.getElementById('password-form');
-            const placeholder = document.getElementById('password-placeholder');
-            const editBtn = form.previousElementSibling.querySelector('.edit-btn');
-            
-            form.style.display = 'block';
-            placeholder.style.display = 'none';
-            editBtn.style.display = 'none';
         }
     }
 
-    // Annuler les modifications
     function cancelEdit(section) {
         if (section === 'profile') {
             const form = document.getElementById('profile-form');
@@ -180,7 +154,6 @@
             const actions = form.querySelector('.form-actions');
             const editBtn = form.previousElementSibling.querySelector('.edit-btn');
             
-            // Restaurer les valeurs originales
             inputs.forEach(input => {
                 input.disabled = true;
                 input.value = originalProfileData[input.name] || '';
@@ -195,10 +168,9 @@
             const actions = form.querySelector('.form-actions');
             const editBtn = form.previousElementSibling.querySelector('.edit-btn');
             
-            // Restaurer les valeurs originales
             inputs.forEach(input => {
                 input.disabled = true;
-                input.value = originalAddressData[input.name] || '';
+                input.value = originalAddressData[input.name];
             });
             
             actions.style.display = 'none';
@@ -216,14 +188,12 @@
         }
     }
 
-    // Mettre à jour le profil
     async function updateProfile(event) {
         event.preventDefault();
         
         const formData = new FormData(event.target);
         const data = {};
         
-        // Construire l'objet avec les bons noms de paramètres
         const userType = '{{ user_type }}';
         if (userType === 'customer') {
             data.customer_first_name = formData.get('first_name');
@@ -248,18 +218,17 @@
             });
             
             if (response.ok) {
-                alert('Profil mis à jour avec succès !');
+                alert('Profil successfuly edited');
                 window.location.reload();
             } else {
                 const error = await response.json();
-                alert('Erreur: ' + (error.detail || 'Impossible de mettre à jour le profil'));
+                alert('Error: ' + (error.detail || 'Error occured while editing profile'));
             }
         } catch (error) {
-            alert('Erreur: ' + error.message);
+            alert('Error: ' + error.message);
         }
     }
 
-    // Mettre à jour l'adresse
     async function updateAddress(event) {
         event.preventDefault();
         
@@ -283,18 +252,17 @@
             });
             
             if (response.ok) {
-                alert('Adresse mise à jour avec succès !');
+                alert('Address successfuly edited');
                 window.location.reload();
             } else {
                 const error = await response.json();
-                alert('Erreur: ' + (error.detail || 'Impossible de mettre à jour l\'adresse'));
+                alert('Error: ' + (error.detail || 'Error while updating address'));
             }
         } catch (error) {
-            alert('Erreur: ' + error.message);
+            alert('Error: ' + error.message);
         }
     }
 
-    // Mettre à jour le mot de passe
     async function updatePassword(event) {
         event.preventDefault();
         
@@ -304,11 +272,6 @@
             new_password: formData.get('new_password'),
             confirm_password: formData.get('confirm_password')
         };
-        
-        if (data.new_password !== data.confirm_password) {
-            alert('Les mots de passe ne correspondent pas !');
-            return;
-        }
         
         try {
             const response = await fetch('/customer/me/password', {
@@ -321,14 +284,15 @@
             });
             
             if (response.ok) {
-                alert('Mot de passe modifié avec succès !');
+                alert('Password successfuly updated !');
                 cancelEdit('password');
             } else {
                 const error = await response.json();
-                alert('Erreur: ' + (error.detail || 'Impossible de modifier le mot de passe'));
+                alert('Error: ' + (error.detail || 'Error while updating password'));
             }
         } catch (error) {
-            alert('Erreur: ' + error.message);
+            alert('Error: ' + error.message);
         }
     }
+
 </script>

@@ -315,7 +315,7 @@ def create_checkout_session(
 
 @customer_router.get(
     "/payment/verify-payment",
-    status_code=status.HTTP_202_ACCEPTED,
+    status_code=status.HTTP_200_OK,
     dependencies=[Depends(CustomerBearer())],
 )
 def verify_payment(
@@ -333,9 +333,37 @@ def verify_payment(
             )
 
         paid_order = order_service.mark_as_paid(order_id)
+
+        orderables_list = []
+        for orderable, qty in paid_order.order_orderables.items():
+            if isinstance(orderable, Item):
+                orderables_list.append(
+                    {
+                        "item_name": orderable.item_name,
+                        "item_price": orderable.price,
+                        "item_type": orderable.item_type,
+                        "image_url": orderable.orderable_image_url,
+                        "quantity": qty,
+                        "type": "item",
+                    }
+                )
+            elif isinstance(orderable, Bundle):
+                orderables_list.append(
+                    {
+                        "bundle_name": orderable.bundle_name,
+                        "bundle_price": orderable.price,
+                        "image_url": orderable.orderable_image_url,
+                        "quantity": qty,
+                        "type": "bundle",
+                    }
+                )
         order_service.create_order(customer_id)
 
-        return {"order": paid_order, "order_price": paid_order.order_price}
+        return {
+            "order_id": paid_order.order_id,
+            "order_price": paid_order.order_price,
+            "orderables": orderables_list,
+        }
 
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e

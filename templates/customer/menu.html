@@ -169,26 +169,6 @@
         object-fit: cover;
     }
 
-    .item-image::after {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
-        animation: rotate 20s linear infinite;
-    }
-
-    @keyframes rotate {
-        0% {
-            transform: rotate(0deg);
-        }
-        100% {
-            transform: rotate(360deg);
-        }
-    }
-
     .item-badge {
         position: absolute;
         top: 16px;
@@ -791,31 +771,18 @@
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
     }
-
-    /* Empty message */
-    .empty-message {
-        text-align: center;
-        padding: 80px 20px;
-    }
-
-    .empty-message-icon {
-        font-size: 64px;
-        margin-bottom: 16px;
-        opacity: 0.3;
-    }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="menu-container">
     <div class="page-header">
-        <h1>Notre Menu</h1>
-        <p>Découvrez nos délicieuses galettes-saucisses et menus</p>
+        <h1>Menu</h1>
     </div>
 
     <div class="menu-filters">
         <button class="filter-btn active" data-filter="all">
-            Tout
+            All products
         </button>
         {% for type in item_types %}
         <button class="filter-btn" data-filter="{{ type }}">
@@ -824,7 +791,7 @@
         {% endfor %}
         {% if bundles %}
         <button class="filter-btn" data-filter="bundles">
-            Menus
+            Bundles
         </button>
         {% endif %}
     </div>
@@ -849,7 +816,7 @@
     <div class="cart-items" id="cart-items">
         <div class="loading">
             <div class="loading-spinner"></div>
-            <p style="color: #7f8c8d;">Chargement du panier...</p>
+            <p style="color: #7f8c8d;">Loading cart...</p>
         </div>
     </div>
     <div class="cart-footer">
@@ -858,7 +825,7 @@
             <span class="cart-total-amount" id="cart-total">0,00€</span>
         </div>
         <button class="checkout-btn" onclick="checkout()" id="checkout-btn">
-            Commander
+            Checkout
         </button>
     </div>
 </div>
@@ -881,18 +848,17 @@
                 currentOrder = await response.json();
                 updateCartDisplay();
             } else {
-                console.error('Erreur lors du chargement du panier');
                 showEmptyCart();
             }
         } catch (error) {
-            console.error('Erreur:', error);
+            console.error('Error:', error);
             showEmptyCart();
         }
     }
 
     function showEmptyCart() {
         const cartItems = document.getElementById('cart-items');
-        cartItems.innerHTML = '<p style="text-align: center; color: #95a5a6; padding: 40px;">Votre panier est vide</p>';
+        cartItems.innerHTML = '<p style="text-align: center; color: #95a5a6; padding: 40px;">Your order is empty</p>';
         document.getElementById('cart-count').textContent = '0';
         document.getElementById('cart-total').textContent = '0,00€';
         document.getElementById('checkout-btn').disabled = true;
@@ -1031,13 +997,13 @@
                 }, 1500);
             } else {
                 const error = await response.json();
-                alert('Erreur: ' + (error.detail || 'Impossible d\'ajouter au panier'));
+                alert('Erreur: ' + (error.detail || 'Error while adding to order'));
                 btn.textContent = originalText;
                 btn.disabled = false;
             }
         } catch (error) {
             console.error('Erreur:', error);
-            alert('Erreur lors de l\'ajout au panier');
+            alert('Erreur adding to order');
             btn.textContent = originalText;
             btn.disabled = false;
         }
@@ -1063,11 +1029,11 @@
                 await loadCart();
             } else {
                 const error = await response.json();
-                alert('Erreur: ' + (error.detail || 'Impossible d\'ajouter au panier'));
+                alert('Erreur: ' + (error.detail || 'Error while adding to order'));
             }
         } catch (error) {
             console.error('Erreur:', error);
-            alert('Erreur lors de l\'ajout au panier');
+            alert('Erreur adding to order');
         }
     }
 
@@ -1091,11 +1057,11 @@
                 await loadCart();
             } else {
                 const error = await response.json();
-                alert('Erreur: ' + (error.detail || 'Impossible de retirer du panier'));
+                alert('Erreur: ' + (error.detail || 'Error while deleting from order'));
             }
         } catch (error) {
             console.error('Erreur:', error);
-            alert('Erreur lors du retrait du panier');
+            alert('Erreur deleting from order');
         }
     }
 
@@ -1125,11 +1091,11 @@
                 await loadCart();
             } else {
                 const error = await response.json();
-                alert('Erreur: ' + (error.detail || 'Impossible de supprimer du panier'));
+                alert('Erreur: ' + (error.detail || 'Error while deleting from order'));
             }
         } catch (error) {
             console.error('Erreur:', error);
-            alert('Erreur lors de la suppression');
+            alert('Erreur deleting from order');
         }
     }
 
@@ -1149,7 +1115,7 @@
 
         const checkoutBtn = document.getElementById('checkout-btn');
         checkoutBtn.disabled = true;
-        checkoutBtn.textContent = 'Chargement...';
+        checkoutBtn.textContent = 'Loading...';
 
         try {
             const response = await fetch('/customer/payment/checkout', {
@@ -1165,15 +1131,14 @@
                 window.location.href = data.url;
             } else {
                 const error = await response.json();
-                alert('Erreur lors de la commande: ' + (error.detail || 'Erreur inconnue'));
+                alert('Erreur while ordering: ' + (error.detail || 'An error occured while delivering'));
                 checkoutBtn.disabled = false;
-                checkoutBtn.textContent = 'Commander';
+                checkoutBtn.textContent = 'Checkout';
             }
         } catch (error) {
-            console.error('Erreur:', error);
-            alert('Erreur lors de la commande. Veuillez réessayer.');
+            console.error('Error:', error);
             checkoutBtn.disabled = false;
-            checkoutBtn.textContent = 'Commander';
+            checkoutBtn.textContent = 'Checkout';
         }
     }
 </script>

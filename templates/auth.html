@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Connexion / Inscription - Ub'EJR Eats{% endblock %}
+{% block title %}Login / Register - Ub'EJR Eats{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -200,17 +200,6 @@
         75% { transform: translateX(5px); }
     }
 
-    .address-help {
-        background: linear-gradient(135deg, #e8f4f8 0%, #d4e9f7 100%);
-        padding: 16px;
-        border-radius: 12px;
-        margin-top: 12px;
-        font-size: 13px;
-        color: #5a6c7d;
-        border-left: 3px solid #84fab0;
-        animation: slideInLeft 0.5s ease-out;
-    }
-
     @keyframes slideInLeft {
         from {
             transform: translateX(-20px);
@@ -222,10 +211,6 @@
         }
     }
 
-    .address-help::before {
-        content: "💡 ";
-        margin-right: 5px;
-    }
 </style>
 {% endblock %}
 
@@ -233,73 +218,73 @@
 <div class="auth-container">
     <div class="auth-tabs" id="auth-tabs">
         <button class="auth-tab active" onclick="switchTab('login')">
-            Connexion
+            Login
         </button>
         <button class="auth-tab" onclick="switchTab('register')">
-            Inscription
+            Register
         </button>
     </div>
 
     <form id="login-form" class="auth-form active" method="POST" action="/auth/login">
         <div class="form-group">
-            <label for="login-user-type">Je suis :</label>
+            <label for="login-user-type">I am :</label>
             <select id="login-user-type" name="user_type" required>
                 <option value="customer">Client</option>
-                <option value="driver">Livreur</option>
-                <option value="admin">Administrateur</option>
+                <option value="driver">Driver</option>
+                <option value="admin">Admin</option>
             </select>
         </div>
 
         <div class="form-group" id="login-identifier-group">
-            <label for="login-identifier">Email ou téléphone :</label>
+            <label for="login-identifier">Email or phone :</label>
             <input 
                 type="text" 
                 id="login-identifier" 
                 name="identifier" 
-                placeholder="exemple@email.com ou 0612345678"
+                placeholder="example@email.com / 0612345678"
                 required
             >
         </div>
 
         <div class="form-group">
-            <label for="login-password">Mot de passe :</label>
+            <label for="login-password">Password :</label>
             <input 
                 type="password" 
                 id="login-password" 
                 name="password" 
-                placeholder="Votre mot de passe"
+                placeholder="Your password"
                 required
             >
         </div>
 
-        <button type="submit" class="btn-submit">Se connecter</button>
+        <button type="submit" class="btn-submit">Login</button>
     </form>
 
     <form id="register-form" class="auth-form" method="POST" action="/auth/register">
         <div class="form-group">
-            <label for="register-first-name">Prénom :</label>
+            <label for="register-first-name">First Name :</label>
             <input 
                 type="text" 
                 id="register-first-name" 
                 name="first_name" 
-                placeholder="Jean"
+                placeholder="John"
                 required
             >
         </div>
 
         <div class="form-group">
-            <label for="register-last-name">Nom :</label>
+            <label for="register-last-name">Last Name :</label>
             <input 
                 type="text" 
                 id="register-last-name" 
                 name="last_name" 
-                placeholder="Dupont"
+                placeholder="Smith"
                 required
             >
         </div>
 
         <div class="form-group">
-            <label for="register-phone">Téléphone :</label>
+            <label for="register-phone">Phone :</label>
             <input 
                 type="tel" 
                 id="register-phone" 
@@ -317,7 +302,7 @@
                 type="email" 
                 id="register-email" 
                 name="mail" 
-                placeholder="exemple@email.com"
+                placeholder="example@email.com"
                 required
             >
         </div>
@@ -328,11 +313,11 @@
                 type="password" 
                 id="register-password" 
                 name="password" 
-                placeholder="Minimum 8 caractères, 1 majuscule et un caractère spécial"
+                placeholder="Your password"
                 minlength="8"
                 required
             >
-            <small>Minimum 8 caractères, avec majuscules, minuscules et chiffres</small>
+            <small>At least 8 character, an uppercase letter and a special character</small>
         </div>
 
         <div class="form-group">
@@ -341,14 +326,14 @@
                 type="password" 
                 id="register-confirm-password" 
                 name="confirm_password" 
-                placeholder="Confirmez votre mot de passe"
+                placeholder="Confirm your password"
                 minlength="8"
                 required
             >
         </div>
 
         <div class="form-group">
-            <label for="register-address">Adresse complète :</label>
+            <label for="register-address">Address :</label>
             <input 
                 type="text" 
                 id="register-address" 
@@ -356,10 +341,6 @@
                 placeholder="12 Rue de la République, 35000 Rennes"
                 required
             >
-            <div class="address-help">
-                Format: Numéro Rue, Code Postal Ville, Pays<br>
-                Exemple: 12 Rue Victor Hugo, 35000 Rennes, France
-            </div>
         </div>
 
         <button type="submit" class="btn-submit">S'inscrire</button>
@@ -396,20 +377,20 @@
         if (e.target.value === 'admin') {
             identifierGroup.style.display = 'block';
             identifierInput.required = true;
-            label.textContent = 'Identifiant :';
+            label.textContent = 'Username :';
             identifierInput.placeholder = 'id';
-            identifierInput.type = 'tel';
+            identifierInput.type = 'text';
         } else if (e.target.value === 'driver') {
             identifierGroup.style.display = 'block';
             identifierInput.required = true;
-            label.textContent = 'Téléphone :';
+            label.textContent = 'Phone :';
             identifierInput.placeholder = '0612345678';
             identifierInput.type = 'tel';
         } else {
             identifierGroup.style.display = 'block';
             identifierInput.required = true;
-            label.textContent = 'Email ou téléphone :';
-            identifierInput.placeholder = 'exemple@email.com ou 0612345678';
+            label.textContent = 'EMail or phone :';
+            identifierInput.placeholder = 'example@email.com or 0612345678';
             identifierInput.type = 'text';
         }
     });
@@ -445,10 +426,10 @@
                 }
             } else {
                 const error = await response.json();
-                alert('Erreur: ' + (error.detail || 'Identifiants incorrects'));
+                alert('Error: ' + (error.detail || 'Invalid credentials'));
             }
         } catch (error) {
-            alert('Erreur de connexion: ' + error.message);
+            alert('Error occured while login: ' + error.message);
         }
     });
 
@@ -469,29 +450,9 @@
             
             if (response.ok) {
                 window.location.href = '/menu';
-            } else {
-                const error = await response.json();
-            
-                let errorMessage = 'Inscription échouée';
-                
-                if (typeof error.detail === 'string') {
-                    errorMessage = error.detail;
-                } else if (Array.isArray(error.detail)) {
-                    errorMessage = error.detail.map(err => {
-                        if (err.msg) return err.msg;
-                        if (err.message) return err.message;
-                        return JSON.stringify(err);
-                    }).join('\n');
-                } else if (typeof error.detail === 'object') {
-                    errorMessage = JSON.stringify(error.detail, null, 2);
-                } else if (error.message) {
-                    errorMessage = error.message;
-                }
-                
-                alert('Erreur: ' + errorMessage);
             }
         } catch (error) {
-            alert('Erreur d\'inscription: ' + error.message);
+            alert('Erreur while registering : ' + error.message);
         }
     });
 </script>

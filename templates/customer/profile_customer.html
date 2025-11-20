@@ -161,7 +161,6 @@
         box-shadow: 0 6px 20px rgba(168, 184, 216, 0.4);
     }
 
-    /* Historique des commandes */
     .order-history {
         margin-top: 10px;
     }
@@ -282,22 +281,19 @@
 {% block content %}
 <div class="profile-container">
     <div class="page-header">
-        <h1>Mon Profil</h1>
+        <h1>My profile</h1>
     </div>
 
-    <!-- Inclusion du composant commun de profil -->
     {% include 'profile.html' %}
 
-    <!-- Historique des commandes -->
     <div class="profile-section">
         <div class="section-header">
-            <h2>Historique des commandes</h2>
+            <h2>Order history</h2>
         </div>
         
         <div class="order-history" id="order-history">
             <div class="empty-history">
-                <div class="empty-icon">Chargement...</div>
-                <p>Chargement de votre historique...</p>
+                <div class="empty-icon">Loading...</div>
             </div>
         </div>
     </div>
@@ -337,11 +333,11 @@
         }
 
         const statusLabels = {
-            'OrderState.PENDING': 'En cours',
-            'OrderState.PAID': 'En cours de préparation',
-            'OrderState.PREPARED': 'Prête',
-            'OrderState.DELIVERING': 'En livraison',
-            'OrderState.DELIVERED': 'Livrée'
+            'OrderState.PENDING': 'In progress',
+            'OrderState.PAID': 'En preparation',
+            'OrderState.PREPARED': 'Ready',
+            'OrderState.DELIVERING': 'Delivering',
+            'OrderState.DELIVERED': 'Delivered'
         };
 
         const statusClasses = {
@@ -371,7 +367,7 @@
 
                     return `
                         <div class="order-item">
-                            <span>${item.quantity}x ${itemName}</span>
+                            <span>${item.quantity} x ${itemName}</span>
                         </div>
                     `;
                 }).join('');
@@ -404,8 +400,7 @@
         const container = document.getElementById('order-history');
         container.innerHTML = `
             <div class="empty-history">
-                <div class="empty-icon">Aucune commande</div>
-                <p>Vous n'avez pas encore passé de commande</p>
+                <div class="empty-icon">No order yet</div>
             </div>
         `;
     }
