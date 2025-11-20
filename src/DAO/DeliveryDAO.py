@@ -32,7 +32,7 @@ class DeliveryDAO(metaclass=Singleton):
             "SELECT * from Deliveries WHERE delivery_driver_id=%s", [delivery_id_driver], "one"
         )
         if raw_delivery is None:
-            return None
+            return []
         return Delivery(**raw_delivery)
 
     @log

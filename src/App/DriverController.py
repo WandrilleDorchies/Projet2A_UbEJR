@@ -2,6 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
+from pydantic import BaseModel
 
 from src.Model.Order import OrderState
 
@@ -38,17 +39,22 @@ def get_profile(driver_id: int = Depends(get_driver_id_from_token)):
         raise HTTPException(status_code=500, detail=f"Error fetching profile: {e}") from e
 
 
+class DriverUpdate(BaseModel):
+    driver_first_name: str = None
+    driver_last_name: str = None
+    driver_phone: str = None
+
+
 @driver_router.put("/me", status_code=status.HTTP_200_OK, dependencies=[Depends(DriverBearer())])
 def update_profile(
-    driver_first_name: str = None,
-    driver_last_name: str = None,
-    driver_phone: str = None,
+    driver_update: DriverUpdate,
     driver_id: int = Depends(get_driver_id_from_token),
 ):
     try:
-        update_data = locals()
-        update_data.pop("driver_id")
-        if update_data.get("driver_phone") and customer_service.get_customer_by_phone(driver_phone):
+        update_data = vars(driver_update)
+        if driver_update.driver_phone and customer_service.get_customer_by_phone(
+            driver_update.driver_phone
+        ):
             raise HTTPException(
                 status_code=403,
                 detail="[DriverController] Cannot update driver: "
@@ -158,3 +164,24 @@ def end_delivery(
         raise HTTPException(status_code=404, detail=str(e)) from e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error finishing delivery: {e}") from e
+
+
+class DeleteAccountForm(BaseModel):
+    identifier: str
+    password: str
+
+
+@driver_router.delete(
+    "/delete_account",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(DriverBearer())],
+)
+def delete_account(delete_account: DeleteAccountForm):
+    try:
+        driver = driver_service.login_customer(delete_account.identifier, delete_account.password)
+        return customer_service.delete_customer(driver.id)
+
+    except ValueError as e:
+        raise HTTPException(status_code=401, detail=f"Invalid credentials: {e}") from e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Login failed: {e}") from e

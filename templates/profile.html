@@ -109,6 +109,26 @@
         </div>
     </form>
 </div>
+<div class="profile-section">
+    <div class="section-header">
+        <h2>Delete Account</h2>
+    </div>
+    
+    <form id="password-form" class="profile-form" onsubmit="deleteAccount(event)">
+        <div class="form-group">
+            <label for="identifier">New password</label>
+            <input type="text" id="identifier" name="identifier" placeholder="At least 8 characters, 1 uppercase later and a special character" minlength="8" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Passsword</label>
+            <input type="password" id="password" name="password" placeholder="Your password" required>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn-primary">Delete Account</button>
+        </div>
+    </form>
+</div>
 
 <script>
     let originalProfileData = {};
@@ -293,5 +313,46 @@
             alert('Error: ' + error.message);
         }
     }
-
+    async function deleteAccount(event) {
+        event.preventDefault();
+        
+        const confirmed = confirm(
+            "⚠️ WARNING ⚠️\n\n" +
+            "This action is irreversible and your data will be lost."
+        );
+        
+        if (!confirmed) {
+            return;
+        }
+        
+        const formData = new FormData(event.target);
+        const data = {
+            identifier: formData.get('identifier'),
+            password: formData.get('password')
+        };
+        
+        try {
+            const userType = '{{ user_type }}';
+            const endpoint = userType === 'customer' ? '/customer/delete_account' : '/drivers/delete_account';
+            
+            const response = await fetch(endpoint, {
+                method: 'DELETE',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+            
+            if (response.ok || response.status === 204) {
+                alert('Your account has been deleted');
+                window.location.href = '/';
+            } else {
+                const error = await response.json();
+                alert('Error: ' + (error.detail || 'An error occured while deleting your account'));
+            }
+        } catch (error) {
+            alert('Error: ' + error.message);
+        }
+    }
 </script>

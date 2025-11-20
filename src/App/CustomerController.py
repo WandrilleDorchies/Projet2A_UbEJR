@@ -1,5 +1,6 @@
 from typing import Annotated
 
+from __unknown__ import driver_service
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import BaseModel
@@ -82,6 +83,14 @@ def update_profile(
 ):
     try:
         update_data = vars(customer_update)
+        if customer_update.customer_phone and driver_service.get_driver_by_phone(
+            customer_update.driver_phone
+        ):
+            raise HTTPException(
+                status_code=403,
+                detail="[CustomerController] Cannot update customer: "
+                "A driver already have this phone number.",
+            )
         updated_customer = customer_service.update_customer(customer_id, update_data)
         return updated_customer
 
@@ -269,14 +278,21 @@ def view_order_history(customer_id: int = Depends(get_customer_id_from_token)):
         ) from e
 
 
+class DeleteAccountForm(BaseModel):
+    identifier: str
+    password: str
+
+
 @customer_router.delete(
     "/delete_account",
     status_code=status.HTTP_204_NO_CONTENT,
     dependencies=[Depends(CustomerBearer())],
 )
-def delete_account(identifier: str, password: str):
+def delete_account(delete_account: DeleteAccountForm):
     try:
-        customer = customer_service.login_customer(identifier, password)
+        customer = customer_service.login_customer(
+            delete_account.identifier, delete_account.password
+        )
         return customer_service.delete_customer(customer.id)
 
     except ValueError as e:

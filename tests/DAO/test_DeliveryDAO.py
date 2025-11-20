@@ -28,7 +28,7 @@ class TestDeliveryDAO:
         """Test getting delivery by non-existant driver id"""
         retrieved_delivery = delivery_dao.get_deliveries_by_driver(9999)
 
-        assert retrieved_delivery is None
+        assert retrieved_delivery == []
 
     def test_get_driver_current_delivery_exist(
         self, delivery_dao, sample_order, sample_driver, clean_database
