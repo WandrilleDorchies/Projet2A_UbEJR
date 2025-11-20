@@ -5,7 +5,10 @@ from fastapi.staticfiles import StaticFiles
 
 from src.utils.log_init import initialiser_logs
 
-from .AdminController import admin_router
+from .AdminController.AdminController import admin_router
+from .AdminController.AdminOrderablesController import admin_orderables_router
+from .AdminController.AdminOrdersController import admin_orders_router
+from .AdminController.AdminUsersController import admin_users_router
 from .AuthentificationController import auth_router
 from .CustomerController import customer_router
 from .DriverController import driver_router
@@ -32,6 +35,9 @@ def run_app():
     )
 
     admin_app.include_router(admin_router, prefix="")
+    admin_app.include_router(admin_orderables_router, prefix="")
+    admin_app.include_router(admin_users_router, prefix="")
+    admin_app.include_router(admin_orders_router, prefix="")
     app.mount("/admin", admin_app)
 
     app.include_router(web_router)
