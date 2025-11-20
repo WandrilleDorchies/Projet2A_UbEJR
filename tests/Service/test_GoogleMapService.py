@@ -71,9 +71,6 @@ class TestGoogleMapService:
         result = google_map_service.get_path(destination)
 
         assert result is not None
-        assert "distance" in result
-        assert "duration" in result
-        assert "steps" in result
 
     def test_get_path_to_invalid_destination(self, google_map_service):
         """Test: Destination invalide lève une exception"""

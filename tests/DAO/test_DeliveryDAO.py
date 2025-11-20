@@ -142,7 +142,7 @@ class TestDeliveryDAO:
 
         delivery_dao.delete_delivery(delivery_id)
 
-        retrieved_delivery = delivery_dao.get_deliveries_by_driver(sample_driver.id)
+        retrieved_delivery = delivery_dao.get_delivery_by_order_id(sample_order.order_id)
 
         if retrieved_delivery is not None:
             assert retrieved_delivery.delivery_order_id != delivery_id
