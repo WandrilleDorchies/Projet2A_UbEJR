@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Literal, Optional
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 
@@ -9,6 +9,7 @@ from src.App.init_app import (
     menu_service,
 )
 from src.App.JWTBearer import AdminBearer
+from src.Model.Item import ITEM_TYPE
 
 admin_orderables_router = APIRouter(
     prefix="", tags=["Menu / Orderables"], dependencies=[Depends(AdminBearer())]
@@ -53,13 +54,13 @@ def remove_orderable_from_menu(orderable_id: int):
     try:
         menu_service.remove_orderable_from_menu(orderable_id)
         return f"The item with Orderable ID {orderable_id} has been removed from the menu."
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error fetching orderables: {e}") from e
     except ValueError as e:
         raise HTTPException(
             status_code=400,
             detail=f"[AdminController] Cannot remove orderable from menu : {str(e)}",
         ) from e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching orderables: {e}") from e
 
 
 # ITEMS
@@ -82,7 +83,7 @@ def get_item_by_id(item_id: int):
 async def create_item(
     item_name: str,
     item_price: float,
-    item_type: Literal["Starter", "Main course", "Dessert", "Side dish", "Drink"],
+    item_type: ITEM_TYPE,
     item_description: str,
     item_stock: int,
     item_image: Optional[str] = None,
@@ -103,7 +104,7 @@ async def update_item(
     item_id: int,
     item_name: str = None,
     item_price: float = None,
-    item_type: Literal["Starter", "Main course", "Dessert", "Side dish", "Drink"] = None,
+    item_type: ITEM_TYPE = None,
     item_description: str = None,
     item_stock: int = None,
     item_image: Optional[str] = None,

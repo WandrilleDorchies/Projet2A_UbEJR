@@ -4,6 +4,8 @@ from pydantic import Field
 
 from .Orderable import Orderable
 
+ITEM_TYPE = Literal["Starter", "Main course", "Dessert", "Side dish", "Drink"]
+
 
 class Item(Orderable):
     """
@@ -24,7 +26,7 @@ class Item(Orderable):
     orderable_id: int
     item_name: str
     item_price: float = Field(gt=0, description="[Item] Price must be > 0.")
-    item_type: Literal["Starter", "Main course", "Dessert", "Side dish", "Drink"]
+    item_type: ITEM_TYPE
     item_description: str
     item_stock: int = Field(ge=0, description="[Item] Stock must be >= 0.")
 
