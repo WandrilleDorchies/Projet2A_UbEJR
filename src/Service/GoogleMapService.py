@@ -1,7 +1,7 @@
 import math
 import os
 from datetime import datetime
-from typing import Dict, Optional, Union
+from typing import Dict, Union
 
 import googlemaps
 
@@ -44,14 +44,24 @@ class GoogleMapService:
         The delivery zone is defined as a circle centered on ENSAI with radius
         extending to the extremity of Rennes.
 
-        Args
-        ----
-        address (str): address to test
+        Parameters
+        ----------
+        address: str
+            address to test
 
         Returns
         -------
-        Address or None
-            An Address object if valid and within range, None otherwise
+        bool
+            True if the address can be created, False otherwise
+
+        Raises
+        ------
+        ValueError
+            If the address is invalid (i.e. it doesn't exist or is wrongly spelled)
+        ValueError
+            If the address lack of certain informations (number, street)
+        ValueError
+            If the address outside the delivery zone
         """
 
         result = self.__gmaps.geocode(address)
@@ -80,7 +90,7 @@ class GoogleMapService:
     @log
     def extract_components(self, address: str) -> Dict[str, Union[str, int]]:
         """
-        _summary_
+        Extract the components needed to create an Address object
 
         Parameters
         ----------
@@ -90,7 +100,7 @@ class GoogleMapService:
         Returns
         -------
         Dict[str, Union[str, int]]
-            _description_
+            A dictionnary with all the attributes of an Address class
         """
         result = self.__gmaps.geocode(address)
 
@@ -121,17 +131,25 @@ class GoogleMapService:
         }
 
     @log
-    def get_path(self, destination: str) -> Optional[dict]:
+    def get_path(self, destination: str) -> str:
         """
         Compute the driving route from ENSAI to a destination address.
 
-        Args
-        ----
-        destination (str): address of the destination
+        Parameters
+        ----------
+        destination: str
+            address of the destination
 
         Returns
         -------
-        dict: a dictionnary containing all the informations to print the path to the destination
+        str
+            An url leading to a map showing the route
+
+        Raises
+        ------
+        Exception
+            If an error occured getting the route
+
         """
         now: datetime = datetime.now()
 
