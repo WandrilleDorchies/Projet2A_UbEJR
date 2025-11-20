@@ -184,6 +184,8 @@ async def create_bundle(
         if len(item_ids) != len(item_quantities):
             raise ValueError("The number of item and quantities does not match.")
 
+        if any([item_quantity <= 0 for item_quantity in item_quantities]):
+            raise ValueError("All items in the bundle must be in positive quantity.")
         Items = {}
         for item_id, nb in zip(item_ids, item_quantities, strict=False):
             item = item_service.get_item_by_id(int(item_id))

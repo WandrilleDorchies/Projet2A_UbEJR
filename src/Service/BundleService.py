@@ -14,24 +14,24 @@ class BundleService:
         self.bundle_dao = bundle_dao
 
     @log
-    def get_bundle_by_id(self, bundle_id: int) -> Optional[Bundle]:
+    def get_bundle_by_id(self, bundle_id: int) -> Bundle:
         """
-        _summary_
+        Retrieve a bundle via its unique id
 
         Parameters
         ----------
         bundle_id : int
-            _description_
+            Unique id of the bundle
 
         Returns
         -------
-        Optional[Bundle]
-            _description_
+        Bundle
+            A Bundle object with the informations of the retrieved bundle
 
         Raises
         ------
         ValueError
-            _description_
+            If the bundle id is invalid
         """
         bundle = self.bundle_dao.get_bundle_by_id(bundle_id)
         if bundle is None:
@@ -39,24 +39,24 @@ class BundleService:
         return bundle
 
     @log
-    def get_bundle_by_orderable_id(self, orderable_id: int) -> Optional[Bundle]:
+    def get_bundle_by_orderable_id(self, orderable_id: int) -> Bundle:
         """
-        _summary_
+        Retrieve a bundle via its orderable id
 
         Parameters
         ----------
         orderable_id : int
-            _description_
+            A unique orderable id
 
         Returns
         -------
-        Optional[Bundle]
-            _description_
+        Bundle
+            A Bundle object with the informations of the retrieved bundle
 
         Raises
         ------
         ValueError
-            _description_
+            If the orderable id is invalid
         """
         bundle = self.bundle_dao.get_bundle_by_orderable_id(orderable_id)
         if bundle is None:
@@ -66,14 +66,14 @@ class BundleService:
         return bundle
 
     @log
-    def get_all_bundles(self) -> Optional[List[Bundle]]:
+    def get_all_bundles(self) -> List[Bundle]:
         """
-        _summary_
+        Fetch all existing bundles
 
         Returns
         -------
-        Optional[List[Bundle]]
-            _description_
+        List[Bundle]
+            A list of Bundle object, an empty list if there is no bundles
         """
         bundles = self.bundle_dao.get_all_bundle()
         return bundles
@@ -89,42 +89,47 @@ class BundleService:
         bundle_items: Dict[Item, int],
         bundle_image: Optional[str] = None,
         is_in_menu: bool = False,
-    ) -> Optional[Bundle]:
+    ) -> Bundle:
         """
-        _summary_
+        Check all the informations of the bundle, if there is no problem create it
+
+        Checking:
+            - The reduction percentage must be between 0 and 100
+            - The ending availability date must be after the starting availability date
+            - The starting availability date must be later than today
 
         Parameters
         ----------
         bundle_name : str
-            _description_
+            Name of the bundle
         bundle_reduction : int
-            _description_
+            Percentage of reduction of the bundle
         bundle_description : str
-            _description_
+            Description of the bundle
         bundle_availability_start_date : datetime
-            _description_
+            Date at which the bundle will become available
         bundle_availability_end_date : datetime
-            _description_
+            Date at which the bundle will become unavailable
         bundle_items : Dict[Item, int]
-            _description_
+            A dictionnary with the items and their number in the bundle
         bundle_image : Optional[bytes], optional
-            _description_, by default None
+            The url to the bundle's image, by default None
         is_in_menu : bool, optional
-            _description_, by default False
+            If you want to include it in the menu, by default False
 
         Returns
         -------
-        Optional[Bundle]
-            _description_
+        Bundle
+            The created bundle
 
         Raises
         ------
         ValueError
-            _description_
+            If the reduction percentage isn't between 0 and 100
         ValueError
-            _description_
+            If the ending availability date comes before the starting availability date
         ValueError
-            _description_
+            If the starting availibility date is in the past
         """
         if not (0 <= bundle_reduction <= 100):
             raise ValueError(
@@ -156,36 +161,41 @@ class BundleService:
         return create_bundle
 
     @log
-    def update_bundle(self, bundle_id: int, update: dict) -> Optional[Bundle]:
+    def update_bundle(self, bundle_id: int, update: dict) -> Bundle:
         """
-        _summary_
+        Update a bundle informations after checking infos from the dictionnary
+
+        Checking:
+            - The reduction percentage must be between 0 and 100
+            - The ending availability date must be after the starting availability date
+            - The starting availability date must be later than today
 
         Parameters
         ----------
         bundle_id : int
-            _description_
+            Unique id of the bundle
         update : dict
-            _description_
+            A dictionnary with the name of the variable to update as key and the change as value
 
         Returns
         -------
-        Optional[Bundle]
-            _description_
+        Bundle
+            The bundle if successfuly updated
 
         Raises
         ------
         ValueError
-            _description_
+            If the dictionnary does not change anything
         ValueError
-            _description_
+            Invalid starting date format
         ValueError
-            _description_
+            Invalid ending date format
         ValueError
-            _description_
+            If the ending availability date comes before the starting availability date
         ValueError
-            _description_
+            If the starting availibility date is in the past
         ValueError
-            _description_
+            If the reduction percentage isn't between 0 and 100
         """
         current_bundle = self.get_bundle_by_id(bundle_id)
 
@@ -249,12 +259,12 @@ class BundleService:
     @log
     def delete_bundle(self, bundle_id: int) -> None:
         """
-        _summary_
+        Deletes a bundle from the database by its id.
 
         Parameters
         ----------
         bundle_id : int
-            _description_
+            The id of the bundle to delete.
         """
         self.get_bundle_by_id(bundle_id)
         self.bundle_dao.delete_bundle(bundle_id)

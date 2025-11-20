@@ -266,9 +266,10 @@ class CustomerService:
         return self.user_service.login(identifier, password, "customer")
 
     @log
-    def update_customer(self, customer_id: int, update: dict) -> Customer:
+    def update_customer(self, customer_id: int, update: dict) -> Customer:  # noqa 901C
         """
         Update a customer personal informations after checking and formatting
+        infos from the dictionnary
 
         Checking:
             - First and last name should only contains letters
