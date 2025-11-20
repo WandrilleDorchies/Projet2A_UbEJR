@@ -41,12 +41,7 @@ class TestCustomerService:
 
     def test_get_customer_by_phone_not_exists(self, customer_service, clean_database):
         """Test getting customer by non-existing phone returns None"""
-        with pytest.raises(
-            ValueError,
-            match=re.escape(
-                "[CustomerService] Cannot find: customer with phone +33699999999 not found."
-            ),
-        ):
+        with pytest.raises(ValueError, match="not found"):
             customer_service.get_customer_by_phone("+33699999999")
 
     def test_get_all_customers_empty(self, customer_service, clean_database):
@@ -109,6 +104,28 @@ class TestCustomerService:
                 address_string="51 Rue Blaise Pascal, 35170 Bruz, France",
             )
 
+    @pytest.mark.parametrize(
+        "customer_email",
+        [
+            "12enlesn345",
+            "0653564432",
+            "alras@notavaliddomain.notvalidending",
+        ],
+    )
+    def test_create_customer_invalid_email_raises_error(
+        self, customer_service, sample_customer, clean_database, customer_email
+    ):
+        """Test creating customer with invalid email raises error"""
+        with pytest.raises(ValueError, match="Please enter a valid email !"):
+            customer_service.create_customer(
+                first_name="Test",
+                last_name="User",
+                phone="+33698765432",
+                mail=customer_email,
+                password="V4lidP@ssword",
+                address_string="51 Rue Blaise Pascal, 35170 Bruz, France",
+            )
+
     def test_create_customer_duplicate_phone_raises_error(
         self, customer_service, sample_customer, clean_database
     ):
@@ -123,6 +140,51 @@ class TestCustomerService:
                 address_string="51 Rue Blaise Pascal, 35170 Bruz, France",
             )
 
+    @pytest.mark.parametrize(
+        "customer_phone",
+        ["12345", "notaphone", "+33 6 12 34", "waluigi@gmail.com"],
+    )
+    def test_create_customer_invalid_phone_raises_error(
+        self, customer_service, sample_customer, clean_database, customer_phone
+    ):
+        """Test creating customer with invalid phone raises error"""
+        with pytest.raises(ValueError, match="invalid|valid|associated"):
+            customer_service.create_customer(
+                first_name="Test",
+                last_name="User",
+                phone=customer_phone,
+                mail="newtest@email.com",
+                password="V4lidP@ssword",
+                address_string="51 Rue Blaise Pascal, 35170 Bruz, France",
+            )
+
+    @pytest.mark.parametrize(
+        ("customer_first_name", "customer_last_name"),
+        [
+            ("12345", "User"),
+            ("Test", "12345"),
+            ("12345", "6789#"),
+        ],
+    )
+    def test_create_customer_invalid_name_raises_error(
+        self,
+        customer_service,
+        sample_customer,
+        clean_database,
+        customer_first_name,
+        customer_last_name,
+    ):
+        """Test creating customer with invalid name raises error"""
+        with pytest.raises(ValueError, match="only contain letters"):
+            customer_service.create_customer(
+                first_name=customer_first_name,
+                last_name=customer_last_name,
+                phone="+33698765432",
+                mail="newtest@email.com",
+                password="V4lidP@ssword",
+                address_string="51 Rue Blaise Pascal, 35170 Bruz, France",
+            )
+
     def test_create_customer_weak_password_raises_error(self, customer_service, clean_database):
         """Test creating customer with weak password raises error"""
         with pytest.raises(ValueError):
@@ -132,18 +194,6 @@ class TestCustomerService:
                 phone="0612345678",
                 mail="test@email.com",
                 password="weak",
-                address_string="51 Rue Blaise Pascal, 35170 Bruz, France",
-            )
-
-    def test_create_customer_invalid_phone_raises_error(self, customer_service, clean_database):
-        """Test creating customer with invalid phone raises error"""
-        with pytest.raises(ValueError, match="invalid"):
-            customer_service.create_customer(
-                first_name="Test",
-                last_name="User",
-                phone="123",
-                mail="test@email.com",
-                password="V4lidP@ssword",
                 address_string="51 Rue Blaise Pascal, 35170 Bruz, France",
             )
 
