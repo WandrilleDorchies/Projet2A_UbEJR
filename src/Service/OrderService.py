@@ -36,6 +36,24 @@ class OrderService:
 
     @log
     def get_order_by_id(self, order_id: int) -> Optional[Order]:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        order_id : int
+            _description_
+
+        Returns
+        -------
+        Optional[Order]
+            _description_
+
+        Raises
+        ------
+        ValueError
+            _description_
+        """
         order = self.order_dao.get_order_by_id(order_id)
         if order is None:
             raise ValueError(f"[Order Service] Cannot find: order with ID {order_id} not found.")
@@ -43,14 +61,53 @@ class OrderService:
 
     @log
     def get_all_orders(self, limit: int) -> Optional[List[Order]]:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        limit : int
+            _description_
+
+        Returns
+        -------
+        Optional[List[Order]]
+            _description_
+        """
         return self.order_dao.get_all_orders(limit)
 
     @log
     def get_all_orders_by_customer(self, customer_id: int) -> Optional[List[Order]]:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        customer_id : int
+            _description_
+
+        Returns
+        -------
+        Optional[List[Order]]
+            _description_
+        """
         return self.order_dao.get_all_orders_by_customer(customer_id)
 
     @log
     def get_customer_current_order(self, customer_id: int) -> Optional[Order]:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        customer_id : int
+            _description_
+
+        Returns
+        -------
+        Optional[Order]
+            _description_
+        """
         return self.order_dao.get_customer_current_order(customer_id)
 
     @log
@@ -58,18 +115,60 @@ class OrderService:
         self,
         state: OrderState,
     ) -> List[Order]:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        state : OrderState
+            _description_
+
+        Returns
+        -------
+        List[Order]
+            _description_
+        """
         return self.order_dao.get_orders_by_state(state.value)
 
     @log
     def get_available_orders_for_drivers(self) -> List[Order]:
+        """
+        _summary_
+
+        Returns
+        -------
+        List[Order]
+            _description_
+        """
         return self.order_dao.get_orders_by_state(OrderState.PREPARED.value, order_by="ASC")
 
     @log
     def get_actives_orders(self) -> List[Order]:
+        """
+        _summary_
+
+        Returns
+        -------
+        List[Order]
+            _description_
+        """
         return self.order_dao.get_actives_orders()
 
     @log
     def create_order(self, customer_id) -> Order:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        customer_id : _type_
+            _description_
+
+        Returns
+        -------
+        Order
+            _description_
+        """
         orders = self.get_all_orders_by_customer(customer_id)
         states = [order.order_state.value for order in orders]
 
@@ -81,6 +180,26 @@ class OrderService:
 
     @log
     def update_order_state(self, order_id: int, new_state: OrderState) -> Optional[Order]:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        order_id : int
+            _description_
+        new_state : OrderState
+            _description_
+
+        Returns
+        -------
+        Optional[Order]
+            _description_
+
+        Raises
+        ------
+        ValueError
+            _description_
+        """
         order = self.get_order_by_id(order_id)
 
         if new_state not in self.valid_transition[order.order_state]:
@@ -94,14 +213,48 @@ class OrderService:
 
     @log
     def mark_as_paid(self, order_id: int) -> Order:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        order_id : int
+            _description_
+
+        Returns
+        -------
+        Order
+            _description_
+        """
         return self.update_order_state(order_id, OrderState.PAID)
 
     @log
     def mark_as_prepared(self, order_id: int) -> Order:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        order_id : int
+            _description_
+
+        Returns
+        -------
+        Order
+            _description_
+        """
         return self.update_order_state(order_id, OrderState.PREPARED)
 
     @log
     def delete_order(self, order_id: int) -> None:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        order_id : int
+            _description_
+        """
         self.get_order_by_id(order_id)
         self.order_dao.delete_order(order_id)
 

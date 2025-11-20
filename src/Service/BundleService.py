@@ -15,6 +15,24 @@ class BundleService:
 
     @log
     def get_bundle_by_id(self, bundle_id: int) -> Optional[Bundle]:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        bundle_id : int
+            _description_
+
+        Returns
+        -------
+        Optional[Bundle]
+            _description_
+
+        Raises
+        ------
+        ValueError
+            _description_
+        """
         bundle = self.bundle_dao.get_bundle_by_id(bundle_id)
         if bundle is None:
             raise ValueError(f"[BundleService] Cannot get: bundle with ID {bundle_id} not found.")
@@ -22,6 +40,24 @@ class BundleService:
 
     @log
     def get_bundle_by_orderable_id(self, orderable_id: int) -> Optional[Bundle]:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        orderable_id : int
+            _description_
+
+        Returns
+        -------
+        Optional[Bundle]
+            _description_
+
+        Raises
+        ------
+        ValueError
+            _description_
+        """
         bundle = self.bundle_dao.get_bundle_by_orderable_id(orderable_id)
         if bundle is None:
             raise ValueError(
@@ -31,6 +67,14 @@ class BundleService:
 
     @log
     def get_all_bundles(self) -> Optional[List[Bundle]]:
+        """
+        _summary_
+
+        Returns
+        -------
+        Optional[List[Bundle]]
+            _description_
+        """
         bundles = self.bundle_dao.get_all_bundle()
         return bundles
 
@@ -46,6 +90,42 @@ class BundleService:
         bundle_image: Optional[bytes] = None,
         is_in_menu: bool = False,
     ) -> Optional[Bundle]:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        bundle_name : str
+            _description_
+        bundle_reduction : int
+            _description_
+        bundle_description : str
+            _description_
+        bundle_availability_start_date : datetime
+            _description_
+        bundle_availability_end_date : datetime
+            _description_
+        bundle_items : Dict[Item, int]
+            _description_
+        bundle_image : Optional[bytes], optional
+            _description_, by default None
+        is_in_menu : bool, optional
+            _description_, by default False
+
+        Returns
+        -------
+        Optional[Bundle]
+            _description_
+
+        Raises
+        ------
+        ValueError
+            _description_
+        ValueError
+            _description_
+        ValueError
+            _description_
+        """
         if not (0 <= bundle_reduction <= 100):
             raise ValueError(
                 "[BundleService] Cannot create bundle: Bundle reduction must be between 0 and 100."
@@ -77,6 +157,36 @@ class BundleService:
 
     @log
     def update_bundle(self, bundle_id: int, update: dict) -> Optional[Bundle]:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        bundle_id : int
+            _description_
+        update : dict
+            _description_
+
+        Returns
+        -------
+        Optional[Bundle]
+            _description_
+
+        Raises
+        ------
+        ValueError
+            _description_
+        ValueError
+            _description_
+        ValueError
+            _description_
+        ValueError
+            _description_
+        ValueError
+            _description_
+        ValueError
+            _description_
+        """
         current_bundle = self.get_bundle_by_id(bundle_id)
 
         if all([value is None for value in update.values()]):
@@ -138,5 +248,13 @@ class BundleService:
 
     @log
     def delete_bundle(self, bundle_id: int) -> None:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        bundle_id : int
+            _description_
+        """
         self.get_bundle_by_id(bundle_id)
         self.bundle_dao.delete_bundle(bundle_id)

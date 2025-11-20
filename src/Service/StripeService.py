@@ -16,6 +16,28 @@ class StripeService:
 
     @log
     def create_checkout_session(self, order: Order, customer_mail: str) -> Session:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        order : Order
+            _description_
+        customer_mail : str
+            _description_
+
+        Returns
+        -------
+        Session
+            _description_
+
+        Raises
+        ------
+        ValueError
+            _description_
+        ValueError
+            _description_
+        """
         if len(order.order_orderables) == 0:
             raise ValueError("Your order is empty.")
 
@@ -67,6 +89,24 @@ class StripeService:
 
     @log
     def verify_payment(self, session_id: int):
+        """
+        _summary_
+
+        Parameters
+        ----------
+        session_id : int
+            _description_
+
+        Returns
+        -------
+        _type_
+            _description_
+
+        Raises
+        ------
+        ValueError
+            _description_
+        """
         try:
             session = Session.retrieve(session_id)
 

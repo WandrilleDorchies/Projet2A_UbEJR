@@ -29,6 +29,24 @@ class CustomerService:
 
     @log
     def get_customer_by_id(self, customer_id: int) -> Optional[Customer]:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        customer_id : int
+            _description_
+
+        Returns
+        -------
+        Optional[Customer]
+            _description_
+
+        Raises
+        ------
+        ValueError
+            _description_
+        """
         customer = self.customer_dao.get_customer_by_id(customer_id)
         if customer is None:
             raise ValueError(
@@ -38,24 +56,79 @@ class CustomerService:
 
     @log
     def get_address_by_customer_id(self, customer_id: int) -> Address:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        customer_id : int
+            _description_
+
+        Returns
+        -------
+        Address
+            _description_
+        """
         self.get_customer_by_id(customer_id)
         return self.address_service.get_address_by_customer_id(customer_id)
 
     @log
     def get_customer_by_email(self, customer_email: str) -> Optional[Customer]:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        customer_email : str
+            _description_
+
+        Returns
+        -------
+        Optional[Customer]
+            _description_
+        """
         return self.customer_dao.get_customer_by_email(customer_email)
 
     @log
     def get_customer_by_phone(self, customer_phone: int) -> Optional[Customer]:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        customer_phone : int
+            _description_
+
+        Returns
+        -------
+        Optional[Customer]
+            _description_
+        """
         return self.customer_dao.get_customer_by_phone(customer_phone)
 
     @log
     def get_all_customers(self) -> Optional[List[Customer]]:
+        """
+        _summary_
+
+        Returns
+        -------
+        Optional[List[Customer]]
+            _description_
+        """
         customers = self.customer_dao.get_all_customers()
         return customers
 
     @log
     def get_all_customer_email(self) -> Optional[List[str]]:
+        """
+        _summary_
+
+        Returns
+        -------
+        Optional[List[str]]
+            _description_
+        """
         customers_email = self.customer_dao.get_all_customer_email()
         return customers_email
 
@@ -69,6 +142,42 @@ class CustomerService:
         password: str,
         address_string: str,
     ) -> Optional[Customer]:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        first_name : str
+            _description_
+        last_name : str
+            _description_
+        phone : str
+            _description_
+        mail : str
+            _description_
+        password : str
+            _description_
+        address_string : str
+            _description_
+
+        Returns
+        -------
+        Optional[Customer]
+            _description_
+
+        Raises
+        ------
+        ValueError
+            _description_
+        ValueError
+            _description_
+        ValueError
+            _description_
+        ValueError
+            _description_
+        ValueError
+            _description_
+        """
         # Check on first and last name
         if not re.match(self.pattern, first_name) or not re.match(self.pattern, last_name):
             logging.error("[CustomerService] First name and last name must only contains letters")
@@ -140,6 +249,34 @@ class CustomerService:
 
     @log
     def update_customer(self, customer_id: int, update: dict) -> Customer:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        customer_id : int
+            _description_
+        update : dict
+            _description_
+
+        Returns
+        -------
+        Customer
+            _description_
+
+        Raises
+        ------
+        ValueError
+            _description_
+        ValueError
+            _description_
+        ValueError
+            _description_
+        ValueError
+            _description_
+        ValueError
+            _description_
+        """
         self.get_customer_by_id(customer_id)
 
         if all([value is None for value in update.values()]):

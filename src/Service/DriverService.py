@@ -35,6 +35,24 @@ class DriverService:
 
     @log
     def get_driver_by_id(self, driver_id: int) -> Optional[Driver]:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        driver_id : int
+            _description_
+
+        Returns
+        -------
+        Optional[Driver]
+            _description_
+
+        Raises
+        ------
+        ValueError
+            _description_
+        """
         driver = self.driver_dao.get_driver_by_id(driver_id)
         if driver is None:
             raise ValueError(
@@ -110,6 +128,34 @@ class DriverService:
     def create_driver(
         self, first_name: str, last_name: str, phone: str, password: str
     ) -> Optional[Driver]:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        first_name : str
+            _description_
+        last_name : str
+            _description_
+        phone : str
+            _description_
+        password : str
+            _description_
+
+        Returns
+        -------
+        Optional[Driver]
+            _description_
+
+        Raises
+        ------
+        ValueError
+            _description_
+        ValueError
+            _description_
+        ValueError
+            _description_
+        """
         #
         validated_phone = self.user_service.identifier_validator(phone)
         if validated_phone is None or validated_phone["type"] != "phone":
@@ -148,6 +194,32 @@ class DriverService:
 
     @log
     def update_driver(self, driver_id: int, update: dict) -> Optional[Driver]:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        driver_id : int
+            _description_
+        update : dict
+            _description_
+
+        Returns
+        -------
+        Optional[Driver]
+            _description_
+
+        Raises
+        ------
+        ValueError
+            _description_
+        ValueError
+            _description_
+        ValueError
+            _description_
+        ValueError
+            _description_
+        """
         self.get_driver_by_id(driver_id)
 
         if all([value is None for value in update.values()]):
@@ -183,6 +255,28 @@ class DriverService:
 
     @log
     def start_delivery(self, order_id: int, driver_id: int) -> Delivery:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        order_id : int
+            _description_
+        driver_id : int
+            _description_
+
+        Returns
+        -------
+        Delivery
+            _description_
+
+        Raises
+        ------
+        ValueError
+            _description_
+        ValueError
+            _description_
+        """
         driver = self.get_driver_by_id(driver_id)
         order = self.order_dao.get_order_by_id(order_id)
 
@@ -206,6 +300,26 @@ class DriverService:
 
     @log
     def end_delivery(self, order_id: int, driver_id: int) -> Delivery:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        order_id : int
+            _description_
+        driver_id : int
+            _description_
+
+        Returns
+        -------
+        Delivery
+            _description_
+
+        Raises
+        ------
+        ValueError
+            _description_
+        """
         self.get_driver_by_id(driver_id)
 
         order = self.order_dao.get_order_by_id(order_id)
@@ -223,5 +337,13 @@ class DriverService:
 
     @log
     def delete_driver(self, driver_id: int) -> None:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        driver_id : int
+            _description_
+        """
         self.get_driver_by_id(driver_id)
         self.driver_dao.delete_driver(driver_id)

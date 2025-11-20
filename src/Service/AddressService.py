@@ -18,6 +18,24 @@ class AddressService:
 
     @log
     def get_address_by_id(self, address_id: int) -> Optional[Address]:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        address_id : int
+            _description_
+
+        Returns
+        -------
+        Optional[Address]
+            _description_
+
+        Raises
+        ------
+        ValueError
+            _description_
+        """
         address = self.address_dao.get_address_by_id(address_id)
         if address is None:
             logging.error(f"[AddressService] Cannot find: Address with ID {address_id} not found.")
@@ -28,6 +46,24 @@ class AddressService:
 
     @log
     def get_address_by_customer_id(self, customer_id: int) -> Optional[Address]:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        customer_id : int
+            _description_
+
+        Returns
+        -------
+        Optional[Address]
+            _description_
+
+        Raises
+        ------
+        ValueError
+            _description_
+        """
         address = self.address_dao.get_address_by_customer_id(customer_id)
         if address is None:
             logging.error(
@@ -40,6 +76,19 @@ class AddressService:
 
     @log
     def get_all_address(self) -> Optional[List[Address]]:
+        """
+        _summary_
+
+        Returns
+        -------
+        Optional[List[Address]]
+            _description_
+
+        Raises
+        ------
+        ValueError
+            _description_
+        """
         addresses = self.address_dao.get_all_address()
         if addresses is None:
             logging.error("[AddressService] No adresses in the database.")
@@ -51,6 +100,19 @@ class AddressService:
         self,
         address: str,
     ) -> Optional[Address]:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        address : str
+            _description_
+
+        Returns
+        -------
+        Optional[Address]
+            _description_
+        """
         self.gm_service.validate_address(address)
 
         components = self.gm_service.extract_components(address)
@@ -58,6 +120,26 @@ class AddressService:
 
     @log
     def update_address(self, address_id: int, update: dict) -> Optional[Address]:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        address_id : int
+            _description_
+        update : dict
+            _description_
+
+        Returns
+        -------
+        Optional[Address]
+            _description_
+
+        Raises
+        ------
+        ValueError
+            _description_
+        """
         current_address = self.get_address_by_id(address_id)
 
         if all([value is None for value in update.values()]):
@@ -79,5 +161,13 @@ class AddressService:
 
     @log
     def delete_address(self, address_id: int) -> None:
+        """
+        _summary_
+
+        Parameters
+        ----------
+        address_id : int
+            _description_
+        """
         self.get_address_by_id(address_id)
         self.address_dao.delete_address_by_id(address_id)
