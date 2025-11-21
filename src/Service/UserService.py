@@ -60,8 +60,8 @@ class UserService:
             validated_identifier = self.identifier_validator(identifier)
             if not validated_identifier:
                 logging.error(
-                    "[UserService] Login failed for user of type {user_type}:"
-                    " Identifier {identfier} invalid"
+                    f"[UserService] Login failed for user of type {user_type}:"
+                    f" Identifier {identifier} invalid"
                 )
                 raise ValueError("Invalid identifier!")
             logging.info("[UserService] Identifier validated. Attempting to find the user... ")

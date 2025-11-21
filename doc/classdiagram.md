@@ -117,8 +117,6 @@ namespace DAOs {
         update_driver(self, driver_id: int, update: dict):
         delete_driver(self, driver_id: int) -> None:
         _map_db_to_model(raw_driver: dict) -> dict:
-
-
     }
 
     class ItemDAO {
@@ -133,20 +131,44 @@ namespace DAOs {
     }
 
     class OrderableDAO {
-        +create_orderable(orderable_type: str, orderable_name: str = None, orderable_image_data: Optional[bytes] = None, is_in_menu: bool = False,) -> int:
-        +get_orderable_by_id(self, orderable_id: int) -> Optional[Dict]:
-        +get_all_orderables(self) -> List[Dict]:
-        +update_orderable_state(self, orderable_id: int, is_in_menu: bool) -> Dict:
-        +get_image_from_orderable(self, orderable_id: int) -> bytes:
-        update_image(self, orderable_id: int, orderable_type: str, orderable_name: str,orderable_image_data: bytes,) -> Dict:
+        +create_orderable(orderable_type: str, orderable_name: str = None, orderable_image_data: Optional[bytes] = None, is_in_menu: bool = False): int
+        +get_orderable_by_id(self, orderable_id: int): Optional[Dict]
+        +get_all_orderables(): List[Dict]
+        +update_orderable_state(self, orderable_id: int, is_in_menu: bool): Dict
+        +get_image_from_orderable(self, orderable_id: int): bytes
+        +update_image(self, orderable_id: int, orderable_type: str, orderable_name: str,orderable_image_data: bytes): Dict
+        update_image(orderable_id: int, orderable_type: str, orderable_name: str, orderable_image_data: bytes): Dict
+        delete_orderable(self, orderable_id: int): None
+        _is_in_menu(self, orderable_id: int): bool
 
     }
 
     class OrderDAO {
+        +create_order(customer_id: int): Order
+        +get_order_by_id(order_id: int): Optional[Order]
+        get_all_orders(limit: int): Optional[List[Order]]
+        +get_all_orders_by_customer(customer_id: int): Optional[List[Order]]
+        +get_customer_current_order(customer_id: int): Optional[Order]
+        +get_orders_by_state(state: int, order_by: Literal["DESC", "ASC"] = "DESC"): List[Order]
+        +get_actives_orders(self): List[Order]
+        +update_order_state(self, order_id: int, new_state: int): Order
+        +delete_order(self, order_id): None
+        +add_orderable_to_order(self, order_id: int, orderable_id: int, quantity: int = 1): Order
+        +remove_orderable_from_order(order_id: int, orderable_id: int, quantity: int = 1): Order
+        +get_quantity_of_orderables(order_id: int, orderable_id: int): int
+        _get_orderables_in_order(order_id: int): Dict[Union[Item, Bundle], int]:
 
     }
 
     class DeliveryDAO {
+        +create_delivery(order_id: int, driver_id: int): Delivery
+        +get_delivery_by_driver(delivery_id_driver: int): Optional[Delivery]
+        +get_driver_current_delivery(delivery_id_driver: int): Optional[Delivery]
+        +get_delivery_by_user(customer_id: int): Optional[Delivery]
+        +get_delivery_by_order_id(order_id: int): Optional[Delivery]
+        +update_delivery_state(delivery_id: int, state: int): Delivery
+        +change_driver(delivery_id: int, driver_id: int): Delivery
+        +delete_delivery(delivery_id: int): None
 
     }
 }

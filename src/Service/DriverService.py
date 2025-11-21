@@ -55,18 +55,20 @@ class DriverService:
         """
         driver = self.driver_dao.get_driver_by_id(driver_id)
         if driver is None:
-            raise ValueError(
+            logging.error(
                 f"[DriverService] Cannot find driver: driver with ID {driver_id} not found."
             )
+            raise ValueError(f"Driver with ID {driver_id} not found.")
         return driver
 
     @log
     def get_driver_by_phone(self, phone_number: str) -> Optional[Driver]:
         driver = self.driver_dao.get_driver_by_phone(phone_number.strip())
         if driver is None:
-            raise ValueError(
+            logging.error(
                 f"[DriverService] Cannot update driver: driver with phone {phone_number} not found."
             )
+            raise ValueError(f"Driver with phone {phone_number} not found.")
         return driver
 
     @log
@@ -117,10 +119,11 @@ class DriverService:
         """
         delivery = self.delivery_dao.get_driver_current_delivery(driver_id)
         if delivery is None or delivery.delivery_state == 2:
-            raise ValueError(
+            logging.error(
                 "[DriverService] Cannot get delivery: There isn't any delivery "
-                "assigned to this driver."
+                f"assigned to driver with id {driver_id}."
             )
+            raise ValueError("There isn't any delivery assigned to this driver.")
 
         return self.order_dao.get_order_by_id(delivery.delivery_order_id)
 
@@ -165,16 +168,17 @@ class DriverService:
         existing_user = self.driver_dao.get_driver_by_phone(validated_phone["identifier"])
         if existing_user is not None:
             logging.error(
-                "[DriverService] Cannot create: customer "
+                "[DriverService] Cannot create: Driver "
                 f"with phone {validated_phone['identifier']} "
                 "already exists."
             )
             raise ValueError("This phone number is already associated with an account !")
         if not re.match(self.pattern, first_name) or not re.match(self.pattern, last_name):
-            raise ValueError(
+            logging.error(
                 "[Driver Service] Cannot create driver: First name and last name "
-                "must only contains letters"
+                "must only contain letters"
             )
+            raise ValueError("First name and last name must only contain letters")
 
         check_password_strength(password)
         salt = create_salt()
@@ -223,21 +227,23 @@ class DriverService:
         self.get_driver_by_id(driver_id)
 
         if all([value is None for value in update.values()]):
+            logging.error("[DriverService] Attempted to update driver without changing any fields")
             raise ValueError("You must change at least one field.")
 
         update = {key: value for key, value in update.items() if update[key]}
 
         if update.get("driver_first_name"):
             if not re.match(self.pattern, update.get("driver_first_name")):
-                raise ValueError(
-                    "[driver Service] Cannot update driver: First name must only contains letters"
+                logging.error(
+                    "[Driver Service] Cannot update driver: First name must only contain letters"
                 )
+                raise ValueError("First name must only contain letters")
             update["driver_first_name"] = update["driver_first_name"].strip().capitalize()
 
         if update.get("driver_last_name"):
             if not re.match(self.pattern, update.get("driver_last_name")):
                 raise ValueError(
-                    "[driver Service] Cannot update driver: Last name must only contains letters"
+                    "[Driver Service] Cannot update driver: Last name must only contains letters"
                 )
 
             update["driver_last_name"] = update["driver_last_name"].strip().upper()
@@ -246,6 +252,10 @@ class DriverService:
             customer_phone = update["driver_phone"]
             validated_phone = self.user_service.identifier_validator(customer_phone)
             if validated_phone is None or validated_phone["type"] != "phone":
+                logging.error(
+                    "[DriverService] Attempted to update with "
+                    f"invalid phone:{update['driver_phone']}"
+                )
                 raise ValueError(f"The number {update['driver_phone']} is invalid.")
 
             update["driver_phone"] = validated_phone["identifier"]
@@ -281,16 +291,21 @@ class DriverService:
         order = self.order_dao.get_order_by_id(order_id)
 
         if order.order_state != OrderState.PREPARED:
-            raise ValueError(
+            logging.error(
                 "[DriverService] Cannot start delivery: "
+                f"Order isn't prepared, current state: {order.order_state.name}"
+            )
+            raise ValueError(
+                "Cannot start delivery: "
                 f"Order isn't prepared, current state: {order.order_state.name}"
             )
 
         if driver.driver_is_delivering:
-            raise ValueError(
+            logging.error(
                 f"[DriverService] Cannot start delivery: Driver {driver_id} "
                 "already has an active delivery"
             )
+            raise ValueError(f"Driver {driver_id} already has an active delivery")
 
         self.delivery_dao.create_delivery(order_id, driver_id)
         self.driver_dao.update_driver(driver_id, update={"driver_is_delivering": True})
@@ -325,8 +340,12 @@ class DriverService:
         order = self.order_dao.get_order_by_id(order_id)
 
         if order.order_state != OrderState.DELIVERING:
-            raise ValueError(
+            logging.error(
                 "[DriverService] Cannot end delivery: Order must be delivering to complete, "
+                f"current state: {order.order_state.name}"
+            )
+            raise ValueError(
+                "Cannot end delivery: Order must be delivering to complete, "
                 f"current state: {order.order_state.name}"
             )
 
