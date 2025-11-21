@@ -362,7 +362,7 @@ async def create_bundle(
     "/bundles/{bundle_id}", status_code=status.HTTP_200_OK, dependencies=[Depends(AdminBearer())]
 )
 async def update_bundle(
-    bundle_di: int = Path(description="The id of the bundle you want to update"),
+    bundle_id: int = Path(description="The id of the bundle you want to update"),
     bundle_name: Optional[str] = Query(description="The name of the bundle"),
     bundle_reduction: Optional[int] = Query(
         None, description="The reduction percentage of the bundle", ge=0, le=100
