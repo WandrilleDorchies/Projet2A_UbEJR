@@ -14,7 +14,7 @@ from src.Model.APIItem import APIItem
 from src.Model.Item import Item
 
 admin_orderables_router = APIRouter(
-    prefix="", tags=["Menu / Orderables"], dependencies=[Depends(AdminBearer())]
+    tags=["Menu / Orderables"], dependencies=[Depends(AdminBearer())]
 )
 
 
@@ -24,7 +24,7 @@ admin_orderables_router = APIRouter(
 )
 def get_all_orderables(
     in_menu: bool = Query(
-        False, description="Do you only want the orderables available for custoemrs ?"
+        False, description="Do you only want the orderables available for customers ?"
     ),
 ):
     """
@@ -147,7 +147,7 @@ async def create_item(
     item_image: Optional[str] = Query(None, description="An url to linkin to an image of the item"),
 ):
     """
-    Adds an item to the database
+    Add an item to the database
 
     Parameters
     ----------
@@ -239,8 +239,8 @@ def delete_item(item_id: int = Path(description="The id of the item you want to 
 
     Parameters
     ----------
-        orderable_id: int
-            The id of the orderable you want to remove from the database
+        item_id: int
+            The id of the item you want to remove from the database
     """
     try:
         item_service.delete_item(item_id)
@@ -298,7 +298,7 @@ async def create_bundle(
     bundle_image: Optional[str] = Query(None, description="An url linking to the bundle image"),
 ):
     """
-    Adds a bundle to the database
+    Add a bundle to the database
 
     Parameters
     ----------
@@ -319,10 +319,10 @@ async def create_bundle(
         bundle_availability_end_date: str
             The date at which the bundle's availability ends
 
-        item_ids: List[int]:
+        item_ids: List[int]
             A list containing the id of the items in the bundle
 
-        item_quantities: List[int]:
+        item_quantities: List[int]
             A list containing the quantity of each item
 
         bundle_image: str | None
@@ -378,6 +378,38 @@ async def update_bundle(
     item_quantities: Optional[List[int]] = query_item_quantities,
     bundle_image: Optional[str] = Query(None, description="An url linking to the bundle image"),
 ):
+    """
+    Parameters
+    ----------
+        bundle_id: int
+            The id of the bundle you want to update
+
+        bundle_name: str | None
+            A name for the item
+
+        bundle_reduction: int | None
+            The reduction of the bundle,
+            the new price will be calculated with :
+               (sum item prices) * (1-bundle_reduction)/100
+
+        bundle_description: str | None
+            A short description of the bundle
+
+        bundle_availability_start_date: str | None
+            The date at which the bundle becomes available (must be later than today)
+
+        bundle_availability_end_date: str | None
+            The date at which the bundle's availability ends
+
+        item_ids: List[int] | None
+            A list containing the id of the items in the bundle
+
+        item_quantities: List[int] | None
+            A list containing the quantity of each item
+
+        bundle_image: str | None
+            An optional link to the item's image
+    """
     try:
         update = locals()
         update.pop("item_ids")
@@ -402,11 +434,19 @@ async def update_bundle(
 
 
 @admin_orderables_router.delete(
-    "/bundles",
+    "/bundles/{bundle_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     dependencies=[Depends(AdminBearer())],
 )
-def delete_bundle(bundle_id: int):
+def delete_bundle(bundle_id: int = Path(description="The id of the bundle you want to remove")):
+    """
+    Remove a bundle from the database (this action cannot be undone)
+
+    Parameters
+    ----------
+        bundle_id: int
+            The id of the bundle you want to remove from the database
+    """
     try:
         bundle_service.delete_bundle(bundle_id)
         return
@@ -415,9 +455,19 @@ def delete_bundle(bundle_id: int):
 
 
 @admin_orderables_router.get(
-    "/orderables/image", status_code=status.HTTP_200_OK, response_class=Response
+    "/orderables/{orderable_id}/image", status_code=status.HTTP_200_OK, response_class=Response
 )
-def get_orderable_image(orderable_id: int):
+def get_orderable_image(
+    orderable_id: int = Path(description="The id of the orderable whose image you want"),
+):
+    """
+    Fetch the image of the orderable of your choice
+
+    Parameters
+    ----------
+        orderable_id: int
+            The id of the orderable whose image you want
+    """
     try:
         image_data = menu_service.get_orderable_image(orderable_id)
         if image_data is None:

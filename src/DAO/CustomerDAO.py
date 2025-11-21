@@ -105,8 +105,10 @@ class CustomerDAO(metaclass=Singleton):
         return Customer(**mapped_args)
 
     @log
-    def get_all_customers(self) -> Optional[List[Customer]]:
-        raw_customers = self.db_connector.sql_query("SELECT * from Customers ", return_type="all")
+    def get_all_customers(self, limit: int = 15) -> Optional[List[Customer]]:
+        raw_customers = self.db_connector.sql_query(
+            "SELECT * from Customers LIMIT %s;", [limit], "all"
+        )
 
         if not raw_customers:
             return []

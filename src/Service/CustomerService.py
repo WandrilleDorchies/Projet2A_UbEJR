@@ -128,7 +128,7 @@ class CustomerService:
         return customer
 
     @log
-    def get_all_customers(self) -> List[Customer]:
+    def get_all_customers(self, limit: int = 15) -> List[Customer]:
         """
         Fetch all customers of the database
 
@@ -137,7 +137,7 @@ class CustomerService:
         List[Customer]
             A list of Customer object, an empty list if there is none
         """
-        customers = self.customer_dao.get_all_customers()
+        customers = self.customer_dao.get_all_customers(limit)
         return customers
 
     @log

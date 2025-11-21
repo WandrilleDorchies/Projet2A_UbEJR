@@ -72,8 +72,8 @@ class DriverService:
         return driver
 
     @log
-    def get_all_drivers(self) -> Optional[Driver]:
-        drivers = self.driver_dao.get_all_drivers()
+    def get_all_drivers(self, limit: int = 15) -> Optional[Driver]:
+        drivers = self.driver_dao.get_all_drivers(limit)
         return drivers
 
     @log

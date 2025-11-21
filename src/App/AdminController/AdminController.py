@@ -11,7 +11,7 @@ from src.App.init_app import (
 from src.App.JWTBearer import AdminBearer
 
 templates = Jinja2Templates(directory="templates")
-admin_router = APIRouter(prefix="", tags=["General"], dependencies=[Depends(AdminBearer())])
+admin_router = APIRouter(tags=["General"], dependencies=[Depends(AdminBearer())])
 
 
 # OVERVIEW

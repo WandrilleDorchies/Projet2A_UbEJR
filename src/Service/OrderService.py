@@ -261,7 +261,7 @@ class OrderService:
     @log
     def add_orderable_to_order(self, orderable_id: int, order_id: int, quantity: int = 1) -> Order:
         """
-        Adds an orderable to a given order if enough stock is available.
+        Add an orderable to a given order if enough stock is available.
 
         Parameters
         ----------
