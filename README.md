@@ -23,10 +23,10 @@ pdm install
 ```
 
 This will setup all we need for this project to work:
-    - A virtual environnment
-    - Install all packages in their right version
+- A virtual environnment
+- Install all packages in their right version
 
-** All the files for the application are now downloaded **
+**All the files for the application are now downloaded**
 
 ## II. Configuration
 
