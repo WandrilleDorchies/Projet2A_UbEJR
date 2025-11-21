@@ -44,8 +44,8 @@ format = "ruff format"
 test = "pytest tests --cov=src"
 start = "pdm run __main__.py"
 typecheck = "pyrefly check"
-reset = "pdm run python -m src.utils.reset_db project test"
-reset_prod = "pdm run python -m src.utils.reset_db project test True"
+resetscale = "pdm run python -m src.utils.reset_db project test"
+resetprod = "pdm run python -m src.utils.reset_db project test True"
 
 [tool.ruff]
 line-length = 100

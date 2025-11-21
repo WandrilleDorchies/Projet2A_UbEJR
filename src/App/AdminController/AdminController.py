@@ -55,6 +55,6 @@ async def logout(request: Request):
     """
     Logout of the admin page
     """
-    response = RedirectResponse("/", status_code=302)
+    response = RedirectResponse("/login", status_code=302)
     response.delete_cookie(key="access_token")
-    return RedirectResponse(url="/login")
+    return
