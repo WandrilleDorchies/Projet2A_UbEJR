@@ -217,7 +217,7 @@ class CustomerService:
         # Check email
         validated_email = self.user_service.identifier_validator(mail)
         if validated_email is None or validated_email["type"] != "email":
-            logging.error("f[CustomerService] Cannot create: The email {mail} is invalid.")
+            logging.error(f"[CustomerService] Cannot create: The email {mail} is invalid.")
             raise ValueError("Please enter a valid email !")
         # check that email is not already used
         existing_user = self.customer_dao.get_customer_by_email(validated_email["identifier"])
