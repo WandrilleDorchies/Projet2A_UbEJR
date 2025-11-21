@@ -19,6 +19,16 @@ admin_router = APIRouter(prefix="", tags=["General"], dependencies=[Depends(Admi
     "/overview", status_code=status.HTTP_200_OK, dependencies=[Depends(AdminBearer())]
 )
 def get_overview():
+    """
+    Get diffrent useful informations about the status of Ub'EJR
+
+    - The number of customers registered
+    - The number of drivers
+    - The number of orderables
+    - The number of orders that can be picked up by the drivers
+    - The number of orders currently in the kitchen
+    - The total earnings of Ub'EJR
+    """
     try:
         customers = customer_service.get_number_customers()
         drivers = driver_service.get_number_drivers()
@@ -42,6 +52,9 @@ def get_overview():
 
 @admin_router.get("/logout", response_class=HTMLResponse)
 async def logout(request: Request):
+    """
+    Logout of the admin page
+    """
     response = RedirectResponse("/", status_code=302)
     response.delete_cookie(key="access_token")
-    return templates.TemplateResponse("auth.html", {"request": request})
+    return RedirectResponse(url="/login")
