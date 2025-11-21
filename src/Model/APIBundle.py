@@ -38,7 +38,7 @@ class APIBundle(BaseModel):
     def from_bundle(cls, bundle):
         bundle_items_dict = {}
         for item, quantity in bundle.bundle_items.items():
-            bundle_items_dict[APIItem.from_item(item)] = quantity
+            bundle_items_dict[str(item.item_id)] = quantity
 
         return cls(
             bundle_id=bundle.bundle_id,

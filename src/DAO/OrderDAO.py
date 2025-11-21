@@ -311,3 +311,39 @@ class OrderDAO(metaclass=Singleton):
                 products_dict[product] = quantity
 
         return products_dict
+
+    @log
+    def get_benef(self) -> float:
+        raw_orders = self.db_connector.sql_query(
+            """
+            SELECT o.order_id
+            FROM Orders AS o
+            WHERE o.order_paid_at IS NOT NULL;
+            """,
+            return_type="all",
+        )
+        benef = 0
+        for raw_order in raw_orders:
+            order = self.get_order_by_id(raw_order["order_id"])
+            benef += order.order_price
+
+        return round(benef, 2)
+
+    @log
+    def get_number_orders_by_state(self) -> Dict[str, int]:
+        count_orders = self.db_connector.sql_query(
+            """
+            SELECT COUNT(*), o.order_state
+            FROM Orders AS o
+            GROUP BY o.order_state
+            """,
+            return_type="all",
+        )
+
+        merged_count = {k: v for d in count_orders for k, v in d.items()}
+
+        order_count = {}
+        order_count["preparing"] = merged_count.get(1, 0)
+        order_count["ready_for_delivering"] = merged_count.get(2, 0)
+
+        return order_count

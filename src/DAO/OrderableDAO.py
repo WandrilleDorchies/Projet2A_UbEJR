@@ -143,3 +143,14 @@ class OrderableDAO(metaclass=Singleton):
             "one",
         )["orderable_image_name"]
         return raw_infos
+
+    @log
+    def get_number_orderables(self) -> int:
+        count_orderables = self.db_connector.sql_query(
+            """
+            SELECT COUNT(*)
+            FROM Orderables;
+            """,
+            return_type="one",
+        )
+        return count_orderables["count"]

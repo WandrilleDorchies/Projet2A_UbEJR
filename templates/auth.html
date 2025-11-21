@@ -450,6 +450,9 @@
             
             if (response.ok) {
                 window.location.href = '/menu';
+            } else {
+                const error = await response.json();
+                alert('Error: ' + (error.detail));
             }
         } catch (error) {
             alert('Erreur while registering : ' + error.message);

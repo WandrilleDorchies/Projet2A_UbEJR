@@ -21,25 +21,20 @@ admin_router = APIRouter(prefix="", tags=["General"], dependencies=[Depends(Admi
 )
 def get_overview():
     try:
-        customers = customer_service.get_all_customers()
-        drivers = driver_service.get_all_drivers()
+        # customers = customer_service.get_all_customers()
+        # drivers = driver_service.get_all_drivers()
 
-        orders_prepared = order_service.get_orders_by_state(OrderState.PREPARED)
-        current_orders = order_service.get_orders_by_state(OrderState.PAID)
-        delivering_orders = order_service.get_orders_by_state(OrderState.DELIVERING)
-        delivered_order = order_service.get_orders_by_state(OrderState.DELIVERED)
+        benef = order_service.get_benef()
+        orders_count = order_service.get_number_orders_by_state()
 
-        past_orders = orders_prepared + current_orders + delivering_orders + delivered_order
-        benef = sum([order.order_price for order in list(past_orders)])
-
-        items = menu_service.get_all_orderables(in_menu=True)
+        nb_items = menu_service.get_number_of_orderables()
 
         return {
-            "total_customers": len(customers) if customers else 0,
-            "total_drivers": len(drivers) if drivers else 0,
-            "total_orders_prepared": len(orders_prepared) if orders_prepared else 0,
-            "total_orders_in_kitchen": len(current_orders) if current_orders else 0,
-            "total_orderables_in_menu": len(items) if items else 0,
+            # "total_customers": len(customers) if customers else 0,
+            # "total_drivers": len(drivers) if drivers else 0,
+            "total_orderables_in_menu": nb_items,
+            "total_orders_ready": orders_count["ready_for_delivering"],
+            "total_orders_in_kitchen": orders_count["preparing"],
             "benefice": f"{benef} €",
         }
     except Exception as e:

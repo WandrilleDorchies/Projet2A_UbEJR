@@ -9,7 +9,9 @@ from src.App.init_app import (
     menu_service,
 )
 from src.App.JWTBearer import AdminBearer
-from src.Model.Item import ITEM_TYPE
+from src.Model.APIBundle import APIBundle
+from src.Model.APIItem import APIItem
+from src.Model.Item import ITEM_TYPE, Item
 
 admin_orderables_router = APIRouter(
     prefix="", tags=["Menu / Orderables"], dependencies=[Depends(AdminBearer())]
@@ -22,7 +24,15 @@ admin_orderables_router = APIRouter(
 )
 def get_all_orderables(in_menu: bool = False):
     try:
-        return menu_service.get_all_orderables(in_menu=in_menu)
+        menu = menu_service.get_all_orderables(in_menu=in_menu)
+        api_menu = []
+        for orderable in menu:
+            if isinstance(orderable, Item):
+                api_menu.append(APIItem.from_item(orderable))
+            else:
+                api_menu.append(APIBundle.from_item(orderable))
+
+        return menu
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching orderables: {e}") from e
@@ -72,7 +82,7 @@ def get_item_by_id(item_id: int):
         item = item_service.get_item_by_id(item_id)
         if item is None:
             raise HTTPException(status_code=404, detail=f"Item with id [{item_id}] not found")
-        return item
+        return APIItem.from_item(item)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Invalid request: {e}") from e
 
@@ -145,7 +155,7 @@ def get_bundle_by_id(bundle_id: int):
         bundle = bundle_service.get_bundle_by_id(bundle_id)
         if bundle is None:
             raise HTTPException(status_code=404, detail=f"Bundle with id [{bundle_id}] not found")
-        return bundle
+        return APIBundle.from_bundle(bundle)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Invalid request: {e}") from e
 
