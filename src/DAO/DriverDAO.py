@@ -105,6 +105,17 @@ class DriverDAO(metaclass=Singleton):
     def delete_driver(self, driver_id: int) -> None:
         self.db_connector.sql_query("DELETE FROM Drivers WHERE driver_id=%s", [driver_id], "none")
 
+    @log
+    def get_number_drivers(self) -> int:
+        number = self.db_connector.sql_query(
+            """
+            SELECT COUNT(*)
+            FROM Drivers;
+            """,
+            return_type="one",
+        )
+        return number["count"]
+
     @staticmethod
     def _map_db_to_model(raw_driver: dict) -> dict:
         """

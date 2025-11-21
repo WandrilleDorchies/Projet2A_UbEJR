@@ -437,6 +437,13 @@ class CustomerService:
         )
 
     @log
+    def get_number_customers(self) -> int:
+        try:
+            return self.customer_dao.get_number_customers()
+        except Exception as e:
+            raise Exception(f"Error while getting number of customer: {str(e)}") from e
+
+    @log
     def delete_customer(self, customer_id: int) -> None:
         """
         Deletes a customer from the database by its ID.

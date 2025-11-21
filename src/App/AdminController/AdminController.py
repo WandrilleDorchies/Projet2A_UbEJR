@@ -9,7 +9,6 @@ from src.App.init_app import (
     order_service,
 )
 from src.App.JWTBearer import AdminBearer
-from src.Model.Order import OrderState
 
 templates = Jinja2Templates(directory="templates")
 admin_router = APIRouter(prefix="", tags=["General"], dependencies=[Depends(AdminBearer())])
@@ -21,17 +20,17 @@ admin_router = APIRouter(prefix="", tags=["General"], dependencies=[Depends(Admi
 )
 def get_overview():
     try:
-        # customers = customer_service.get_all_customers()
-        # drivers = driver_service.get_all_drivers()
+        customers = customer_service.get_number_customers()
+        drivers = driver_service.get_number_drivers()
 
         benef = order_service.get_benef()
         orders_count = order_service.get_number_orders_by_state()
 
-        nb_items = menu_service.get_number_of_orderables()
+        nb_items = menu_service.get_number_orderables()
 
         return {
-            # "total_customers": len(customers) if customers else 0,
-            # "total_drivers": len(drivers) if drivers else 0,
+            "total_customers": customers,
+            "total_drivers": drivers,
             "total_orderables_in_menu": nb_items,
             "total_orders_ready": orders_count["ready_for_delivering"],
             "total_orders_in_kitchen": orders_count["preparing"],

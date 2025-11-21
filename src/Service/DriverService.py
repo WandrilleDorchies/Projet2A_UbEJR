@@ -355,6 +355,13 @@ class DriverService:
         return delivery
 
     @log
+    def get_number_drivers(self) -> int:
+        try:
+            return self.driver_dao.get_number_drivers()
+        except Exception as e:
+            raise Exception(f"Error while getting number of driver: {str(e)}") from e
+
+    @log
     def delete_driver(self, driver_id: int) -> None:
         """
         _summary_

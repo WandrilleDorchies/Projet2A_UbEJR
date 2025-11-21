@@ -157,6 +157,17 @@ class CustomerDAO(metaclass=Singleton):
             "none",
         )
 
+    @log
+    def get_number_customers(self) -> int:
+        number = self.db_connector.sql_query(
+            """
+            SELECT COUNT(*)
+            FROM Customers;
+            """,
+            return_type="one",
+        )
+        return number["count"]
+
     @staticmethod
     def _map_db_to_model(raw_customer: dict) -> dict:
         """
