@@ -6,7 +6,6 @@ from .Driver import Driver
 class APIDriver(BaseModel):
     """
     Driver representation in the API
-
     """
 
     id: int

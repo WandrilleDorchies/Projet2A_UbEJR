@@ -7,6 +7,9 @@ from .APIItem import APIItem
 
 
 class APIBundle(BaseModel):
+    """
+    Bundle representation in the API
+    """
     bundle_id: int
     orderable_id: int
     bundle_name: str

@@ -7,6 +7,9 @@ from .Order import Order, OrderState
 
 
 class APIOrder(BaseModel):
+    """
+    Order representation in the API
+    """
     order_id: int
     order_customer_id: int
     order_state: OrderState

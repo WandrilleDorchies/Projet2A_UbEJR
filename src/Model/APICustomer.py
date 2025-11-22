@@ -7,7 +7,6 @@ from .Customer import Customer
 class APICustomer(BaseModel):
     """
     Customer representation in the API
-
     """
 
     id: int

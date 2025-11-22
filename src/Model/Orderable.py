@@ -21,10 +21,31 @@ class Orderable(BaseModel, ABC):
 
     @abstractmethod
     def check_availability(self) -> bool:
+        """
+        Check that the orderable can be added to the menu
+
+        Returns
+        -------
+        bool
+            True if it can be added, else False
+        """
         pass
 
     @abstractmethod
-    def check_stock(self, quantity) -> bool:
+    def check_stock(self, quantity: int) -> bool:
+        """
+        Check that there is a sufficient stock to provide the quantity of orderables
+
+        Parameters
+        ----------
+        quantity : int
+            The number of orderables ordered
+
+        Returns
+        -------
+        bool
+            True if ther is enough stock, else False
+        """
         pass
 
     @property

@@ -3,14 +3,7 @@ from pydantic import BaseModel
 
 class APIItem(BaseModel):
     """
-    Represents an item/product in the system.
-
-    Attributes
-    ----------
-        item_name (str): Name of the item.
-        item_price (float): Price of the item (>= 0).
-        item_type (str): Category or type of item.
-        item_description (str): Description of the item.
+    Item representation in the API
     """
 
     item_id: int

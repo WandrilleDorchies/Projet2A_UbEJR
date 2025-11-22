@@ -60,12 +60,20 @@ class Bundle(Orderable):
         )
         return is_in_period and all_items_available
 
-    def check_stock(self, quantity) -> bool:
+    def check_stock(self, quantity: int) -> bool:
         sufficient_stock = all(
             item.check_stock(quantity * nb) for item, nb in self.bundle_items.items()
         )
         return sufficient_stock
 
     def get_stock(self) -> int:
+        """
+        Get the amount of bundle we can create with the available items stock
+
+        Returns
+        -------
+        int
+            The number of availables bundles
+        """
         bottleneck = min(item.item_stock / nb for item, nb in self.bundle_items.items())
         return int(bottleneck)
