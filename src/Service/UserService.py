@@ -54,8 +54,10 @@ class UserService:
             If the used identifier is unknown
         """
         user = None
-        if user_type == "admin" and identifier == "adminsee":
-            user = self.admin_dao.get_admin()
+        if user_type == "admin":
+            user = self.admin_dao.get_admin_by_username(identifier)
+            if user is None:
+                raise ValueError("[UserService] Invalid admin username")
         else:
             validated_identifier = self.identifier_validator(identifier)
             if not validated_identifier:
@@ -149,7 +151,7 @@ class UserService:
         elif user_type == "driver":
             return self.driver_dao.get_driver_by_id(user_id)
         elif user_type == "admin":
-            return self.admin_dao.get_admin()
+            return self.admin_dao.get_admin_by_id(user_id)
 
     @log
     def identifier_validator(self, identifier: str) -> Optional[dict]:

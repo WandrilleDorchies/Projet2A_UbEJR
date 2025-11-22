@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from src.Model.Admin import Admin
 from src.utils.log_decorator import log
@@ -15,8 +16,21 @@ class AdminDAO(metaclass=Singleton):
 
     # READ
     @log
-    def get_admin(self) -> Admin:
-        raw_admin = self.db_connector.sql_query("SELECT * from Admins", return_type="one")
+    def get_admin_by_id(self, admin_id: int) -> Optional[Admin]:
+        raw_admin = self.db_connector.sql_query(
+            "SELECT * from Admins WHERE admin_id=%s", [admin_id], return_type="one"
+        )
+        if raw_admin is None:
+            return None
+
+        raw_admin_mapped = self._map_db_to_model(raw_admin)
+        return Admin(**raw_admin_mapped)
+
+    @log
+    def get_admin_by_username(self, username: str) -> Optional[Admin]:
+        raw_admin = self.db_connector.sql_query(
+            "SELECT * from Admins WHERE username=%s", [username], return_type="one"
+        )
         if raw_admin is None:
             return None
 
@@ -28,8 +42,6 @@ class AdminDAO(metaclass=Singleton):
     def create_admin(
         self, username: str, first_name: str, last_name: str, password: str, salt: str
     ) -> Admin:
-        if self.get_admin() is not None:
-            raise ValueError("It can only exists one admin.")
         raw_admin = self.db_connector.sql_query(
             """INSERT INTO Admins (username, admin_first_name, admin_last_name, admin_created_at,
                                    admin_password_hash, admin_salt)
@@ -50,16 +62,17 @@ class AdminDAO(metaclass=Singleton):
 
     # UPDATE
     @log
-    def update_admin_password(self, new_password) -> Admin:
+    def update_admin_password(self, username: str, new_password: str) -> Admin:
         self.db_connector.sql_query(
             """
             UPDATE Admins
-            SET admin_password_hash = %s;
+            SET admin_password_hash = %(new_password)s
+            WHERE username=%(username)s;
             """,
-            [new_password],
+            {"new_password": new_password, "username": username},
             "none",
         )
-        return self.get_admin()
+        return self.get_admin_by_username(username)
 
     @staticmethod
     def _map_db_to_model(raw_admin: dict) -> dict:

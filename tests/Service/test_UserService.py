@@ -288,7 +288,7 @@ class TestUserService:
 
     def test_get_user_by_type_admin(self, user_service, admin_dao, clean_database, sample_admin):
         """Test getting user by type (admin)"""
-        admin = admin_dao.get_admin()
+        admin = admin_dao.get_admin_by_id(1)
 
         retrieved_user = user_service._get_user_by_type(admin.id, "admin")
 
