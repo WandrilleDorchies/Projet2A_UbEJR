@@ -1,4 +1,4 @@
-from typing import Literal, Optional
+from typing import Dict, Literal, Optional
 
 from fastapi import APIRouter, HTTPException, Response, status
 from pydantic import BaseModel
@@ -29,39 +29,30 @@ class LoginForm(BaseModel):
 def register(
     register_form: RegisterForm,
     response: Response,
-):
+) -> Dict:
     """
-    Registration request for customers
+    Allows a customer to create an account. Then, create a cookie and an order.
 
     Parameters
     ----------
-    first_name : str
-        first name of the customer
-    last_name : str
-        last name of the customer
-    phone : str
-        phone number of the customer. Phone number validity is checked by CustomerService.
-    mail : str
-        email address of the customer
-    password : str
-        Password [TODO: specify requirements]
-    confirm_password : str
-        Password confirmation, must match password
-    address_string : str
-        Address of the customer as a string. Address validity is cheked by CustomerService.
+    register_form : RegisterForm
+        An object with all the informations required to register a new customer
+    response : Response
+        HTTP response which holds the cookie
 
     Returns
     -------
-    _type_: ?
-        _description_ : ?
+    Dict
+        A dictionnary with the user's informations and the JWT token
+
     Raises
     ------
     HTTPException
-        raised if password confimration field differs from password field
+        If the two passwords don't match
     HTTPException
-        _description_ ?
+        If a ValueError is raised beforehand
     HTTPException
-        _description_ ?
+        Catch any other Exception that could be raised
     """
     try:
         if register_form.confirm_password != register_form.password:
