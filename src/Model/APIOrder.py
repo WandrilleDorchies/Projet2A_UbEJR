@@ -25,7 +25,7 @@ class APIOrder(BaseModel):
             order_id=order.order_id,
             order_customer_id=order.order_customer_id,
             order_state=order.order_state,
-            order_price=order.order_price,
+            order_price=round(order.order_price, 2),
             order_orderables=orderables,
             order_created_at=order.order_created_at,
             order_paid_at=order.order_paid_at,

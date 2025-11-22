@@ -405,8 +405,9 @@
 
             if (response.ok) {
                 const order_id = await response.json();
-                console.log(order_id)
-                window.location.href = `/delivery/${order_id}`;
+                if (order_id){
+                    window.location.href = `/delivery/${order_id}`;
+                }
             }
         } catch (error) {
             console.error('Error checking active delivery:', error);

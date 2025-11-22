@@ -39,8 +39,10 @@ def get_profile(driver_id: int = Depends(get_driver_id_from_token)):
 @driver_router.get(
     "/me/current-delivery", status_code=status.HTTP_200_OK, dependencies=[Depends(DriverBearer())]
 )
-def get_current_order_id(driver_id: int = Depends(get_driver_id_from_token)) -> int:
+def get_current_order_id(driver_id: int = Depends(get_driver_id_from_token)):
     delivery = driver_service.get_driver_current_delivery(driver_id)
+    if delivery is None:
+        return None
     return delivery.delivery_order_id
 
 

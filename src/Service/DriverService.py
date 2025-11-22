@@ -108,14 +108,8 @@ class DriverService:
 
         Returns
         -------
-        Optional[Order]
-            An Order, if the driver is currently handling one through a delivery
-
-        Raises
-        ------
-        ValueError
-            raised if there is no in progress delivery assigned to this driver
-            and therefore no order
+        Optional[Delivery]
+            A Delivery, if the driver is delivering
         """
         delivery = self.delivery_dao.get_driver_current_delivery(driver_id)
         if delivery is None or delivery.delivery_state != 1:
