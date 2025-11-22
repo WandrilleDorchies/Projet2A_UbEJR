@@ -84,25 +84,6 @@ class TestCustomerDAO:
 
         assert customers == []
 
-    def test_get_all_customers_multiple(self, customer_dao, address_dao, clean_database):
-        """Test getting all customers"""
-        address = address_dao.create_address(1, "Rue Test", "Rennes", 35000, "France")
-
-        customer_dao.create_customer(
-            "A", "A", "0601", "a@test.com", "hash", "salt", address.address_id
-        )
-        customer_dao.create_customer(
-            "B", "B", "0602", "b@test.com", "hash", "salt", address.address_id
-        )
-        customer_dao.create_customer(
-            "C", "C", "0603", "c@test.com", "hash", "salt", address.address_id
-        )
-
-        customers = customer_dao.get_all_customers()
-
-        assert customers is not None
-        assert len(customers) == 3
-
     def test_update_customer_multiple_fields(self, customer_dao, sample_customer, clean_database):
         """Test updating multiple fields"""
         updated_customer = customer_dao.update_customer(

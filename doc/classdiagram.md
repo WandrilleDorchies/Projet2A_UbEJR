@@ -87,7 +87,6 @@ namespace services {
 namespace DAOs {
     class AddressDAO {
         +create_address(address_number: int, address_street: str, address_city: str, address_postal_code: int, address_country: str) : Address
-        +get_address_by_id(self, address_id: int): Optional[Address]
         +get_address_by_customer_id(self, customer_id: int): Optional[Address]
         +update_address(self, address_id: int, update: dict): Optional[Address]
         +delete_address_by_id(self, address_id: int): None

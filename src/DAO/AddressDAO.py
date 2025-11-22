@@ -23,27 +23,6 @@ class AddressDAO(metaclass=Singleton):
         address_postal_code: int,
         address_country: str,
     ) -> Address:
-        """
-        Create a new address entry in the database.
-
-        Args
-        ----
-        address_number (str or int):
-            Street number of the address.
-        address_street (str):
-            Name of the street.
-        address_city (str):
-            City where the address is located.
-        address_postal_code (str or int):
-            Postal code of the address.
-        address_country (str):
-            Country of the address.
-
-        Returns
-        -------
-        Address
-            The newly created Address object containing the inserted information.
-        """
         raw_created_address = self.db_connector.sql_query(
             """
             INSERT INTO Addresses (address_id, address_number, address_street, address_city,
@@ -63,54 +42,13 @@ class AddressDAO(metaclass=Singleton):
         return Address(**raw_created_address)
 
     # READ
+
     @log
-    def get_address_by_id(self, address_id: int) -> Optional[Address]:
-        """
-        Retrieve the address associated with a given id.
-
-        Args
-        ----
-        address_id (int):
-            Unique identifier of the adress
-
-        Returns
-        -------
-        Address or None
-            An Address object containing the customer's address information
-        """
-
+    def get_address_by_customer_id(self, customer_id: int) -> Optional[Address]:
         raw_address = self.db_connector.sql_query(
             """SELECT *
                FROM Addresses
                WHERE address_id = %s;
-            """,
-            [address_id],
-            "one",
-        )
-
-        return Address(**raw_address) if raw_address else None
-
-    @log
-    def get_address_by_customer_id(self, customer_id: int) -> Optional[Address]:
-        """
-        Retrieve the address associated with a given customer id.
-
-        Args
-        ----
-        customer_id (int):
-            Unique identifier of the customer
-
-        Returns
-        -------
-        Address or None
-            An Address object containing the customer's address information
-        """
-
-        raw_address = self.db_connector.sql_query(
-            """SELECT a.*
-               FROM Addresses AS a
-               INNER JOIN Customers AS c ON a.address_id=c.customer_address_id
-               WHERE c.customer_id = %s;
             """,
             [customer_id],
             "one",
@@ -120,38 +58,13 @@ class AddressDAO(metaclass=Singleton):
 
     @log
     def get_all_addresses(self) -> Optional[list[Address]]:
-        """
-        Retrieve all addresses stored in the database.
-
-        Returns
-        -------
-        list[Address] or None
-            A list of Address objects if at least one address exists in the database,
-            None otherwise.
-        """
-
         raw_addresses = self.db_connector.sql_query("SELECT * FROM Addresses", return_type="all")
 
-        return [Address(**raw_address) for raw_address in raw_addresses] if raw_addresses else None
+        return [Address(**raw_address) for raw_address in raw_addresses] if raw_addresses else []
 
     # UPDATE
     @log
     def update_address(self, address_id: int, update: dict):
-        """
-        Update an existing address in the database.
-
-        Args
-        ----
-        address_id (int):
-            Unique identifier of the address to update.
-        ? (str or int):
-            ?.
-
-        Returns
-        -------
-        Address
-            The updated Address object reflecting the new information stored in the database.
-        """
         if not update:
             raise ValueError("At least one value should be updated")
 
@@ -180,7 +93,7 @@ class AddressDAO(metaclass=Singleton):
             "none",
         )
 
-        return self.get_address_by_id(address_id)
+        return self.get_address_by_customer_id(address_id)
 
     # DELETE
     @log

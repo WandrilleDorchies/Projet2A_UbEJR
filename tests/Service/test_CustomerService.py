@@ -55,6 +55,8 @@ class TestCustomerService:
     ):
         """Test getting all customers"""
         address = address_dao.create_address(1, "Rue Test", "Rennes", 35000, "France")
+        address = address_dao.create_address(2, "Rue Test", "Rennes", 35000, "France")
+        address = address_dao.create_address(3, "Rue Test", "Rennes", 35000, "France")
 
         customer_dao.create_customer(
             "A", "A", "0601", "a@test.com", "hash", "salt", address.address_id

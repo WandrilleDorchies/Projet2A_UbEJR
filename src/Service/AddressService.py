@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional
+from typing import List
 
 from src.DAO.AddressDAO import AddressDAO
 from src.Model.Address import Address
@@ -17,52 +17,24 @@ class AddressService:
         self.gm_service = gm_service
 
     @log
-    def get_address_by_id(self, address_id: int) -> Optional[Address]:
+    def get_address_by_customer_id(self, customer_id: int) -> Address:
         """
-        _summary_
-
-        Parameters
-        ----------
-        address_id : int
-            _description_
-
-        Returns
-        -------
-        Optional[Address]
-            _description_
-
-        Raises
-        ------
-        ValueError
-            _description_
-        """
-        address = self.address_dao.get_address_by_id(address_id)
-        if address is None:
-            logging.error(f"[AddressService] Cannot find: Address with ID {address_id} not found.")
-            raise ValueError(
-                f"[AddressService] Cannot find: Address with ID {address_id} not found."
-            )
-        return address
-
-    @log
-    def get_address_by_customer_id(self, customer_id: int) -> Optional[Address]:
-        """
-        _summary_
+        Fetch an address associated with a customer
 
         Parameters
         ----------
         customer_id : int
-            _description_
+            The unique identifier of the customer
 
         Returns
         -------
-        Optional[Address]
-            _description_
+        Address
+            An Address Object
 
         Raises
         ------
         ValueError
-            _description_
+            If the customer id is invalid
         """
         address = self.address_dao.get_address_by_customer_id(customer_id)
         if address is None:
@@ -75,43 +47,36 @@ class AddressService:
         return address
 
     @log
-    def get_all_address(self) -> Optional[List[Address]]:
+    def get_all_address(self) -> List[Address]:
         """
-        _summary_
+        Fetch all the addresses in the database
 
         Returns
         -------
-        Optional[List[Address]]
-            _description_
+        List[Address]
+            A list with all the addresses in the database
 
-        Raises
-        ------
-        ValueError
-            _description_
         """
         addresses = self.address_dao.get_all_address()
-        if addresses is None:
-            logging.error("[AddressService] No adresses in the database.")
-            raise ValueError("[AddressService] No adresses in the database.")
         return addresses
 
     @log
     def create_address(
         self,
         address: str,
-    ) -> Optional[Address]:
+    ) -> Address:
         """
-        _summary_
+        Create an address from a string, check that the address real and valid
 
         Parameters
         ----------
         address : str
-            _description_
+            A string (ex: 51 rue Blaise Pascal, 35170 BRUZ)
 
         Returns
         -------
-        Optional[Address]
-            _description_
+        Address
+            The newly created address
         """
         self.gm_service.validate_address(address)
 
@@ -119,28 +84,33 @@ class AddressService:
         return self.address_dao.create_address(**components)
 
     @log
-    def update_address(self, address_id: int, update: dict) -> Optional[Address]:
+    def update_address(self, address_id: int, update: dict) -> Address:
         """
-        _summary_
+        Update an address
 
         Parameters
         ----------
         address_id : int
-            _description_
+            The id of the address to update
         update : dict
-            _description_
+            A dictionnary that can contains:
+                - address_number: int
+                - address_street: str
+                - address_postal_code: int
+                - address_city: str
+                - address_country: str
 
         Returns
         -------
-        Optional[Address]
-            _description_
+        Address
+            The updated address
 
         Raises
         ------
         ValueError
-            _description_
+            If the update dictionnary is empty
         """
-        current_address = self.get_address_by_id(address_id)
+        current_address = self.get_address_by_customer_id(address_id)
 
         if all([value is None for value in update.values()]):
             raise ValueError(
@@ -162,12 +132,12 @@ class AddressService:
     @log
     def delete_address(self, address_id: int) -> None:
         """
-        _summary_
+        Deletes a given address
 
         Parameters
         ----------
         address_id : int
-            _description_
+            The unique id of an address
         """
-        self.get_address_by_id(address_id)
+        self.get_address_by_customer_id(address_id)
         self.address_dao.delete_address_by_id(address_id)

@@ -18,6 +18,7 @@ class TestDeliveryDAO:
     ):
         """Test getting delivery by driver id"""
         delivery_dao.create_delivery(order_id=sample_order.order_id, driver_id=sample_driver.id)
+        delivery_dao.update_delivery_state(sample_order.order_id, 1)
         retrieved_delivery = delivery_dao.get_driver_current_delivery(sample_driver.id)
 
         assert retrieved_delivery is not None
@@ -35,6 +36,7 @@ class TestDeliveryDAO:
     ):
         """Should return a Delivery when at least one exists"""
         delivery_dao.create_delivery(order_id=sample_order.order_id, driver_id=sample_driver.id)
+        delivery_dao.update_delivery_state(sample_order.order_id, 1)
 
         retrieved = delivery_dao.get_driver_current_delivery(sample_driver.id)
 
