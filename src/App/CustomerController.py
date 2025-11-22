@@ -11,7 +11,6 @@ from src.Model.Item import Item
 from .init_app import (
     address_service,
     customer_service,
-    driver_service,
     jwt_service,
     order_service,
     stripe_service,
@@ -32,6 +31,18 @@ class AddRemoveOrderable(BaseModel):
 def get_customer_id_from_token(
     credentials: Annotated[HTTPAuthorizationCredentials, Depends(CustomerBearer())],
 ) -> int:
+    """
+    Get the customer id of the connected user
+    Parameters
+    ----------
+    credentials : Annotated[HTTPAuthorizationCredentials, Depends
+        The user's credentials
+
+    Returns
+    -------
+    int
+        The id of the connected user
+    """
     token = credentials.credentials
     customer_id = int(jwt_service.validate_user_jwt(token)["user_id"])
     return customer_id
@@ -40,6 +51,24 @@ def get_customer_id_from_token(
 def get_current_order_id(
     customer_id: int = Depends(get_customer_id_from_token),
 ) -> int:
+    """
+    Get the current order of the customer (the one he's currently updating)
+
+    Parameters
+    ----------
+    customer_id : int
+        The id of the current customer (given by Depends)
+
+    Returns
+    -------
+    int
+        The od of the current order
+
+    Raises
+    ------
+    HTTPException
+        If no order was created
+    """
     order = order_service.get_customer_current_order(customer_id)
     if order is None:
         raise HTTPException(status_code=404, detail="The order wasn't created")
@@ -51,16 +80,29 @@ def get_current_order_id(
     "/me", status_code=status.HTTP_200_OK, dependencies=[Depends(CustomerBearer())]
 )
 def get_profile(customer_id: int = Depends(get_customer_id_from_token)) -> APICustomer:
+    """
+    Returns the information about the current customer
+
+    Parameters
+    ----------
+    customer_id : int
+        The id of the logged customer
+
+    Returns
+    -------
+    APICustomer
+        A Customer without sensible informations like hash
+
+    Raises
+    ------
+    HTTPException
+        If a ValueError is raised beforehand
+    HTTPException
+        Catch any other Exception that could be raised
+    """
     try:
         customer = customer_service.get_customer_by_id(customer_id)
-        return APICustomer(
-            id=customer.id,
-            first_name=customer.first_name,
-            last_name=customer.last_name,
-            address=customer.customer_address,
-            customer_phone=customer.customer_phone,
-            customer_mail=customer.customer_mail,
-        )
+        return APICustomer.from_customer(customer)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
     except Exception as e:
@@ -81,18 +123,31 @@ def update_profile(
     customer_update: CustomerUpdate,
     customer_id: int = Depends(get_customer_id_from_token),
 ):
+    """
+
+    Parameters
+    ----------
+    customer_update : CustomerUpdate
+        A class containing all the informations a customer can update
+    customer_id : int
+        The id of the current customer
+
+    Returns
+    -------
+    APICustomer
+        A Customer without sensible informations like hash
+
+    Raises
+    ------
+    HTTPException
+        If a ValueError is raised beforehand
+    HTTPException
+        Catch any other Exception that could be raised
+    """
     try:
         update_data = vars(customer_update)
-        if customer_update.customer_phone and driver_service.get_driver_by_phone(
-            customer_update.driver_phone
-        ):
-            raise HTTPException(
-                status_code=403,
-                detail="[CustomerController] Cannot update customer: "
-                "A driver already have this phone number.",
-            )
         updated_customer = customer_service.update_customer(customer_id, update_data)
-        return updated_customer
+        return APICustomer.from_customer(updated_customer)
 
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
@@ -115,6 +170,28 @@ def update_address(
     address_update: AdressUpdate,
     customer_id: int = Depends(get_customer_id_from_token),
 ):
+    """
+    Allows a customer to update his address
+
+    Parameters
+    ----------
+    address_update : AdressUpdate
+        A class containing all the parameters a customer can update in his address
+    customer_id : int
+        The id of the current customer
+
+    Returns
+    -------
+    Address
+        The updated address
+
+    Raises
+    ------
+    HTTPException
+        If a ValueError is raised beforehand
+    HTTPException
+        Catch any other Exception that could be raised
+    """
     try:
         update_data = vars(address_update)
         updated_address = address_service.update_address(customer_id, update_data)
@@ -139,9 +216,31 @@ def update_password(
     password_update: PasswordUpdate,
     customer_id: int = Depends(get_customer_id_from_token),
 ):
+    """
+    Allows a customer to update his password
+
+    Parameters
+    ----------
+    password_update : PasswordUpdate
+        A class containing all the informations required to update his password
+    customer_id : int
+        The id of the current customer
+
+    Raises
+    ------
+    HTTPException
+        If the two new passwords don't match
+    HTTPException
+        If a ValueError is raised beforehand
+    HTTPException
+        Catch any other Exception that could be raised
+    """
     try:
         if password_update.new_password != password_update.confirm_password:
-            raise HTTPException(status_code=400, detail="")
+            raise HTTPException(
+                status_code=400,
+                detail="[CustomerController] Cannot update password: The two passwords don't match",
+            )
 
         customer_service.update_password(
             customer_id, password_update.current_password, password_update.new_password
@@ -163,6 +262,19 @@ def update_password(
 def get_order(
     order_id: int = Depends(get_current_order_id),
 ):
+    """
+    Get the current order of a customer
+
+    Parameters
+    ----------
+    order_id : int
+        The id of the current order
+
+    Returns
+    -------
+    Dict:
+        A dictionnary with the id, the price and the orderables in the order
+    """
     order = order_service.get_order_by_id(order_id)
     return {
         "order_id": order.order_id,
@@ -183,17 +295,42 @@ def add_orderable_to_order(
     add_orderable: AddRemoveOrderable,
     order_id: int = Depends(get_current_order_id),
 ):
+    """
+    Allows a customer to add an orderable to his order
+
+    Parameters
+    ----------
+    add_orderable : AddRemoveOrderable
+        A class with the orderable id and the quantity to add as attributes
+    order_id : int, optional
+        The current order
+
+    Returns
+    -------
+    Order:
+        The updated order
+
+    Raises
+    ------
+    HTTPException
+        If the customer asks for a negative amount of orderable
+    HTTPException
+        If a ValueError is raised beforehand
+    HTTPException
+        Catch any other Exception that could be raised
+    """
     if add_orderable.quantity <= 0:
-        errortext = "[CustomerController] Invalid input:"
-        errortext += " cannot add 0 or a negative number of orderables."
         raise HTTPException(
             status_code=403,
-            detail=errortext,
+            detail="[CustomerController] Invalid input: cannot add 0 or "
+            "a negative number of orderables.",
         )
     try:
         return order_service.add_orderable_to_order(
             add_orderable.orderable_id, order_id, add_orderable.quantity
         )
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
     except Exception as e:
         raise HTTPException(
             status_code=403, detail=f"[CustomerController] cannot add orderable : {str(e)}"
@@ -209,17 +346,42 @@ def remove_orderable_from_order(
     add_orderable: AddRemoveOrderable,
     order_id: int = Depends(get_current_order_id),
 ):
+    """
+    Allows a customer to remove an orderable to his order
+
+    Parameters
+    ----------
+    add_orderable : AddRemoveOrderable
+        A class with the orderable id and the quantity to remove as attributes
+    order_id : int, optional
+        The current order
+
+    Returns
+    -------
+    Order:
+        The updated order
+
+    Raises
+    ------
+    HTTPException
+        If the customer asks for a negative amount of orderable
+    HTTPException
+        If a ValueError is raised beforehand
+    HTTPException
+        Catch any other Exception that could be raised
+    """
     if add_orderable.quantity <= 0:
-        errortext = "[CustomerController] Invalid input:"
-        errortext += " cannot remove 0 or a negative number of orderables."
         raise HTTPException(
             status_code=403,
-            detail=errortext,
+            detail="[CustomerController] Invalid input: cannot remove 0 or "
+            "a negative number of orderables.",
         )
     try:
         return order_service.remove_orderable_from_order(
             add_orderable.orderable_id, order_id, add_orderable.quantity
         )
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
     except Exception as e:
         raise HTTPException(
             status_code=403,
@@ -232,6 +394,26 @@ def remove_orderable_from_order(
     "/me/order_history", status_code=status.HTTP_200_OK, dependencies=[Depends(CustomerBearer())]
 )
 def view_order_history(customer_id: int = Depends(get_customer_id_from_token)):
+    """
+    Get all the past and current orders of the customer
+
+    Parameters
+    ----------
+    customer_id : int
+        The id of the current customer
+
+    Returns
+    -------
+    List:
+        A list containing all the orders
+
+    Raises
+    ------
+    HTTPException
+        If a ValueError is raised beforehand
+    HTTPException
+        Catch any other Exception that could be raised
+    """
     try:
         orders = order_service.get_all_orders_by_customer(customer_id)
         history = []
@@ -271,7 +453,8 @@ def view_order_history(customer_id: int = Depends(get_customer_id_from_token)):
             history.append(formatted_order)
 
         return history
-
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"[CustomerController] Could not get order history: {str(e)}"
@@ -289,11 +472,26 @@ class DeleteAccountForm(BaseModel):
     dependencies=[Depends(CustomerBearer())],
 )
 def delete_account(delete_account: DeleteAccountForm):
+    """
+    Allows a customer to delete his account (forever)
+
+    Parameters
+    ----------
+    delete_account : DeleteAccountForm
+        A class with the customer's identifier and the password as attributes
+
+    Raises
+    ------
+    HTTPException
+        If a ValueError is raised beforehand
+    HTTPException
+        Catch any other Exception that could be raised
+    """
     try:
         customer = customer_service.login_customer(
             delete_account.identifier, delete_account.password
         )
-        return customer_service.delete_customer(customer.id)
+        customer_service.delete_customer(customer.id)
 
     except ValueError as e:
         raise HTTPException(status_code=401, detail=f"Invalid credentials: {e}") from e
@@ -311,6 +509,30 @@ def create_checkout_session(
     order_id: int = Depends(get_current_order_id),
     customer_id: int = Depends(get_customer_id_from_token),
 ):
+    """
+    Create a checkout session for the current customer and order
+
+    Parameters
+    ----------
+    order_id : int
+        The id of the current order
+    customer_id : int
+        The id of the current customer
+
+    Returns
+    -------
+    Dict
+        A dictionnary with the url to the checkout session and the session id
+
+    Raises
+    ------
+    HTTPException
+        If the order is already paid
+    HTTPException
+        If a ValueError is raised beforehand
+    HTTPException
+        Catch any other Exception that could be raised
+    """
     try:
         order = order_service.get_order_by_id(order_id)
 
@@ -339,6 +561,32 @@ def verify_payment(
     customer_id: int = Depends(get_customer_id_from_token),
     order_id: int = Depends(get_current_order_id),
 ):
+    """
+    Verify that the payment was successful
+
+    Parameters
+    ----------
+    session_id : str
+        An unique id of the checkout session
+    order_id : int
+        The id of the current order
+    customer_id : int
+        The id of the current customer
+
+    Returns
+    -------
+    Dict
+        A dictionnary with informations about the paid order
+
+    Raises
+    ------
+    HTTPException
+        If the orde wansn't paid
+    HTTPException
+        If a ValueError is raised beforehand
+    HTTPException
+        Catch any other Exception that could be raised
+    """
     try:
         payment_info = stripe_service.verify_payment(session_id)
 
