@@ -108,19 +108,12 @@ class ItemService:
         """
         self.get_item_by_id(item_id)
 
-        # if all([value is None for value in update.values()]):
-        #     raise ValueError(
-        #         "[ItemService] Cannot update item: You must change at least one field."
-        #     )
-
         if update.get("item_price") is not None and update.get("item_price") <= 0.0:
             raise ValueError("[ItemService] Cannot update item: Price must be strictly positive")
 
         if update.get("item_stock") and update.get("item_stock") < 0:
             raise ValueError("[ItemService] Cannot update item: Stock must be positive")
 
-        # update = {key: value for key, value in update.items() if update[key]}
-        # correction potntielle
         update = {key: value for key, value in update.items() if value is not None}
         item = self.item_dao.update_item(item_id, update=update)
         return item

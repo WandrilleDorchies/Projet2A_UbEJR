@@ -1,4 +1,4 @@
-from typing import Dict, List, Literal, Optional
+from typing import Dict, List, Literal
 
 from src.DAO.BundleDAO import BundleDAO
 from src.DAO.ItemDAO import ItemDAO
@@ -60,7 +60,7 @@ class OrderService:
         return order
 
     @log
-    def get_all_orders(self, limit: int) -> Optional[List[Order]]:
+    def get_all_orders(self, limit: int) -> List[Order]:
         """
         Fetch a certain number of orders. The firsts orders are the latests.
 
@@ -95,7 +95,7 @@ class OrderService:
         return self.order_dao.get_all_orders_by_customer(customer_id)
 
     @log
-    def get_customer_current_order(self, customer_id: int) -> Optional[Order]:
+    def get_customer_current_order(self, customer_id: int) -> Order:
         """
         Fetch the current order of a given customer. It means the order he's currently
         updating
@@ -283,7 +283,7 @@ class OrderService:
             The id of the item to add
         order_id : int
             The id of the order
-        quantity : int, optional
+        quantity : int
             Number of units to add (default is 1)
 
         Returns
@@ -350,7 +350,7 @@ class OrderService:
             The id of the item to remove
         order_id : int
             The id of the order
-        quantity : int, optional
+        quantity : int
             Number of units to remove (default is 1)
 
         Returns

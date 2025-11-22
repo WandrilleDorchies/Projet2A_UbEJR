@@ -473,6 +473,6 @@ def get_orderable_image(
         if image_data is None:
             raise HTTPException(status_code=404, detail="Image not found")
 
-        return Response(content=image_data, media_type="image/jpg")
+        return {"url": image_data, "message": "Copy the URL to view the image"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching image: {e}") from e

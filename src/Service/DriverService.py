@@ -1,6 +1,6 @@
 import logging
 import re
-from typing import Dict, Optional, Union
+from typing import Dict, List, Optional, Union
 
 from src.DAO.DeliveryDAO import DeliveryDAO
 from src.DAO.DriverDAO import DriverDAO
@@ -34,24 +34,24 @@ class DriverService:
         self.pattern = r"^(?=.*[A-Za-zÀ-ÖØ-öø-ÿ])[-A-Za-zÀ-ÖØ-öø-ÿ ]+$"
 
     @log
-    def get_driver_by_id(self, driver_id: int) -> Optional[Driver]:
+    def get_driver_by_id(self, driver_id: int) -> Driver:
         """
-        _summary_
+        Fetch a driver by his id
 
         Parameters
         ----------
         driver_id : int
-            _description_
+            The unique id of a driver
 
         Returns
         -------
-        Optional[Driver]
-            _description_
+        Driver
+            A Driver object with all the informations about the retrieved driver
 
         Raises
         ------
         ValueError
-            _description_
+            If the given id isn't associated with any driver
         """
         driver = self.driver_dao.get_driver_by_id(driver_id)
         if driver is None:
@@ -62,7 +62,25 @@ class DriverService:
         return driver
 
     @log
-    def get_driver_by_phone(self, phone_number: str) -> Optional[Driver]:
+    def get_driver_by_phone(self, phone_number: str) -> Driver:
+        """
+        Get a driver thanks to his phone number
+
+        Parameters
+        ----------
+        phone_number : str
+            A phone number as a string in a valid format (E164)
+
+        Returns
+        -------
+        Driver
+            A Driver object with all the informations about the retrieved driver
+
+        Raises
+        ------
+        ValueError
+            If the phone number isn't associated with any driver
+        """
         driver = self.driver_dao.get_driver_by_phone(phone_number.strip())
         if driver is None:
             logging.error(
@@ -72,12 +90,24 @@ class DriverService:
         return driver
 
     @log
-    def get_all_drivers(self, limit: int = 15) -> Optional[Driver]:
-        drivers = self.driver_dao.get_all_drivers(limit)
-        return drivers
+    def get_all_drivers(self, limit: int = 15) -> List[Driver]:
+        """
+        Fetch a certain amount of drivers in the database
+
+        Parameters
+        ----------
+        limit : int
+            The number of driver you want to fetch, by default 15
+
+        Returns
+        -------
+        List[Driver]
+            A list of Driver objects
+        """
+        return self.driver_dao.get_all_drivers(limit)
 
     @log
-    def login(self, identifier: str, password: str) -> Optional[Driver]:
+    def login(self, identifier: str, password: str) -> Driver:
         """
         Allows the driver to login by calling the mutual user_service.login method,
         which also handles errors
@@ -91,7 +121,7 @@ class DriverService:
 
         Returns
         -------
-        Optional[Driver]
+        Driver
             A Driver object in case of successful login
         """
         return self.user_service.login(identifier, password)
@@ -104,7 +134,7 @@ class DriverService:
         Parameters
         ----------
         driver_id : int
-            ID of the driver
+            The id of the driver
 
         Returns
         -------
@@ -118,38 +148,47 @@ class DriverService:
         return delivery
 
     @log
-    def create_driver(
-        self, first_name: str, last_name: str, phone: str, password: str
-    ) -> Optional[Driver]:
+    def create_driver(self, first_name: str, last_name: str, phone: str, password: str) -> Driver:
         """
-        _summary_
+        Add a driver personal informations after checking and formatting
+        infos
+
+        Checking:
+            - First and last name should only contains letters
+            - Phone number is unique and valid
+            - Password meets all the requirements
+
+        Formatting:
+            - First name as snake-case
+            - Last Name as uppercase
+            - Format the phone number to E164
+
 
         Parameters
         ----------
-        first_name : str
-            _description_
-        last_name : str
-            _description_
-        phone : str
-            _description_
-        password : str
-            _description_
+        first_name: str
+            First name of the driver
+        last_name: str
+            Last name of the driver
+        phone: str
+            Phone number of the driver
+        password: str
+            A password that meets all the requirements
 
         Returns
         -------
-        Optional[Driver]
-            _description_
+        Driver
+            A newly created Driver object
 
         Raises
         ------
         ValueError
-            _description_
+            If the phone number isn't valid
         ValueError
-            _description_
+            If a driver with this phone number already exists
         ValueError
-            _description_
+            If the first or last name isn't valid (for example contains numbers)
         """
-        #
         validated_phone = self.user_service.identifier_validator(phone)
         if validated_phone is None or validated_phone["type"] != "phone":
             logging.error("[DriverService] Cannot create: The phone {phone} is invalid.")
@@ -189,30 +228,40 @@ class DriverService:
     @log
     def update_driver(self, driver_id: int, update: dict) -> Optional[Driver]:
         """
-        _summary_
+        Update a driver personal informations after checking and formatting
+        infos from the dictionnary
+
+        Checking:
+            - First and last name should only contains letters
+            - Phone number is unique and valid
+
+        Formatting:
+            - First name as snake-case
+            - Last Name as uppercase
+            - Format the phone number to E164
 
         Parameters
         ----------
         driver_id : int
-            _description_
+            The id of the driver to update
         update : dict
-            _description_
+            A dictionnary with all the updated informations
 
         Returns
         -------
-        Optional[Driver]
-            _description_
+        Driver
+            A Driver object with the updated informations
 
         Raises
         ------
         ValueError
-            _description_
+            If the update dictionnary is filled with None (no changes)
         ValueError
-            _description_
+            First name is invalid
         ValueError
-            _description_
+            Last name is invalid
         ValueError
-            _description_
+            The driver's phone is invalid
         """
         self.get_driver_by_id(driver_id)
 
@@ -256,26 +305,29 @@ class DriverService:
     @log
     def start_delivery(self, order_id: int, driver_id: int) -> Delivery:
         """
-        _summary_
+        Allows a driver to start a delivery if it's possible. Set the order's state as 'delivering'
+        and the driver's 'driver_is_delivering' as True. Create a delivery
+
+        A driver can start a delivery if the order is prepared and if he's not currently delivering
 
         Parameters
         ----------
         order_id : int
-            _description_
+            The order's id the driver want to handle
         driver_id : int
-            _description_
+            The id of the driver
 
         Returns
         -------
         Delivery
-            _description_
+            A Delivery object
 
         Raises
         ------
         ValueError
-            _description_
+            If the order's state isn't "prepared"
         ValueError
-            _description_
+            If the driver is already delivering an order
         """
         driver = self.get_driver_by_id(driver_id)
         order = self.order_dao.get_order_by_id(order_id)
@@ -306,24 +358,27 @@ class DriverService:
     @log
     def end_delivery(self, order_id: int, driver_id: int) -> Delivery:
         """
-        _summary_
+        Allows a driver to end a delivery if it's possible. Set the order's state as 'delivered'
+        and the driver's 'driver_is_delivering' as False. Close the delivery
+
+        A driver can start a delivery if the order is "delivering"
 
         Parameters
         ----------
         order_id : int
-            _description_
+            The order's id the driver is handling
         driver_id : int
-            _description_
+            The id of the driver
 
         Returns
         -------
         Delivery
-            _description_
+            A Delivery object
 
         Raises
         ------
         ValueError
-            _description_
+            If the order's state isn't "delivering"
         """
         self.get_driver_by_id(driver_id)
 
@@ -346,6 +401,19 @@ class DriverService:
 
     @log
     def get_number_drivers(self) -> int:
+        """
+        Count the number of drivers in the database
+
+        Returns
+        -------
+        int
+            The number of driver
+
+        Raises
+        ------
+        Exception
+            If any error occured
+        """
         try:
             return self.driver_dao.get_number_drivers()
         except Exception as e:
@@ -354,18 +422,31 @@ class DriverService:
     @log
     def delete_driver(self, driver_id: int) -> None:
         """
-        _summary_
+        Delete the driver from the database (this action cannot be undone)
 
         Parameters
         ----------
         driver_id : int
-            _description_
+            The driver's id
         """
         self.get_driver_by_id(driver_id)
         self.driver_dao.delete_driver(driver_id)
 
     @log
     def get_driver_stats(self, driver_id: int) -> Dict[str, Union[int, float]]:
+        """
+        Get the number of deliveries made by the driver and the cumulated price of these orders
+
+        Parameters
+        ----------
+        driver_id : int
+            The driver's id you want to get
+
+        Returns
+        -------
+        Dict[str, Union[int, float]]
+            A dictionnary with the statistics
+        """
         deliveries = self.delivery_dao.get_deliveries_by_driver(driver_id)
 
         nb_orders = len(deliveries)
