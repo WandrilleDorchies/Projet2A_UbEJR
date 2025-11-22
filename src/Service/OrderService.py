@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Literal, Optional
 
 from src.DAO.BundleDAO import BundleDAO
 from src.DAO.ItemDAO import ItemDAO
@@ -35,24 +35,24 @@ class OrderService:
         }
 
     @log
-    def get_order_by_id(self, order_id: int) -> Optional[Order]:
+    def get_order_by_id(self, order_id: int) -> Order:
         """
-        _summary_
+        Fetch an order by its unique id
 
         Parameters
         ----------
         order_id : int
-            _description_
+            Unique identifier of the order
 
         Returns
         -------
-        Optional[Order]
-            _description_
+        Order
+            An Order object with all its information
 
         Raises
         ------
         ValueError
-            _description_
+            If the id isn't link to any order
         """
         order = self.order_dao.get_order_by_id(order_id)
         if order is None:
@@ -62,112 +62,119 @@ class OrderService:
     @log
     def get_all_orders(self, limit: int) -> Optional[List[Order]]:
         """
-        _summary_
+        Fetch a certain number of orders. The firsts orders are the latests.
 
         Parameters
         ----------
         limit : int
-            _description_
+            The number of order you want
 
         Returns
         -------
-        Optional[List[Order]]
-            _description_
+        List[Order]
+            The retrived orders
         """
         return self.order_dao.get_all_orders(limit)
 
     @log
-    def get_all_orders_by_customer(self, customer_id: int) -> Optional[List[Order]]:
+    def get_all_orders_by_customer(self, customer_id: int) -> List[Order]:
         """
-        _summary_
+        Get all the past and current orders of a given customer. Orders are ordered by date
+        (latests orders first)
 
         Parameters
         ----------
         customer_id : int
-            _description_
+            The id of the customer whose history you want
 
         Returns
         -------
-        Optional[List[Order]]
-            _description_
+        List[Order]
+            The list of orders associated with this user
         """
         return self.order_dao.get_all_orders_by_customer(customer_id)
 
     @log
     def get_customer_current_order(self, customer_id: int) -> Optional[Order]:
         """
-        _summary_
+        Fetch the current order of a given customer. It means the order he's currently
+        updating
 
         Parameters
         ----------
         customer_id : int
-            _description_
+            The id of the customer whose history you want
 
         Returns
         -------
-        Optional[Order]
-            _description_
+        Order
+            His current order
         """
         return self.order_dao.get_customer_current_order(customer_id)
 
     @log
     def get_orders_by_state(
-        self,
-        state: OrderState,
+        self, state: OrderState, order_by: Literal["DESC", "ASC"] = "DESC"
     ) -> List[Order]:
         """
-        _summary_
+        Fetch all the orders with a given state
 
         Parameters
         ----------
-        state : OrderState
-            _description_
+        state: OrderState
+            An OrderState object (OrderState.<WANTED STATE>)
+
+        order_by: Literal["DESC", "ASC"]
+            How to order the returned order
+            - ASC -> The latest orders first
+            - DESC -> The earlist orders first
+            It is "DESC" by default
 
         Returns
         -------
         List[Order]
-            _description_
+            All the orders of the given state
         """
         return self.order_dao.get_orders_by_state(state.value)
 
     @log
     def get_available_orders_for_drivers(self) -> List[Order]:
         """
-        _summary_
+        Fetch all the orders that can be taken by a driver (it means the order paid and prepared)
 
         Returns
         -------
         List[Order]
-            _description_
+            A list of Order objects that are prepared
         """
         return self.order_dao.get_orders_by_state(OrderState.PREPARED.value, order_by="ASC")
 
     @log
     def get_actives_orders(self) -> List[Order]:
         """
-        _summary_
+        Fetch all the orders that are not already delivered
 
         Returns
         -------
         List[Order]
-            _description_
+            A list of Order objects
         """
         return self.order_dao.get_actives_orders()
 
     @log
-    def create_order(self, customer_id) -> Order:
+    def create_order(self, customer_id: int) -> Order:
         """
-        _summary_
+        Create an order if the customer does not have any active order yet
 
         Parameters
         ----------
-        customer_id : _type_
-            _description_
+        customer_id : int
+            The id of the customer
 
         Returns
         -------
         Order
-            _description_
+            An empty Order object
         """
         orders = self.get_all_orders_by_customer(customer_id)
         states = [order.order_state.value for order in orders]
@@ -179,26 +186,33 @@ class OrderService:
         return new_order
 
     @log
-    def update_order_state(self, order_id: int, new_state: OrderState) -> Optional[Order]:
+    def update_order_state(self, order_id: int, new_state: OrderState) -> Order:
         """
-        _summary_
+        Update the state of an order. The valid state are:
+            - PENDING
+            - PAID
+            - PREPARED
+            - DELIVERING
+            - DELIVERED
+            - CANCELLED
 
         Parameters
         ----------
         order_id : int
-            _description_
+            The identifier of the order
         new_state : OrderState
-            _description_
+            The updated state of the order
 
         Returns
         -------
-        Optional[Order]
-            _description_
+        Order
+            The updated Order object
 
         Raises
         ------
         ValueError
-            _description_
+            If you try to skip a step in the order process
+            (example: mark an order as prepared but it wasn't paid yet)
         """
         order = self.get_order_by_id(order_id)
 
@@ -214,46 +228,46 @@ class OrderService:
     @log
     def mark_as_paid(self, order_id: int) -> Order:
         """
-        _summary_
+        Update an order as paid
 
         Parameters
         ----------
         order_id : int
-            _description_
+            The unique identifier of the order
 
         Returns
         -------
         Order
-            _description_
+            The updated Order object
         """
         return self.update_order_state(order_id, OrderState.PAID)
 
     @log
     def mark_as_prepared(self, order_id: int) -> Order:
         """
-        _summary_
+        Update an order as prepared (it is ready to deliver)
 
         Parameters
         ----------
         order_id : int
-            _description_
+            The unique identifier of the order
 
         Returns
         -------
         Order
-            _description_
+            The updated Order object
         """
         return self.update_order_state(order_id, OrderState.PREPARED)
 
     @log
     def delete_order(self, order_id: int) -> None:
         """
-        _summary_
+        Delete an order from the database
 
         Parameters
         ----------
         order_id : int
-            _description_
+            Unique identifier of the order
         """
         self.get_order_by_id(order_id)
         self.order_dao.delete_order(order_id)
@@ -266,11 +280,29 @@ class OrderService:
         Parameters
         ----------
         item_id : int
-            ID of the item to add.
+            The id of the item to add
         order_id : int
-            ID of the order
+            The id of the order
         quantity : int, optional
-            Number of units to add (default is 1).
+            Number of units to add (default is 1)
+
+        Returns
+        -------
+        Order
+            The updated order object
+
+        Raises
+        ------
+        ValueError
+            If the orderable id isn't associated with any orderable
+        ValueError
+            If you try to add an item that isn't in the menu
+        ValueError
+            If the item doesn't have enough stock
+        ValueError
+            If the bundle isn't in the menu
+        ValueError
+            If the bundle doesn't have enough stock
         """
         raw_orderable = self.orderable_dao.get_orderable_by_id(orderable_id)
 
@@ -279,7 +311,7 @@ class OrderService:
 
         if raw_orderable["orderable_type"] == "item":
             orderable = self.item_dao.get_item_by_orderable_id(orderable_id)
-            if not orderable.check_availability():
+            if not orderable.is_in_menu:
                 raise ValueError("[OrderService] The item isn't available.")
             if not orderable.check_stock(quantity):
                 raise ValueError(
@@ -291,14 +323,14 @@ class OrderService:
 
         if raw_orderable["orderable_type"] == "bundle":
             orderable = self.bundle_dao.get_bundle_by_orderable_id(orderable_id)
+            if not orderable.is_in_menu:
+                raise ValueError("[OrderService] The item isn't available.")
+
             if not orderable.check_stock(quantity):
                 raise ValueError(
                     f"[OrderService] Not enough stock for {orderable.bundle_name}"
                     f" (available: {orderable.get_stock()})."
                 )
-            if not orderable.check_availability():
-                raise ValueError("[OrderService] The item isn't available.")
-
             for item, nb in orderable.bundle_items.items():
                 update_data = {"item_stock": item.item_stock - nb * quantity}
                 self.item_dao.update_item(item.item_id, update_data)
@@ -315,11 +347,24 @@ class OrderService:
         Parameters
         ----------
         orderable_id : int
-            ID of the item to remove.
+            The id of the item to remove
         order_id : int
-            ID of the order
+            The id of the order
         quantity : int, optional
-            Number of units to remove (default is 1).
+            Number of units to remove (default is 1)
+
+        Returns
+        -------
+        Order
+            The updated order object
+
+        Raises
+        ------
+        ValueError
+            If the orderable id isn't associated with any orderable
+        ValueError
+            If you try to remove more orderable than there is in the order
+
         """
         raw_orderable = self.orderable_dao.get_orderable_by_id(orderable_id)
         if raw_orderable is None:
@@ -349,6 +394,19 @@ class OrderService:
 
     @log
     def get_benef(self) -> float:
+        """
+        Calculate the total earnings of Ub'EJR
+
+        Returns
+        -------
+        float
+            The sum of all the paid orders
+
+        Raises
+        ------
+        Exception
+            If any error happens
+        """
         try:
             return self.order_dao.get_benef()
         except Exception as e:
@@ -356,7 +414,20 @@ class OrderService:
 
     @log
     def get_number_orders_by_state(self) -> Dict[str, int]:
+        """
+        Get the number of orders that are beign cooked, and are ready for the driver to pick up
+
+        Returns
+        -------
+        Dict[str, str]
+            A dictionnary with the number of order for the states "preparing" and "ready_to_deliver'
+
+        Raises
+        ------
+        Exception
+            If any error happens
+        """
         try:
             return self.order_dao.get_number_orders_by_state()
         except Exception as e:
-            raise Exception(f"An error occured while calculating profits: {str(e)}") from e
+            raise Exception(f"An error occured while fetchin orders: {str(e)}") from e

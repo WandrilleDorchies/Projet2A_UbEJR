@@ -104,11 +104,11 @@ namespace DAO_Layer {
 
     }
     class DriverDAO {
-        create_driver(first_name: str, last_name: str, phone: str, password_hash: str, salt: str) : Driver:
-        get_driver_by_id(driver_id: int) : Optional[Driver]:
-        get_driver_by_phone(phone_number: str) : Optional[Driver]:
-        update_driver(driver_id: int, update: dict):
-        delete_driver(driver_id: int): None
+        +create_driver(first_name: str, last_name: str, phone: str, password_hash: str, salt: str) : Driver:
+        *get_driver_by_id(driver_id: int) : Optional[Driver]:
+        *get_driver_by_phone(phone_number: str) : Optional[Driver]:
+        *update_driver(driver_id: int, update: dict):
+        *delete_driver(driver_id: int): None
     }
 
     class ItemDAO {

@@ -77,7 +77,9 @@ class OrderDAO(metaclass=Singleton):
 
     @log
     def get_all_orders(self, limit: int) -> Optional[List[Order]]:
-        raw_orders = self.db_connector.sql_query("SELECT * from Orders LIMIT %s;", [limit], "all")
+        raw_orders = self.db_connector.sql_query(
+            "SELECT * from Orders ORDER BY order_created_at DESC LIMIT %s ;", [limit], "all"
+        )
 
         if not raw_orders:
             return []
@@ -92,7 +94,9 @@ class OrderDAO(metaclass=Singleton):
     @log
     def get_all_orders_by_customer(self, customer_id: int) -> Optional[List[Order]]:
         raw_orders = self.db_connector.sql_query(
-            "SELECT * from Orders where order_customer_id=%s", [customer_id], "all"
+            "SELECT * FROM Orders WHERE order_customer_id=%s  ORDER BY order_created_at DESC",
+            [customer_id],
+            "all",
         )
 
         if not raw_orders:
@@ -344,6 +348,6 @@ class OrderDAO(metaclass=Singleton):
 
         order_count = {}
         order_count["preparing"] = merged_count.get(1, 0)
-        order_count["ready_for_delivering"] = merged_count.get(2, 0)
+        order_count["ready_to_deliver"] = merged_count.get(2, 0)
 
         return order_count

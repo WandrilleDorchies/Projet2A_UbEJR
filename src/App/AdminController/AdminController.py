@@ -42,7 +42,7 @@ def get_overview():
             "total_customers": customers,
             "total_drivers": drivers,
             "total_orderables_in_menu": nb_items,
-            "total_orders_ready": orders_count["ready_for_delivering"],
+            "total_orders_ready": orders_count["ready_to_deliver"],
             "total_orders_in_kitchen": orders_count["preparing"],
             "benefice": f"{benef} €",
         }
