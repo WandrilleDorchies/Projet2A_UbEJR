@@ -15,7 +15,7 @@ class Usurper:
         self,
         fake: Faker,
         db_connector: DBConnector,
-        n_customers: int = 100,
+        n_customers: int = 1000,
         n_drivers: int = 10,
         n_items: int = 30,
         n_bundles: int = 10,
@@ -85,11 +85,12 @@ class Usurper:
         data["orderable_id"] = [str(i) for i in n]
 
         data["item_name"] = [
-            f"'{self.fake.word().capitalize()} {self.fake.item_name()}'" for _ in n
+            f"'{self.fake.word().capitalize().replace("'", ' ')} {self.fake.item_name()}'"
+            for _ in n
         ]
         data["item_price"] = [f"{round(randint(5, 50) + randint(0, 99) / 100, 2)}" for _ in n]
         data["item_type"] = [f"'{self.fake.item_type()}'" for _ in n]
-        data["item_description"] = [f"'{self.fake.word()}'" for _ in n]
+        data["item_description"] = [f"'{self.fake.word().replace("'", ' ')}'" for _ in n]
         data["item_stock"] = [str(randint(0, 100)) for _ in n]
 
         return data
@@ -100,10 +101,11 @@ class Usurper:
         data["orderable_id"] = [str(self.n_items + i) for i in n]
 
         data["bundle_name"] = [
-            f"'{self.fake.bundle_name()} {self.fake.word().capitalize()}'" for _ in n
+            f"'{self.fake.bundle_name()} {self.fake.word().capitalize().replace("'", ' ')}'"
+            for _ in n
         ]
         data["bundle_reduction"] = [str(randint(10, 40)) for _ in n]
-        data["bundle_description"] = [f"'{self.fake.word()}'" for _ in n]
+        data["bundle_description"] = [f"'{self.fake.word().replace("'", ' ')}'" for _ in n]
 
         start_dates = [self.fake.date_between(start_date="-1y", end_date="today") for _ in n]
         data["bundle_availability_start_date"] = [f"'{date}'" for date in start_dates]
