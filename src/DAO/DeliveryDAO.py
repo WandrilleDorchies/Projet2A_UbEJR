@@ -28,12 +28,12 @@ class DeliveryDAO(metaclass=Singleton):
 
     @log
     def get_deliveries_by_driver(self, delivery_id_driver: int) -> Optional[Delivery]:
-        raw_delivery = self.db_connector.sql_query(
-            "SELECT * from Deliveries WHERE delivery_driver_id=%s", [delivery_id_driver], "one"
+        raw_deliveries = self.db_connector.sql_query(
+            "SELECT * from Deliveries WHERE delivery_driver_id=%s", [delivery_id_driver], "all"
         )
-        if raw_delivery is None:
+        if raw_deliveries is None:
             return []
-        return Delivery(**raw_delivery)
+        return [Delivery(**raw_delivery) for raw_delivery in raw_deliveries]
 
     @log
     def get_driver_current_delivery(self, delivery_id_driver: int) -> Optional[Delivery]:

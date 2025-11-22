@@ -18,7 +18,7 @@ class TestDeliveryDAO:
     ):
         """Test getting delivery by driver id"""
         delivery_dao.create_delivery(order_id=sample_order.order_id, driver_id=sample_driver.id)
-        retrieved_delivery = delivery_dao.get_deliveries_by_driver(sample_driver.id)
+        retrieved_delivery = delivery_dao.get_driver_current_delivery(sample_driver.id)
 
         assert retrieved_delivery is not None
         assert retrieved_delivery.delivery_driver_id == sample_driver.id

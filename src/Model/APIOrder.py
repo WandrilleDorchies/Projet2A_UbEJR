@@ -10,7 +10,7 @@ class APIOrder(BaseModel):
     order_id: int
     order_customer_id: int
     order_state: OrderState
-    order_price: int
+    order_price: float
     order_created_at: datetime
     order_paid_at: Optional[datetime]
     order_orderables: Dict[str, int]
