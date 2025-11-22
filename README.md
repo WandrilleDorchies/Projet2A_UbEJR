@@ -33,7 +33,7 @@ This will setup all we need for this project to work:
 Create `.env` file at the root of the project. It should have the following variables
 
 ```env
-# Configuration PostgreSQL
+# PostgreSQL Configuration 
 POSTGRES_HOST=localhost
 POSTGRES_PORT=5432
 POSTGRES_DATABASE=defaultdb

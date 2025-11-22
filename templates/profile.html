@@ -89,7 +89,7 @@
     
     <form id="password-form" class="profile-form" onsubmit="updatePassword(event)">
         <div class="form-group">
-            <label for="current_password">Current password</label>
+            <label form="current_password">Current password</label>
             <input type="password" id="current_password" name="current_password" placeholder="Your current password" required>
         </div>
         
@@ -114,9 +114,9 @@
         <h2>Delete Account</h2>
     </div>
     
-    <form id="password-form" class="profile-form" onsubmit="deleteAccount(event)">
+    <form id="delete-form" class="profile-form" onsubmit="deleteAccount(event)">
         <div class="form-group">
-            <label for="identifier">identifier/label>
+            <label form="identifier">Identifier</label>
             <input type="text" id="identifier" name="identifier" placeholder="Your phone number or email" minlength="8" required>
         </div>
         <div class="form-group">
@@ -317,7 +317,7 @@
         event.preventDefault();
         
         const confirmed = confirm(
-            "⚠️ WARNING ⚠️\n\n" +
+            "/!\\ WARNING /!\\ \n\n" +
             "This action is irreversible and your data will be lost."
         );
         

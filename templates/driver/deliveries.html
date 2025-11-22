@@ -419,10 +419,8 @@
             const response = await fetch('/drivers/orders', {
                 credentials: 'include'
             });
-            console.log(response)
             if (response.ok) {
                 const orders = await response.json();
-                console.log(orders)
                 displayDeliveries(orders);
             } else {
                 showEmptyState();
@@ -451,7 +449,6 @@
                 minute: '2-digit'
             });
 
-            console.log(order.items)
             for (const orderable of order.items) {
                 let name = '';
                 let price = 0;

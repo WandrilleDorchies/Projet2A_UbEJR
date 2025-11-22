@@ -1,9 +1,10 @@
-from typing import Annotated
+from typing import Annotated, Dict, List
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import BaseModel
 
+from src.Model.Address import Address
 from src.Model.APICustomer import APICustomer
 from src.Model.Bundle import Bundle
 from src.Model.Item import Item
@@ -33,6 +34,7 @@ def get_customer_id_from_token(
 ) -> int:
     """
     Get the customer id of the connected user
+
     Parameters
     ----------
     credentials : Annotated[HTTPAuthorizationCredentials, Depends
@@ -122,8 +124,9 @@ class CustomerUpdate(BaseModel):
 def update_profile(
     customer_update: CustomerUpdate,
     customer_id: int = Depends(get_customer_id_from_token),
-):
+) -> APICustomer:
     """
+    Allows the customer to update his personal informations
 
     Parameters
     ----------
@@ -169,7 +172,7 @@ class AdressUpdate(BaseModel):
 def update_address(
     address_update: AdressUpdate,
     customer_id: int = Depends(get_customer_id_from_token),
-):
+) -> Address:
     """
     Allows a customer to update his address
 
@@ -215,7 +218,7 @@ class PasswordUpdate(BaseModel):
 def update_password(
     password_update: PasswordUpdate,
     customer_id: int = Depends(get_customer_id_from_token),
-):
+) -> None:
     """
     Allows a customer to update his password
 
@@ -261,7 +264,7 @@ def update_password(
 )
 def get_order(
     order_id: int = Depends(get_current_order_id),
-):
+) -> Dict:
     """
     Get the current order of a customer
 
@@ -294,7 +297,7 @@ def get_order(
 def add_orderable_to_order(
     add_orderable: AddRemoveOrderable,
     order_id: int = Depends(get_current_order_id),
-):
+) -> None:
     """
     Allows a customer to add an orderable to his order
 
@@ -304,11 +307,6 @@ def add_orderable_to_order(
         A class with the orderable id and the quantity to add as attributes
     order_id : int, optional
         The current order
-
-    Returns
-    -------
-    Order:
-        The updated order
 
     Raises
     ------
@@ -326,7 +324,7 @@ def add_orderable_to_order(
             "a negative number of orderables.",
         )
     try:
-        return order_service.add_orderable_to_order(
+        order_service.add_orderable_to_order(
             add_orderable.orderable_id, order_id, add_orderable.quantity
         )
     except ValueError as e:
@@ -345,7 +343,7 @@ def add_orderable_to_order(
 def remove_orderable_from_order(
     add_orderable: AddRemoveOrderable,
     order_id: int = Depends(get_current_order_id),
-):
+) -> None:
     """
     Allows a customer to remove an orderable to his order
 
@@ -355,11 +353,6 @@ def remove_orderable_from_order(
         A class with the orderable id and the quantity to remove as attributes
     order_id : int, optional
         The current order
-
-    Returns
-    -------
-    Order:
-        The updated order
 
     Raises
     ------
@@ -377,7 +370,7 @@ def remove_orderable_from_order(
             "a negative number of orderables.",
         )
     try:
-        return order_service.remove_orderable_from_order(
+        order_service.remove_orderable_from_order(
             add_orderable.orderable_id, order_id, add_orderable.quantity
         )
     except ValueError as e:
@@ -393,7 +386,7 @@ def remove_orderable_from_order(
 @customer_router.get(
     "/me/order_history", status_code=status.HTTP_200_OK, dependencies=[Depends(CustomerBearer())]
 )
-def view_order_history(customer_id: int = Depends(get_customer_id_from_token)):
+def view_order_history(customer_id: int = Depends(get_customer_id_from_token)) -> List:
     """
     Get all the past and current orders of the customer
 
@@ -471,14 +464,14 @@ class DeleteAccountForm(BaseModel):
     status_code=status.HTTP_204_NO_CONTENT,
     dependencies=[Depends(CustomerBearer())],
 )
-def delete_account(delete_account: DeleteAccountForm):
+def delete_account(delete_account: DeleteAccountForm) -> None:
     """
     Allows a customer to delete his account (forever)
 
     Parameters
     ----------
     delete_account : DeleteAccountForm
-        A class with the customer's identifier and the password as attributes
+        A class with the customer's identifier and password as attributes
 
     Raises
     ------
@@ -508,7 +501,7 @@ def delete_account(delete_account: DeleteAccountForm):
 def create_checkout_session(
     order_id: int = Depends(get_current_order_id),
     customer_id: int = Depends(get_customer_id_from_token),
-):
+) -> Dict:
     """
     Create a checkout session for the current customer and order
 
@@ -560,7 +553,7 @@ def verify_payment(
     session_id: str,
     customer_id: int = Depends(get_customer_id_from_token),
     order_id: int = Depends(get_current_order_id),
-):
+) -> Dict:
     """
     Verify that the payment was successful
 

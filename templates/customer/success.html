@@ -335,7 +335,6 @@
 
             if (response.ok) {
                 const order_infos = await response.json();
-                console.log(order_infos)
                 showSuccess(order_infos);
             } else {
                 const error = await response.json();
