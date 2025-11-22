@@ -24,11 +24,6 @@ def get_driver_id_from_token(
     return driver_id
 
 
-def get_current_order_id(driver_id: int = Depends(get_driver_id_from_token)) -> int:
-    order = driver_service.get_driver_current_order(driver_id)
-    return order.order_id
-
-
 # PROFILE
 @driver_router.get("/me", status_code=status.HTTP_200_OK, dependencies=[Depends(DriverBearer())])
 def get_profile(driver_id: int = Depends(get_driver_id_from_token)):
@@ -39,6 +34,14 @@ def get_profile(driver_id: int = Depends(get_driver_id_from_token)):
         raise HTTPException(status_code=404, detail=str(e)) from e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching profile: {e}") from e
+
+
+@driver_router.get(
+    "/me/current-delivery", status_code=status.HTTP_200_OK, dependencies=[Depends(DriverBearer())]
+)
+def get_current_order_id(driver_id: int = Depends(get_driver_id_from_token)) -> int:
+    delivery = driver_service.get_driver_current_delivery(driver_id)
+    return delivery.delivery_order_id
 
 
 class DriverUpdate(BaseModel):

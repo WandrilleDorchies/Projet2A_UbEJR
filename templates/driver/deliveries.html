@@ -393,9 +393,25 @@
 {% raw %}
 <script>
     document.addEventListener('DOMContentLoaded', async function() {
-        console.log('test')
+        await checkActiveDelivery()
         await loadDeliveries();
     });
+
+    async function checkActiveDelivery() {
+        try {
+            const response = await fetch('/drivers/me/current-delivery', {
+                credentials: 'include'
+            });
+
+            if (response.ok) {
+                const order_id = await response.json();
+                console.log(order_id)
+                window.location.href = `/delivery/${order_id}`;
+            }
+        } catch (error) {
+            console.error('Error checking active delivery:', error);
+        }
+    }
 
     async function loadDeliveries() {
         try {
