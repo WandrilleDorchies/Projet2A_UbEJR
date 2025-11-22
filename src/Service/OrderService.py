@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from src.DAO.BundleDAO import BundleDAO
 from src.DAO.ItemDAO import ItemDAO
@@ -261,7 +261,7 @@ class OrderService:
     @log
     def add_orderable_to_order(self, orderable_id: int, order_id: int, quantity: int = 1) -> Order:
         """
-        Adds an orderable to a given order if enough stock is available.
+        Add an orderable to a given order if enough stock is available.
 
         Parameters
         ----------
@@ -346,3 +346,17 @@ class OrderService:
         return self.order_dao.remove_orderable_from_order(
             order_id, orderable.orderable_id, quantity
         )
+
+    @log
+    def get_benef(self) -> float:
+        try:
+            return self.order_dao.get_benef()
+        except Exception as e:
+            raise Exception(f"An error occured while calculating profits: {str(e)}") from e
+
+    @log
+    def get_number_orders_by_state(self) -> Dict[str, int]:
+        try:
+            return self.order_dao.get_number_orders_by_state()
+        except Exception as e:
+            raise Exception(f"An error occured while calculating profits: {str(e)}") from e

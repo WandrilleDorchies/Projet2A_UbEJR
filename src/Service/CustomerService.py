@@ -128,7 +128,7 @@ class CustomerService:
         return customer
 
     @log
-    def get_all_customers(self) -> List[Customer]:
+    def get_all_customers(self, limit: int = 15) -> List[Customer]:
         """
         Fetch all customers of the database
 
@@ -137,7 +137,7 @@ class CustomerService:
         List[Customer]
             A list of Customer object, an empty list if there is none
         """
-        customers = self.customer_dao.get_all_customers()
+        customers = self.customer_dao.get_all_customers(limit)
         return customers
 
     @log
@@ -435,6 +435,13 @@ class CustomerService:
         return self.user_service.change_password(
             customer_id, old_password, new_password, "customer"
         )
+
+    @log
+    def get_number_customers(self) -> int:
+        try:
+            return self.customer_dao.get_number_customers()
+        except Exception as e:
+            raise Exception(f"Error while getting number of customer: {str(e)}") from e
 
     @log
     def delete_customer(self, customer_id: int) -> None:

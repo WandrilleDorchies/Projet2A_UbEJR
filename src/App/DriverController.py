@@ -1,9 +1,11 @@
-from typing import Annotated
+from typing import Annotated, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import BaseModel
 
+from src.Model.APIDriver import APIDriver
+from src.Model.APIOrder import APIOrder
 from src.Model.Bundle import Bundle
 from src.Model.Item import Item
 from src.Model.Order import OrderState
@@ -19,26 +21,64 @@ driver_router = APIRouter(
 def get_driver_id_from_token(
     credentials: Annotated[HTTPAuthorizationCredentials, Depends(DriverBearer())],
 ) -> int:
+    """
+    Get the driver id
+
+    Parameters
+    ----------
+    credentials : Annotated[HTTPAuthorizationCredentials, Depends
+        The driver's credentials
+
+    Returns
+    -------
+    int
+        The id of the connected user
+    """
     token = credentials.credentials
     driver_id = int(jwt_service.validate_user_jwt(token)["user_id"])
     return driver_id
 
 
-def get_current_order_id(driver_id: int = Depends(get_driver_id_from_token)) -> int:
-    order = driver_service.get_driver_current_order(driver_id)
-    return order.order_id
-
-
 # PROFILE
 @driver_router.get("/me", status_code=status.HTTP_200_OK, dependencies=[Depends(DriverBearer())])
-def get_profile(driver_id: int = Depends(get_driver_id_from_token)):
+def get_profile(driver_id: int = Depends(get_driver_id_from_token)) -> APIDriver:
+    """
+    Returns the information about the current driver
+
+    Parameters
+    ----------
+    driver_id : int
+        The id of the logged driver
+
+    Returns
+    -------
+    APIDriver
+        A Driver without sensible informations like hash
+
+    Raises
+    ------
+    HTTPException
+        If a ValueError is raised beforehand
+    HTTPException
+        Catch any other Exception that could be raised
+    """
     try:
         driver = driver_service.get_driver_by_id(driver_id)
-        return driver
+        return APIDriver.from_driver(driver)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching profile: {e}") from e
+
+
+@driver_router.get(
+    "/me/current-delivery", status_code=status.HTTP_200_OK, dependencies=[Depends(DriverBearer())]
+)
+def get_current_order_id(driver_id: int = Depends(get_driver_id_from_token)) -> Optional[int]:
+    delivery = driver_service.get_driver_current_delivery(driver_id)
+    if delivery is None:
+        return None
+    return delivery.delivery_order_id
 
 
 class DriverUpdate(BaseModel):
@@ -51,7 +91,29 @@ class DriverUpdate(BaseModel):
 def update_profile(
     driver_update: DriverUpdate,
     driver_id: int = Depends(get_driver_id_from_token),
-):
+) -> APIDriver:
+    """
+    Allows the driver to update his personal informations
+
+    Parameters
+    ----------
+    driver_update: DriverUpdate
+        A class containing all the informations a driver can update
+    driver_id : int
+        The id of the current driver
+
+    Returns
+    -------
+    APIDriver
+        A Driver without sensible informations like hash
+
+    Raises
+    ------
+    HTTPException
+        If a ValueError is raised beforehand
+    HTTPException
+        Catch any other Exception that could be raised
+    """
     try:
         update_data = vars(driver_update)
         if driver_update.driver_phone and customer_service.get_customer_by_phone(
@@ -63,7 +125,7 @@ def update_profile(
                 "A customer already have this phone number.",
             )
         updated_driver = driver_service.update_driver(driver_id, update_data)
-        return updated_driver
+        return APIDriver.from_driver(updated_driver)
 
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
@@ -75,7 +137,22 @@ def update_profile(
 @driver_router.get(
     "/orders", status_code=status.HTTP_200_OK, dependencies=[Depends(DriverBearer())]
 )
-def get_available_orders():
+def get_available_orders() -> List:
+    """
+    Fetch all the orders a driver can choose from
+
+    Returns
+    -------
+    List
+        The list of available orders
+
+    Raises
+    ------
+    HTTPException
+        If a ValueError is raised beforehand
+    HTTPException
+        Catch any other Exception that could be raised
+    """
     try:
         orders = order_service.get_available_orders_for_drivers()
         orders_infos = []
@@ -127,7 +204,29 @@ def get_available_orders():
 @driver_router.get(
     "/orders/{order_id}", status_code=status.HTTP_200_OK, dependencies=[Depends(DriverBearer())]
 )
-def get_order_by_id(order_id: int):
+def get_order_by_id(order_id: int) -> APIOrder:
+    """
+    Fetch an unique order by its id
+
+    Parameters
+    ----------
+    order_id : int
+        The id of the targeted order
+
+    Returns
+    -------
+    APIOrder
+        An Order with less informations (the orderables dictionnary is lighter)
+
+    Raises
+    ------
+    HTTPException
+        If the order isn't available
+    HTTPException
+        If a ValueError is raised beforehand
+    HTTPException
+        Catch any other Exception that could be raised
+    """
     try:
         order = order_service.get_order_by_id(order_id)
         if order.order_state != OrderState.PREPARED:
@@ -136,7 +235,7 @@ def get_order_by_id(order_id: int):
                 detail=f"This order cannot isn't available, current state : {order.order_state}",
             )
 
-        return order
+        return APIOrder.from_order(order)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
     except Exception as e:
@@ -149,7 +248,26 @@ def get_order_by_id(order_id: int):
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(DriverBearer())],
 )
-def start_delivery(order_id: int, driver_id: int = Depends(get_driver_id_from_token)):
+def start_delivery(order_id: int, driver_id: int = Depends(get_driver_id_from_token)) -> None:
+    """
+    Allows the driver to start a delivery, first check that the order is available
+
+    Parameters
+    ----------
+    order_id : int
+        The order selected by the driver
+    driver_id : int
+        The id of the current driver
+
+    Raises
+    ------
+    HTTPException
+        If the order isn't available
+    HTTPException
+        If a ValueError is raised beforehand
+    HTTPException
+        Catch any other Exception that could be raised
+    """
     try:
         order = order_service.get_order_by_id(order_id)
         if order.order_state != OrderState.PREPARED:
@@ -157,7 +275,7 @@ def start_delivery(order_id: int, driver_id: int = Depends(get_driver_id_from_to
                 status_code=400,
                 detail=f"This order isn't available, current state : {order.order_state}",
             )
-        return driver_service.start_delivery(order_id, driver_id)
+        driver_service.start_delivery(order_id, driver_id)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
     except Exception as e:
@@ -169,7 +287,29 @@ def start_delivery(order_id: int, driver_id: int = Depends(get_driver_id_from_to
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(DriverBearer())],
 )
-def get_path(order_id: int):
+def get_path(order_id: int) -> Dict:
+    """
+    Get the url of the route to the delivery address
+
+    Parameters
+    ----------
+    order_id : int
+        The order selected by the driver
+
+    Returns
+    -------
+    Dict
+        A dictionnary with the url and the delivery address string
+
+    Raises
+    ------
+    HTTPException
+        If the order wasn't chosen by any driver
+    HTTPException
+        If a ValueError is raised beforehand
+    HTTPException
+        Catch any other Exception that could be raised
+    """
     try:
         order = order_service.get_order_by_id(order_id)
         if order.order_state != OrderState.DELIVERING:
@@ -193,7 +333,26 @@ def get_path(order_id: int):
 def end_delivery(
     order_id: int,
     driver_id: int = Depends(get_driver_id_from_token),
-):
+) -> None:
+    """
+    Allows the driver to end his delivery, first check that the order was indeed beng delivered
+
+    Parameters
+    ----------
+    order_id : int
+        The order selected by the driver
+    driver_id : int
+        The id of the current driver
+
+    Raises
+    ------
+    HTTPException
+        If the order isn't in delivery
+    HTTPException
+        If a ValueError is raised beforehand
+    HTTPException
+        Catch any other Exception that could be raised
+    """
     try:
         order = order_service.get_order_by_id(order_id)
         if order.order_state != OrderState.DELIVERING:
@@ -201,7 +360,7 @@ def end_delivery(
                 status_code=400,
                 detail=f"This order isn't in delivery, current state : {order.order_state}",
             )
-        return driver_service.end_delivery(order_id, driver_id)
+        driver_service.end_delivery(order_id, driver_id)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
     except Exception as e:
@@ -219,6 +378,21 @@ class DeleteAccountForm(BaseModel):
     dependencies=[Depends(DriverBearer())],
 )
 def delete_account(delete_account: DeleteAccountForm):
+    """
+    Allows a driver to delete his account (forever)
+
+    Parameters
+    ----------
+    delete_account : DeleteAccountForm
+        A class with the driver's identifier and password as attributes
+
+    Raises
+    ------
+    HTTPException
+        If a ValueError is raised beforehand
+    HTTPException
+        Catch any other Exception that could be raised
+    """
     try:
         driver = driver_service.login_customer(delete_account.identifier, delete_account.password)
         return customer_service.delete_customer(driver.id)

@@ -1,6 +1,6 @@
 INSERT INTO project.Addresses (address_number, address_street, address_city, address_postal_code, address_country)
 VALUES
-(51, 'rue Blaise Pascal', 'Rennes', 35170, 'France');
+(36, 'Boulevard de la Liberté', 'Rennes', 35000, 'France');
 
 INSERT INTO project.Customers (customer_first_name, customer_last_name, customer_phone, customer_mail, customer_password_hash, customer_salt, customer_address_id)
 VALUES

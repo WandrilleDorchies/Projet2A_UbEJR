@@ -65,8 +65,8 @@ class DriverDAO(metaclass=Singleton):
         return Driver(**map_driver)
 
     @log
-    def get_all_drivers(self) -> Optional[list[Driver]]:
-        raw_drivers = self.db_connector.sql_query("SELECT * FROM Drivers", return_type="all")
+    def get_all_drivers(self, limit: int = 15) -> Optional[list[Driver]]:
+        raw_drivers = self.db_connector.sql_query("SELECT * FROM Drivers LIMIT %s;", [limit], "all")
         if raw_drivers is None:
             return None
         return [Driver(**self._map_db_to_model(driver)) for driver in raw_drivers]
@@ -104,6 +104,17 @@ class DriverDAO(metaclass=Singleton):
     @log
     def delete_driver(self, driver_id: int) -> None:
         self.db_connector.sql_query("DELETE FROM Drivers WHERE driver_id=%s", [driver_id], "none")
+
+    @log
+    def get_number_drivers(self) -> int:
+        number = self.db_connector.sql_query(
+            """
+            SELECT COUNT(*)
+            FROM Drivers;
+            """,
+            return_type="one",
+        )
+        return number["count"]
 
     @staticmethod
     def _map_db_to_model(raw_driver: dict) -> dict:

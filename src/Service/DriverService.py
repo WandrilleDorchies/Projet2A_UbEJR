@@ -7,7 +7,7 @@ from src.DAO.DriverDAO import DriverDAO
 from src.DAO.OrderDAO import OrderDAO
 from src.Model.Delivery import Delivery
 from src.Model.Driver import Driver
-from src.Model.Order import Order, OrderState
+from src.Model.Order import OrderState
 from src.Service.UserService import UserService
 from src.utils.log_decorator import log
 
@@ -72,8 +72,8 @@ class DriverService:
         return driver
 
     @log
-    def get_all_drivers(self) -> Optional[Driver]:
-        drivers = self.driver_dao.get_all_drivers()
+    def get_all_drivers(self, limit: int = 15) -> Optional[Driver]:
+        drivers = self.driver_dao.get_all_drivers(limit)
         return drivers
 
     @log
@@ -97,7 +97,7 @@ class DriverService:
         return self.user_service.login(identifier, password)
 
     @log
-    def get_driver_current_order(self, driver_id: int) -> Optional[Order]:
+    def get_driver_current_delivery(self, driver_id: int) -> Optional[Delivery]:
         """
         Retrieves the Order the driver is supposed to be handling
 
@@ -108,24 +108,14 @@ class DriverService:
 
         Returns
         -------
-        Optional[Order]
-            An Order, if the driver is currently handling one through a delivery
-
-        Raises
-        ------
-        ValueError
-            raised if there is no in progress delivery assigned to this driver
-            and therefore no order
+        Optional[Delivery]
+            A Delivery, if the driver is delivering
         """
         delivery = self.delivery_dao.get_driver_current_delivery(driver_id)
-        if delivery is None or delivery.delivery_state == 2:
-            logging.error(
-                "[DriverService] Cannot get delivery: There isn't any delivery "
-                f"assigned to driver with id {driver_id}."
-            )
-            raise ValueError("There isn't any delivery assigned to this driver.")
+        if delivery is None or delivery.delivery_state != 1:
+            return None
 
-        return self.order_dao.get_order_by_id(delivery.delivery_order_id)
+        return delivery
 
     @log
     def create_driver(
@@ -353,6 +343,13 @@ class DriverService:
         self.order_dao.update_order_state(order_id, OrderState.DELIVERED.value)
         delivery = self.delivery_dao.update_delivery_state(order_id, 2)
         return delivery
+
+    @log
+    def get_number_drivers(self) -> int:
+        try:
+            return self.driver_dao.get_number_drivers()
+        except Exception as e:
+            raise Exception(f"Error while getting number of driver: {str(e)}") from e
 
     @log
     def delete_driver(self, driver_id: int) -> None:

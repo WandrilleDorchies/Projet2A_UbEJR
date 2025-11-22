@@ -14,24 +14,6 @@ class TestAddressDAO:
         assert address.address_postal_code == 35170
         assert address.address_country == "France"
 
-    def test_get_address_by_id_exists(self, address_dao, clean_database):
-        """Test getting an address by id"""
-        created_address = address_dao.create_address(
-            51, "Rue Blaise Pascal", "Bruz", 35170, "France"
-        )
-
-        retrieved_address = address_dao.get_address_by_id(created_address.address_id)
-
-        assert retrieved_address is not None
-        assert retrieved_address.address_id == created_address.address_id
-        assert retrieved_address.address_street == "Rue Blaise Pascal"
-
-    def test_get_address_by_id_not_exists(self, address_dao, clean_database):
-        """Test getting address by non-existing id"""
-        retrieved_address = address_dao.get_address_by_id(9999)
-
-        assert retrieved_address is None
-
     def test_get_address_by_customer_id(self, address_dao, customer_dao, clean_database):
         """Test getting address by customer id"""
         address = address_dao.create_address(51, "Rue Blaise Pascal", "Bruz", 35170, "France")
@@ -138,5 +120,5 @@ class TestAddressDAO:
 
         address_dao.delete_address_by_id(address_id)
 
-        retrieved_address = address_dao.get_address_by_id(address_id)
+        retrieved_address = address_dao.get_address_by_customer_id(address_id)
         assert retrieved_address is None

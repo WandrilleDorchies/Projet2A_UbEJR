@@ -4,19 +4,6 @@ import pytest
 
 
 class TestAddressService:
-    def test_get_address_by_id_found(self, address_service, sample_address):
-        """Test: Récupération d'une adresse par ID existant"""
-        result = address_service.get_address_by_id(sample_address.address_id)
-
-        assert result.address_id == sample_address.address_id
-        assert result.address_number == sample_address.address_number
-        assert result.address_street == sample_address.address_street
-
-    def test_get_address_by_id_not_found(self, address_service):
-        """Test: Récupération d'une adresse par ID inexistant"""
-        with pytest.raises(ValueError, match="Cannot find: Address with ID 999 not found"):
-            address_service.get_address_by_id(999)
-
     def test_get_address_by_customer_id_found(
         self, address_service, sample_customer, sample_address
     ):
@@ -84,7 +71,9 @@ class TestAddressService:
         """Test: Mise à jour d'une adresse inexistante"""
         update_data = {"address_street": "New Street"}
 
-        with pytest.raises(ValueError, match="Cannot find: Address with ID 999 not found"):
+        with pytest.raises(
+            ValueError, match="AddressService] Cannot find Address for customer ID 999 not found."
+        ):
             address_service.update_address(999, update_data)
 
     def test_update_address_invalid_new_address(self, address_service, sample_address):
@@ -109,7 +98,7 @@ class TestAddressService:
         address_id = sample_address.address_id
 
         # Vérifier que l'adresse existe avant suppression
-        address_before = address_service.get_address_by_id(address_id)
+        address_before = address_service.get_address_by_customer_id(address_id)
         assert address_before is not None
 
         # Supprimer l'adresse
@@ -117,11 +106,13 @@ class TestAddressService:
 
         # Vérifier que l'adresse n'existe plus
         with pytest.raises(
-            ValueError, match=f"Cannot find: Address with ID {address_id} not found"
+            ValueError, match="AddressService] Cannot find Address for customer ID 1 not found."
         ):
-            address_service.get_address_by_id(address_id)
+            address_service.get_address_by_customer_id(address_id)
 
     def test_delete_address_not_found(self, address_service):
         """Test: Suppression d'une adresse inexistante"""
-        with pytest.raises(ValueError, match="Cannot find: Address with ID 999 not found"):
+        with pytest.raises(
+            ValueError, match="AddressService] Cannot find Address for customer ID 999 not found."
+        ):
             address_service.delete_address(999)

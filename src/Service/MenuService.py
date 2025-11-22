@@ -207,3 +207,7 @@ class MenuService:
             The url of the orderable img
         """
         return self.orderable_dao.get_image_from_orderable(orderable_id)
+
+    @log
+    def get_number_orderables(self) -> int:
+        return self.orderable_dao.get_number_orderables()

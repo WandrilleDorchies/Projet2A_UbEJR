@@ -63,7 +63,7 @@ class CustomerDAO(metaclass=Singleton):
             },
             "one",
         )
-        address = self.address_dao.get_address_by_id(raw_customer["customer_address_id"])
+        address = self.address_dao.get_address_by_customer_id(raw_customer["customer_address_id"])
         raw_customer["customer_address"] = address
         mapped_args = self._map_db_to_model(raw_customer)
         return Customer(**mapped_args)
@@ -105,8 +105,10 @@ class CustomerDAO(metaclass=Singleton):
         return Customer(**mapped_args)
 
     @log
-    def get_all_customers(self) -> Optional[List[Customer]]:
-        raw_customers = self.db_connector.sql_query("SELECT * from Customers ", return_type="all")
+    def get_all_customers(self, limit: int = 15) -> Optional[List[Customer]]:
+        raw_customers = self.db_connector.sql_query(
+            "SELECT * from Customers LIMIT %s;", [limit], "all"
+        )
 
         if not raw_customers:
             return []
@@ -115,6 +117,7 @@ class CustomerDAO(metaclass=Singleton):
             raw_customer["customer_address"] = self.address_dao.get_address_by_customer_id(
                 raw_customer["customer_id"]
             )
+            print(raw_customer["customer_address"])
         return [Customer(**self._map_db_to_model(customer)) for customer in raw_customers]
 
     # UPDATE
@@ -156,6 +159,17 @@ class CustomerDAO(metaclass=Singleton):
             [customer_id],
             "none",
         )
+
+    @log
+    def get_number_customers(self) -> int:
+        number = self.db_connector.sql_query(
+            """
+            SELECT COUNT(*)
+            FROM Customers;
+            """,
+            return_type="one",
+        )
+        return number["count"]
 
     @staticmethod
     def _map_db_to_model(raw_customer: dict) -> dict:
